@@ -1,4 +1,3 @@
-import React, { useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from '../screens/HomeScreen';
 import BookNowScreen from '../screens/BookingPageScreen';
