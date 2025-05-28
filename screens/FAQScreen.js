@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import {
   View,
   Text,
@@ -10,11 +10,22 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import Navbar from '../components/Navbar';
+import { ThemeContext } from '../context/ThemeContext';
 
 const FAQScreen = () => {
   const navigation = useNavigation();
-
+  const { theme } = useContext(ThemeContext);
   const [expanded, setExpanded] = useState({});
+
+  const themeStyles = {
+    container: theme === 'dark' ? 'bg-black' : 'bg-white',
+    cardBg: theme === 'dark' ? 'bg-gray-800' : 'bg-white',
+    textPrimary: theme === 'dark' ? 'text-white' : 'text-gray-800',
+    textSecondary: theme === 'dark' ? 'text-gray-300' : 'text-gray-600',
+    borderColor: theme === 'dark' ? 'border-gray-700' : 'border-gray-200',
+    iconColor: theme === 'dark' ? 'gray-300' : 'gray',
+    shadowColor: theme === 'dark' ? '#FFFFFF' : '#000000',
+  };
 
   const toggleFAQ = (index) => {
     setExpanded((prev) => ({ ...prev, [index]: !prev[index] }));
@@ -50,8 +61,11 @@ const FAQScreen = () => {
   ];
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <StatusBar barStyle="light-content" backgroundColor="#000000" />
+    <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
+      <StatusBar
+        barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
+        backgroundColor={theme === 'dark' ? '#000000' : '#FFFFFF'}
+      />
       <Navbar title="FAQs" onBackPress={() => navigation.goBack()} />
       <ScrollView
         className="flex-1 px-5"
@@ -62,20 +76,22 @@ const FAQScreen = () => {
           <TouchableOpacity
             key={index}
             onPress={() => toggleFAQ(index)}
-            className="mb-4 p-4 bg-white border border-gray-200 rounded-xl shadow-sm"
+            className={`mb-4 p-4 ${themeStyles.cardBg} border ${themeStyles.borderColor} rounded-xl shadow-sm`}
           >
             <View className="flex-row items-center justify-between">
-              <Text className="font-semibold text-gray-800 text-lg flex-1 pr-6">
+              <Text className={`font-semibold text-lg ${themeStyles.textPrimary} flex-1 pr-6`}>
                 {faq.question}
               </Text>
               <Ionicons
                 name={expanded[index] ? 'chevron-up' : 'chevron-down'}
                 size={20}
-                color="gray"
+                color={themeStyles.iconColor}
               />
             </View>
             {expanded[index] && (
-              <Text className="text-gray-600 mt-2 text-base">{faq.answer}</Text>
+              <Text className={`text-base ${themeStyles.textSecondary} mt-2`}>
+                {faq.answer}
+              </Text>
             )}
           </TouchableOpacity>
         ))}

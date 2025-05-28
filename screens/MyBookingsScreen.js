@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useContext } from 'react';
 import {
   View,
   Text,
@@ -19,16 +19,30 @@ import {
   useRoute,
 } from '@react-navigation/native';
 import Navbar from '../components/Navbar';
+import { ThemeContext } from '../context/ThemeContext';
 
 const MyBookingsScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
+  const { theme } = useContext(ThemeContext);
   const [bookings, setBookings] = useState([]);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [newDate, setNewDate] = useState('');
   const [newTime, setNewTime] = useState('');
+
+  const themeStyles = {
+    container: theme === 'dark' ? 'bg-black' : 'bg-white',
+    textPrimary: theme === 'dark' ? 'text-white' : 'text-gray-800',
+    textSecondary: theme === 'dark' ? 'text-gray-300' : 'text-gray-700',
+    textTertiary: theme === 'dark' ? 'text-gray-400' : 'text-gray-600',
+    textNoBookings: theme === 'dark' ? 'text-gray-400' : 'text-gray-500',
+    buttonBg: theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300',
+    buttonText: theme === 'dark' ? 'text-white' : 'text-black',
+    iconColor: theme === 'dark' ? 'gray-300' : 'gray',
+    textAccent: theme === 'dark' ? 'text-amber-500' : 'text-amber-600',
+  };
 
   const loadBookings = async () => {
     try {
@@ -38,7 +52,6 @@ const MyBookingsScreen = () => {
         const sortedBookings = parsedBookings.sort((a, b) => {
           const dateA = parseBookingDateTime(a);
           const dateB = parseBookingDateTime(b);
-
           return dateB - dateA;
         });
         setBookings(sortedBookings);
@@ -150,22 +163,7 @@ const MyBookingsScreen = () => {
   };
   const parseBookingDateTime = (booking) => {
     const [day, month, year] = booking.date.split('/');
-
-    const convertTo24Hour = (time12h) => {
-      const [time, modifier] = time12h.split(' ');
-      let [hours, minutes] = time.split(':');
-
-      if (hours === '12') {
-        hours = '00';
-      }
-      if (modifier.toLowerCase() === 'pm') {
-        hours = String(parseInt(hours, 10) + 12);
-      }
-      return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
-    };
-
     const time24 = convertTo24Hour(booking.time);
-
     return new Date(`${year}-${month}-${day}T${time24}:00`);
   };
 
@@ -203,33 +201,35 @@ const MyBookingsScreen = () => {
         <View className="ml-4 flex-1">
           <View className="flex-row items-start justify-between">
             <View className="flex-col">
-              <Text className="text-lg font-semibold text-gray-800">
+              <Text className={`text-lg font-semibold ${themeStyles.textPrimary}`}>
                 Chef {booking.cook.name}
               </Text>
-              <Text className="text-base font-semibold text-gray-700">
+              <Text className={`text-base font-semibold ${themeStyles.textSecondary}`}>
                 ({booking.cook.rating})
               </Text>
-              <Text className="text-base text-amber-600">
+              <Text className={`text-base ${themeStyles.textAccent}`}>
                 {booking.date} • {booking.time}
               </Text>
-              <Text className="text-base text-amber-600">
+              <Text className={`text-base ${themeStyles.textAccent}`}>
                 {booking.pricing}
               </Text>
               <View className="flex-row items-center">
-                <Text className="text-base text-amber-600">
+                <Text className={`text-base ${themeStyles.textAccent}`}>
                   {booking.cook.cuisine} •
                 </Text>
-                <Text className="text-base text-amber-600 ml-1">
+                <Text className={`text-base ${themeStyles.textAccent} ml-1`}>
                   {booking.guestCount} guests
                 </Text>
               </View>
             </View>
             {booking.status === 'upcoming' && (
               <TouchableOpacity
-                className="bg-gray-300 rounded-full px-6 py-2 mt-2"
+                className={`${themeStyles.buttonBg} rounded-full px-6 py-2 mt-2`}
                 onPress={() => handleModifyBooking(booking)}
               >
-                <Text className="text-black text-base font-medium">Modify</Text>
+                <Text className={`text-base font-medium ${themeStyles.buttonText}`}>
+                  Modify
+                </Text>
               </TouchableOpacity>
             )}
           </View>
@@ -237,12 +237,16 @@ const MyBookingsScreen = () => {
       </View>
       {booking.status === 'upcoming' && (
         <View className="flex-row justify-between items-center mt-4">
-          <Text className="text-xl text-gray-800">Cancel Booking</Text>
+          <Text className={`text-xl ${themeStyles.textPrimary}`}>
+            Cancel Booking
+          </Text>
           <TouchableOpacity
-            className="bg-gray-300 rounded-full px-6 py-2"
+            className={`${themeStyles.buttonBg} rounded-full px-6 py-2`}
             onPress={() => handleCancelBooking(booking.id)}
           >
-            <Text className="text-black text-base font-medium">Cancel</Text>
+            <Text className={`text-base font-medium ${themeStyles.buttonText}`}>
+              Cancel
+            </Text>
           </TouchableOpacity>
         </View>
       )}
@@ -250,17 +254,20 @@ const MyBookingsScreen = () => {
   );
 
   return (
-    <SafeAreaView className="flex-1 ">
-      <StatusBar barStyle="light-content" backgroundColor="#000000" />
+    <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
+      <StatusBar
+        barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
+        backgroundColor={theme === 'dark' ? '#000000' : '#FFFFFF'}
+      />
       <Navbar title="Bookings" />
       <ScrollView showsVerticalScrollIndicator={false}>
         {bookings.length === 0 ? (
           <View className="flex-1 justify-center items-center py-10">
-            <FontAwesome5 name="sad-tear" size={64} color="gray" />
-            <Text className="text-lg text-gray-600 mt-4">
+            <FontAwesome5 name="sad-tear" size={64} color={themeStyles.iconColor} />
+            <Text className={`text-lg ${themeStyles.textTertiary} mt-4`}>
               No bookings found
             </Text>
-            <Text className="text-base text-gray-500 mt-1">
+            <Text className={`text-base ${themeStyles.textNoBookings} mt-1`}>
               Start by booking your favorite chef!
             </Text>
           </View>
@@ -275,7 +282,7 @@ const MyBookingsScreen = () => {
 
             return filteredBookings.length > 0 ? (
               <View key={section} className="mb-6 mt-6 ml-1">
-                <Text className="text-2xl font-semibold text-gray-800 ml-4">
+                <Text className={`text-2xl font-semibold ${themeStyles.textPrimary} ml-4`}>
                   {section === 'past' ? 'Past' : 'Upcoming'}
                 </Text>
                 {filteredBookings.map(renderBooking)}

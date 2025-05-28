@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import {
   View,
   Text,
@@ -13,10 +13,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Navbar from '../components/Navbar';
+import { ThemeContext } from '../context/ThemeContext';
 
 const EditProfileScreen = ({ route }) => {
   const { width, height } = Dimensions.get('window');
   const navigation = useNavigation();
+  const { theme } = useContext(ThemeContext);
 
   const { fullName: initialFullName = '', email: initialEmail = '' } =
     route.params;
@@ -47,40 +49,60 @@ const EditProfileScreen = ({ route }) => {
     ]);
   };
 
+  const themeStyles = {
+    container: theme === 'dark' ? 'bg-black' : 'bg-white',
+    textLabel: theme === 'dark' ? 'text-gray-300' : 'text-gray-700',
+    textInput: theme === 'dark' ? 'text-white' : 'text-gray-800',
+    border: theme === 'dark' ? 'border-gray-700' : 'border-gray-300',
+    inputBg: theme === 'dark' ? 'bg-gray-800' : 'bg-white',
+    placeholder: theme === 'dark' ? '#9ca3af' : '#9ca3af',
+    iconColor: theme === 'dark' ? 'gray' : 'gray',
+    buttonText: theme === 'dark' ? 'text-white' : 'text-white',
+  };
+
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <StatusBar barStyle="light-content" backgroundColor="#000000" />
+    <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
+      <StatusBar
+        barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
+        backgroundColor={theme === 'dark' ? '#000000' : '#FFFFFF'}
+      />
       <Navbar
         title="Edit Profile"
         onBackPress={() => {
           navigation.navigate('Profile');
         }}
       />
-
       <View className="flex-1 p-6 space-y-5">
-        <Text className="mb-2 text-gray-700 font-medium">Full Name</Text>
-        <View className="flex-row items-center border border-gray-300 rounded-xl px-4 py-1 bg-white">
+        <Text className={`mb-2 font-medium ${themeStyles.textLabel}`}>
+          Full Name
+        </Text>
+        <View
+          className={`flex-row items-center border ${themeStyles.border} rounded-xl px-4 py-1 ${themeStyles.inputBg}`}
+        >
           <Ionicons
             name="person-outline"
             size={20}
-            color="gray"
+            color={themeStyles.iconColor}
             className="mr-2"
           />
           <TextInput
             value={fullName}
             onChangeText={setFullName}
             placeholder="Your full name"
-            className="flex-1 text-gray-800"
-            placeholderTextColor="#9ca3af"
+            className={`flex-1 ${themeStyles.textInput}`}
+            placeholderTextColor={themeStyles.placeholder}
           />
         </View>
-
-        <Text className="mb-2 text-gray-700 font-medium mt-8">Email</Text>
-        <View className="flex-row items-center border border-gray-300 rounded-xl px-4 py-1 bg-white">
+        <Text className={`mb-2 font-medium mt-8 ${themeStyles.textLabel}`}>
+          Email
+        </Text>
+        <View
+          className={`flex-row items-center border ${themeStyles.border} rounded-xl px-4 py-1 ${themeStyles.inputBg}`}
+        >
           <Ionicons
             name="mail-outline"
             size={20}
-            color="gray"
+            color={themeStyles.iconColor}
             className="mr-2"
           />
           <TextInput
@@ -88,8 +110,8 @@ const EditProfileScreen = ({ route }) => {
             onChangeText={setEmail}
             placeholder="you@example.com"
             keyboardType="email-address"
-            className="flex-1 text-gray-800"
-            placeholderTextColor="#9ca3af"
+            className={`flex-1 ${themeStyles.textInput}`}
+            placeholderTextColor={themeStyles.placeholder}
             autoCapitalize="none"
           />
         </View>
@@ -103,7 +125,9 @@ const EditProfileScreen = ({ route }) => {
             end={{ x: 1, y: 1 }}
             className="p-4 items-center"
           >
-            <Text className="text-white text-xl font-semibold tracking-wide">
+            <Text
+              className={`text-xl font-semibold tracking-wide ${themeStyles.buttonText}`}
+            >
               Save Changes
             </Text>
           </LinearGradient>

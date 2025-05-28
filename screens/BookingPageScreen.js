@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   View,
   Text,
@@ -14,20 +14,28 @@ import Feather from '@expo/vector-icons/Feather';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Picker } from '@react-native-picker/picker';
-import { useNavigation } from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import Navbar from '../components/Navbar';
+import { ThemeContext } from '../context/ThemeContext';
+import { set } from 'lodash';
 
-export default function BookingPageScreen({ route }) {
-  const { pricing, cook, cuisine, isDiscounted = false } = route.params;
+export default function BookingPageScreen() {
+  const { params } = useRoute();
+  const { pricing, cook, cuisine, isDiscounted = false } = params || {};
   const navigation = useNavigation();
+  const { theme } = useContext(ThemeContext);
 
   const validCuisine =
-    cuisine && pricing[cuisine]
+    cuisine && pricing?.[cuisine]
       ? cuisine
-      : Object.keys(pricing)[0] || 'North Indian';
-  const initialPricing = pricing[validCuisine] || {
+      : Object.keys(pricing || {})[0] || 'North Indian';
+  const initialPricing = pricing?.[validCuisine] || {
     cook: 'Sanjay Kumar',
     price: 500,
     rating: 4.5,
@@ -56,26 +64,71 @@ export default function BookingPageScreen({ route }) {
   });
   const [marker, setMarker] = useState(null);
 
-  useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert(
-          'Permission Denied',
-          'Location permission is required to select an address.',
-        );
-        return;
-      }
+  const themeStyles = {
+    container: theme === 'dark' ? 'bg-black' : 'bg-white',
+    textPrimary: theme === 'dark' ? 'text-white' : 'text-gray-700',
+    textSecondary: theme === 'dark' ? 'text-gray-300' : 'text-gray-800',
+    textAccent: theme === 'dark' ? 'text-red-300' : 'text-red-400',
+    textSupport: theme === 'dark' ? 'text-orange-500' : 'text-orange-700',
+    textHint: theme === 'dark' ? 'text-gray-400' : 'text-gray-500',
+    buttonBg: theme === 'dark' ? 'bg-orange-600' : 'bg-orange-700',
+    buttonText: theme === 'dark' ? 'text-white' : 'text-white',
+    borderColor: theme === 'dark' ? 'border-gray-700' : 'border-gray-300',
+    mealSelectedBg: theme === 'dark' ? 'bg-orange-900' : 'bg-orange-100',
+    mealSelectedBorder:
+      theme === 'dark' ? 'border-orange-400' : 'border-orange-500',
+    mealSelectedText: theme === 'dark' ? 'text-orange-400' : 'text-orange-700',
+    iconColor: theme === 'dark' ? '#D1D5DB' : '#000000',
+    pickerBg: theme === 'dark' ? 'bg-gray-900' : 'bg-white',
+    discountText: theme === 'dark' ? 'text-green-400' : 'text-green-500',
+    placeholderColor: theme === 'dark' ? '#D1D5DB' : '#6B7280',
+  };
 
-      let location = await Location.getCurrentPositionAsync({});
+  useFocusEffect(
+    React.useCallback(() => {
+      setGuestCount(2);
+      setAddress('Select Address');
+      setSelectedDate('');
+      setSelectedTime('');
+      setSelectedCuisine(validCuisine);
+      setCookName(initialPricing.cook);
+      setCookPrice(
+        isDiscounted ? initialPricing.price * 0.9 : initialPricing.price,
+      );
+      setCookRating(initialPricing.rating);
+      setCookImage(initialPricing.image);
       setRegion({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
+        latitude: 12.9716,
+        longitude: 77.5946,
         latitudeDelta: 0.05,
         longitudeDelta: 0.05,
       });
-    })();
-  }, []);
+      setMarker(null);
+      setTimePickerVisibility(false);
+      setDatePickerVisibility(false);
+      setMealType(null);
+    }, []),
+  ),
+    useEffect(() => {
+      (async () => {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert(
+            'Permission Denied',
+            'Location permission is required to select an address.',
+          );
+          return;
+        }
+
+        let location = await Location.getCurrentPositionAsync({});
+        setRegion({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        });
+      })();
+    }, []);
 
   const handleMapPress = async (event) => {
     const { latitude, longitude } = event.nativeEvent.coordinate;
@@ -190,7 +243,10 @@ export default function BookingPageScreen({ route }) {
     const selectedHour = time.getHours();
     const selectedMinute = time.getMinutes();
     const selectedTotalMinutes = selectedHour * 60 + selectedMinute;
-    const { start, end } = timeRestrictions[selectedCuisine];
+    const { start, end } = timeRestrictions[selectedCuisine] || {
+      start: 0,
+      end: 24,
+    };
     const startTotalMinutes = start * 60;
     const endTotalMinutes = end * 60;
 
@@ -220,20 +276,25 @@ export default function BookingPageScreen({ route }) {
   };
 
   return (
-    <SafeAreaView className="flex-1">
-      <StatusBar barStyle="light-content" backgroundColor="#000000" />
+    <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
+      <StatusBar
+        barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
+        backgroundColor={theme === 'dark' ? '#000000' : '#FFFFFF'}
+      />
       <Navbar title="Booking Page" />
       <ScrollView
         className="px-4 pb-6 pt-4"
         showsVerticalScrollIndicator={false}
       >
         <View className="mb-6">
-          <Text className="text-lg font-medium">Select Address:</Text>
-          <Text className="text-sm text-gray-500 mb-2">
+          <Text className={`text-lg font-medium ${themeStyles.textPrimary}`}>
+            Select Address:
+          </Text>
+          <Text className={`text-sm ${themeStyles.textHint} mb-2`}>
             Tap on the map to select your address
           </Text>
           <View
-            className="border border-gray-300 rounded-lg mb-2"
+            className={`border ${themeStyles.borderColor} rounded-lg mb-2`}
             style={{ height: 400, width: '100%' }}
           >
             <MapView
@@ -251,64 +312,95 @@ export default function BookingPageScreen({ route }) {
               )}
             </MapView>
           </View>
-          <View className="mt-2 p-3 border border-gray-300 rounded-md flex-row items-center">
-            <Feather name="map-pin" size={18} color="black" className="mr-2" />
-            <Text className="text-gray-800 text-base flex-1">{address}</Text>
+          <View
+            className={`mt-2 p-3 border ${themeStyles.borderColor} rounded-md flex-row items-center`}
+          >
+            <Feather
+              name="map-pin"
+              size={18}
+              color={themeStyles.iconColor}
+              className="mr-2"
+            />
+            <Text className={`text-base ${themeStyles.textSecondary} flex-1`}>
+              {address}
+            </Text>
           </View>
         </View>
 
         <View className="mb-6">
-          <Text className="text-lg font-medium mb-2">For how many people?</Text>
-          <View className="flex-row items-center border border-gray-300 rounded-lg px-4 py-2 justify-between">
+          <Text
+            className={`text-lg font-medium mb-2 ${themeStyles.textPrimary}`}
+          >
+            For how many people?
+          </Text>
+          <View
+            className={`flex-row items-center border ${themeStyles.borderColor} rounded-lg px-4 py-2 justify-between`}
+          >
             <TouchableOpacity
               onPress={decrementGuests}
-              className="border border-gray-300 rounded-full p-2"
+              className={`border ${themeStyles.borderColor} rounded-full p-2`}
             >
-              <Text className="text-lg font-bold">−</Text>
+              <Text className={`text-lg font-bold ${themeStyles.textPrimary}`}>
+                −
+              </Text>
             </TouchableOpacity>
-            <Text className="text-lg font-medium">{guestCount}</Text>
+            <Text className={`text-lg font-medium ${themeStyles.textPrimary}`}>
+              {guestCount}
+            </Text>
             <TouchableOpacity
               onPress={incrementGuests}
-              className="border border-gray-300 rounded-full p-2"
+              className={`border ${themeStyles.borderColor} rounded-full p-2`}
             >
-              <Text className="text-lg font-bold">+</Text>
+              <Text className={`text-lg font-bold ${themeStyles.textPrimary}`}>
+                +
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
 
         <View className="mb-6">
-          <Text className="text-lg font-medium mb-2">Select Date:</Text>
+          <Text
+            className={`text-lg font-medium mb-2 ${themeStyles.textPrimary}`}
+          >
+            Select Date:
+          </Text>
           <TouchableOpacity
             onPress={showDatePicker}
-            className="flex-row items-center border border-gray-300 rounded-lg px-4 py-2"
+            className={`flex-row items-center border ${themeStyles.borderColor} rounded-lg px-4 py-2`}
           >
             <TextInput
               placeholder="DD/MM/YYYY"
-              className="flex-1 text-gray-700"
+              className={`flex-1 ${themeStyles.textPrimary}`}
               editable={false}
               value={selectedDate}
+              placeholderTextColor={themeStyles.placeholderColor}
             />
             <MaterialCommunityIcons
               name="calendar-month"
               size={24}
-              color="black"
+              color={themeStyles.iconColor}
             />
           </TouchableOpacity>
         </View>
 
         <View className="mb-6">
-          <Text className="text-lg font-medium mb-2">Select Time:</Text>
+          <Text
+            className={`text-lg font-medium mb-2 ${themeStyles.textPrimary}`}
+          >
+            Select Time:
+          </Text>
           <TouchableOpacity
             onPress={showTimePicker}
-            className="flex-row items-center border border-gray-300 rounded-lg px-4 py-2"
+            className={`flex-row items-center border ${themeStyles.borderColor} rounded-lg px-4 py-2`}
           >
             <TextInput
               placeholder="HH:MM AM/PM"
-              className="flex-1 text-gray-700"
+              className={`flex-1 ${themeStyles.textPrimary}`}
               value={selectedTime}
               editable={false}
+              placeholderTextColor={themeStyles.placeholderColor}
             />
-            <Feather name="clock" size={24} color="black" />
+            <Feather name="clock" size={24} color={themeStyles.iconColor} />
           </TouchableOpacity>
         </View>
 
@@ -329,11 +421,18 @@ export default function BookingPageScreen({ route }) {
         />
 
         <View className="mb-6">
-          <Text className="text-lg font-medium mb-2">Select Cuisine:</Text>
-          <View className="border border-gray-300 rounded-lg">
+          <Text
+            className={`text-lg font-medium mb-2 ${themeStyles.textPrimary}`}
+          >
+            Select Cuisine:
+          </Text>
+          <View
+            className={`border ${themeStyles.borderColor} rounded-lg ${themeStyles.pickerBg}`}
+          >
             <Picker
               selectedValue={selectedCuisine}
               onValueChange={handleCuisineChange}
+              style={{ color: theme === 'dark' ? '#D1D5DB' : '#000000' }}
             >
               {Object.keys(pricing).map((cuisine) => (
                 <Picker.Item key={cuisine} label={cuisine} value={cuisine} />
@@ -343,39 +442,55 @@ export default function BookingPageScreen({ route }) {
         </View>
 
         <View className="mb-6 flex-row">
-          <Text className="text-lg">
-            Cook: <Text className="font-medium text-red-400">{cookName}</Text>
+          <Text className={`text-lg ${themeStyles.textPrimary}`}>
+            Cook:{' '}
+            <Text className={`font-medium ${themeStyles.textAccent}`}>
+              {cookName}
+            </Text>
           </Text>
         </View>
         <View className="mb-6">
-          <Text className="text-lg font-medium mb-2">Pricing Details:</Text>
-          <Text className="text-base">
+          <Text
+            className={`text-lg font-medium mb-2 ${themeStyles.textPrimary}`}
+          >
+            Pricing Details:
+          </Text>
+          <Text className={`text-base ${themeStyles.textPrimary}`}>
             Price per guest:{' '}
-            <Text className="font-medium">
+            <Text className={`font-medium ${themeStyles.textSecondary}`}>
               ₹{cookPrice.toFixed(2)}
               {isDiscounted && (
-                <Text className="text-green-500"> (10% discount applied)</Text>
+                <Text className={themeStyles.discountText}>
+                  {' '}
+                  (10% discount applied)
+                </Text>
               )}
             </Text>
           </Text>
-          <Text className="text-base">
+          <Text className={`text-base ${themeStyles.textPrimary}`}>
             Total Amount:{' '}
-            <Text className="font-medium">₹{totalAmount.toFixed(2)}</Text>
+            <Text className={`font-medium ${themeStyles.textSecondary}`}>
+              ₹{totalAmount.toFixed(2)}
+            </Text>
           </Text>
         </View>
-        <Text className="text-lg font-medium mb-2">Choose Meal</Text>
+        <Text className={`text-lg font-medium mb-2 ${themeStyles.textPrimary}`}>
+          Choose Meal
+        </Text>
         <View className="flex-row space-x-2 gap-5 mb-6">
           <TouchableOpacity
             onPress={() => setMealType('Lunch')}
             className={`flex-1 py-3 rounded-lg border ${
               mealType === 'Lunch'
-                ? 'border-orange-500 bg-orange-100'
-                : 'border-gray-300'
+                ? `${themeStyles.mealSelectedBorder} ${themeStyles.mealSelectedBg}`
+                : themeStyles.borderColor
             }`}
           >
             <Text
               className={`text-center font-medium ${
-                mealType === 'Lunch' ? 'text-orange-700' : 'text-gray-700'
+                mealType === 'Lunch'
+                  ? themeStyles.mealSelectedText
+                  : themeStyles.textPrimary
               }`}
             >
               Lunch
@@ -385,13 +500,15 @@ export default function BookingPageScreen({ route }) {
             onPress={() => setMealType('Dinner')}
             className={`flex-1 py-3 rounded-lg border ${
               mealType === 'Dinner'
-                ? 'border-orange-500 bg-orange-100'
-                : 'border-gray-300'
+                ? `${themeStyles.mealSelectedBorder} ${themeStyles.mealSelectedBg}`
+                : themeStyles.borderColor
             }`}
           >
             <Text
               className={`text-center font-medium ${
-                mealType === 'Dinner' ? 'text-orange-700' : 'text-gray-700'
+                mealType === 'Dinner'
+                  ? themeStyles.mealSelectedText
+                  : themeStyles.textPrimary
               }`}
             >
               Dinner
@@ -399,21 +516,23 @@ export default function BookingPageScreen({ route }) {
           </TouchableOpacity>
         </View>
 
-        <Text className="text-center text-lg text-gray-500 mt-3">
+        <Text className={`text-center text-lg ${themeStyles.textHint} mt-3`}>
           Need assistance?
           <Text
-            className="text-orange-700 underline"
+            className={`${themeStyles.textSupport} underline`}
             onPress={handleContactSupport}
           >
-            Contact Support
+            {' Contact Support'}
           </Text>
         </Text>
 
         <TouchableOpacity
           onPress={handleNext}
-          className="mt-6 bg-orange-700 py-4 rounded-lg mb-10"
+          className={`mt-6 ${themeStyles.buttonBg} py-4 rounded-lg mb-10`}
         >
-          <Text className="text-center text-white font-medium">Next</Text>
+          <Text className={`text-center font-medium ${themeStyles.buttonText}`}>
+            Next
+          </Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
