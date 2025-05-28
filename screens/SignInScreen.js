@@ -9,7 +9,6 @@ import {
 import { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeftIcon } from 'react-native-heroicons/solid';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import {
   signInWithEmailAndPassword,
