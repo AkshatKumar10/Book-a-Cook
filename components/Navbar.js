@@ -23,11 +23,15 @@ const Navbar = ({ title, onBackPress }) => {
   };
 
   return (
-    <View className={`relative flex-row items-center justify-center py-2 ${themeStyles.container}`}>
+    <View
+      className={`relative flex-row items-center justify-center py-2 ${themeStyles.container}`}
+    >
       <TouchableOpacity onPress={handleBackPress} className="absolute left-4">
         <Feather name="arrow-left" size={25} color={themeStyles.iconColor} />
       </TouchableOpacity>
-      <Text className={`text-xl font-semibold ${themeStyles.text}`}>{title}</Text>
+      <Text className={`text-xl font-semibold ${themeStyles.text}`}>
+        {title}
+      </Text>
     </View>
   );
 };

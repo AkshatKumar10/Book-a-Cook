@@ -48,8 +48,14 @@ export default function CuisineDetails() {
       />
       <Navbar title={cuisine} />
       <View className="px-6 pt-2 pb-6">
-        <View className={`flex-row items-center ${themeStyles.searchBg} ${themeStyles.searchBorder} rounded-lg px-3`}>
-          <AntDesign name="search1" size={20} color={themeStyles.searchIconColor} />
+        <View
+          className={`flex-row items-center ${themeStyles.searchBg} ${themeStyles.searchBorder} rounded-lg px-3`}
+        >
+          <AntDesign
+            name="search1"
+            size={20}
+            color={themeStyles.searchIconColor}
+          />
           <TextInput
             className={`flex-1 pl-3 py-3 ${themeStyles.searchText}`}
             placeholder="Search for a dish..."
@@ -82,13 +88,17 @@ export default function CuisineDetails() {
                   }}
                   resizeMode="cover"
                 />
-                <Text className={`font-semibold text-lg mt-2 ${themeStyles.textPrimary}`}>
+                <Text
+                  className={`font-semibold text-lg mt-2 ${themeStyles.textPrimary}`}
+                >
                   {specialty.name}
                 </Text>
               </View>
             ))
           ) : (
-            <Text className={`text-center text-lg ${themeStyles.textSecondary}`}>
+            <Text
+              className={`text-center text-lg ${themeStyles.textSecondary}`}
+            >
               No specialties found for {cuisine}.
             </Text>
           )}

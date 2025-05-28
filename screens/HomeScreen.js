@@ -210,11 +210,7 @@ export default function HomeScreen() {
             <ActivityIndicator size="large" color={themeStyles.loadingColor} />
           ) : filteredCuisines.length === 0 && searchQuery ? (
             <View className="items-center justify-center mt-4">
-              <AntDesign
-                name="frown"
-                size={80}
-                color={themeStyles.empty}
-              />
+              <AntDesign name="frown" size={80} color={themeStyles.empty} />
               <Text
                 className={`ml-2 text-center mt-2 ${themeStyles.textNoResults} text-xl`}
               >

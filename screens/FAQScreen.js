@@ -79,7 +79,9 @@ const FAQScreen = () => {
             className={`mb-4 p-4 ${themeStyles.cardBg} border ${themeStyles.borderColor} rounded-xl shadow-sm`}
           >
             <View className="flex-row items-center justify-between">
-              <Text className={`font-semibold text-lg ${themeStyles.textPrimary} flex-1 pr-6`}>
+              <Text
+                className={`font-semibold text-lg ${themeStyles.textPrimary} flex-1 pr-6`}
+              >
                 {faq.question}
               </Text>
               <Ionicons

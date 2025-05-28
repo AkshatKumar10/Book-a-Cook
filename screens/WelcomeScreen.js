@@ -30,10 +30,14 @@ export default function WelcomeScreen() {
             style={{ width: '90%', aspectRatio: 1, borderRadius: 70 }}
           />
         </View>
-        <Text className={`font-bold text-2xl text-center ${themeStyles.textAccent} mt-12`}>
+        <Text
+          className={`font-bold text-2xl text-center ${themeStyles.textAccent} mt-12`}
+        >
           Let's Get Started
         </Text>
-        <Text className={`font-bold text-5xl text-center ${themeStyles.textPrimary} mt-4 mb-3`}>
+        <Text
+          className={`font-bold text-5xl text-center ${themeStyles.textPrimary} mt-4 mb-3`}
+        >
           Book A Cook
         </Text>
         <View className="space-y-2">
@@ -41,7 +45,9 @@ export default function WelcomeScreen() {
             onPress={() => navigation.navigate('SignUp')}
             className={`py-3 ${themeStyles.buttonBg} mx-7 rounded-full mb-4 mt-10`}
           >
-            <Text className={`text-center text-xl font-bold ${themeStyles.buttonText}`}>
+            <Text
+              className={`text-center text-xl font-bold ${themeStyles.buttonText}`}
+            >
               Sign Up
             </Text>
           </TouchableOpacity>
@@ -50,7 +56,9 @@ export default function WelcomeScreen() {
               Already have an account?
             </Text>
             <TouchableOpacity onPress={() => navigation.navigate('SignIn')}>
-              <Text className={`font-semibold mb-10 ml-2 ${themeStyles.textAccent}`}>
+              <Text
+                className={`font-semibold mb-10 ml-2 ${themeStyles.textAccent}`}
+              >
                 Sign In
               </Text>
             </TouchableOpacity>

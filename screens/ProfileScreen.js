@@ -65,7 +65,9 @@ const ProfileScreen = ({ route }) => {
           size={100}
           color={themeStyles.iconColor}
         />
-        <Text className={`font-bold text-center text-lg ${themeStyles.textPrimary}`}>
+        <Text
+          className={`font-bold text-center text-lg ${themeStyles.textPrimary}`}
+        >
           {fullName}
         </Text>
         <Text className={`text-center text-base ${themeStyles.textSecondary}`}>
@@ -85,67 +87,115 @@ const ProfileScreen = ({ route }) => {
           }
           className={`flex-row items-center p-4 border-b ${themeStyles.borderColor}`}
         >
-          <View className={`w-8 h-8 items-center justify-center ${themeStyles.buttonBg} rounded-full mr-4`}>
+          <View
+            className={`w-8 h-8 items-center justify-center ${themeStyles.buttonBg} rounded-full mr-4`}
+          >
             <Ionicons name="person" size={20} color={themeStyles.iconColor} />
           </View>
           <Text className={`flex-1 text-lg ${themeStyles.textPrimary}`}>
             Edit Profile Info
           </Text>
-          <Ionicons name="chevron-forward" size={20} color={themeStyles.iconColor} />
+          <Ionicons
+            name="chevron-forward"
+            size={20}
+            color={themeStyles.iconColor}
+          />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => navigation.navigate('MyBookings')}
           className={`flex-row items-center p-4 border-b ${themeStyles.borderColor}`}
         >
-          <View className={`w-8 h-8 items-center justify-center ${themeStyles.buttonBg} rounded-full mr-4`}>
-            <FontAwesome5 name="calendar-alt" size={20} color={themeStyles.iconColor} />
+          <View
+            className={`w-8 h-8 items-center justify-center ${themeStyles.buttonBg} rounded-full mr-4`}
+          >
+            <FontAwesome5
+              name="calendar-alt"
+              size={20}
+              color={themeStyles.iconColor}
+            />
           </View>
           <Text className={`flex-1 text-lg ${themeStyles.textPrimary}`}>
             Bookings
           </Text>
-          <Ionicons name="chevron-forward" size={20} color={themeStyles.iconColor} />
+          <Ionicons
+            name="chevron-forward"
+            size={20}
+            color={themeStyles.iconColor}
+          />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => Linking.openURL('mailto:bookachef@gmail.com')}
           className={`flex-row items-center p-4 border-b ${themeStyles.borderColor}`}
         >
-          <View className={`w-8 h-8 items-center justify-center ${themeStyles.buttonBg} rounded-full mr-4`}>
-            <FontAwesome5 name="phone" size={20} color={themeStyles.iconColor} />
+          <View
+            className={`w-8 h-8 items-center justify-center ${themeStyles.buttonBg} rounded-full mr-4`}
+          >
+            <FontAwesome5
+              name="phone"
+              size={20}
+              color={themeStyles.iconColor}
+            />
           </View>
           <Text className={`flex-1 text-lg ${themeStyles.textPrimary}`}>
             Contact Us
           </Text>
-          <Ionicons name="chevron-forward" size={20} color={themeStyles.iconColor} />
+          <Ionicons
+            name="chevron-forward"
+            size={20}
+            color={themeStyles.iconColor}
+          />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => navigation.navigate('HowItWorks')}
           className={`flex-row items-center p-4 border-b ${themeStyles.borderColor}`}
         >
-          <View className={`w-8 h-8 items-center justify-center ${themeStyles.buttonBg} rounded-full mr-4`}>
-            <AntDesign name="infocirlce" size={20} color={themeStyles.iconColor} />
+          <View
+            className={`w-8 h-8 items-center justify-center ${themeStyles.buttonBg} rounded-full mr-4`}
+          >
+            <AntDesign
+              name="infocirlce"
+              size={20}
+              color={themeStyles.iconColor}
+            />
           </View>
           <Text className={`flex-1 text-lg ${themeStyles.textPrimary}`}>
             How It Works
           </Text>
-          <Ionicons name="chevron-forward" size={20} color={themeStyles.iconColor} />
+          <Ionicons
+            name="chevron-forward"
+            size={20}
+            color={themeStyles.iconColor}
+          />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => navigation.navigate('FAQScreen')}
           className={`flex-row items-center p-4 border-b ${themeStyles.borderColor}`}
         >
-          <View className={`w-8 h-8 items-center justify-center ${themeStyles.buttonBg} rounded-full mr-4`}>
-            <MaterialIcons name="live-help" size={20} color={themeStyles.iconColor} />
+          <View
+            className={`w-8 h-8 items-center justify-center ${themeStyles.buttonBg} rounded-full mr-4`}
+          >
+            <MaterialIcons
+              name="live-help"
+              size={20}
+              color={themeStyles.iconColor}
+            />
           </View>
           <Text className={`flex-1 text-lg ${themeStyles.textPrimary}`}>
             FAQ
           </Text>
-          <Ionicons name="chevron-forward" size={20} color={themeStyles.iconColor} />
+          <Ionicons
+            name="chevron-forward"
+            size={20}
+            color={themeStyles.iconColor}
+          />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={toggleTheme}
           className={`flex-row items-center p-4 border-b ${themeStyles.borderColor}`}
         >
-          <View className={`w-8 h-8 items-center justify-center ${themeStyles.buttonBg} rounded-full mr-4`}>
+          <View
+            className={`w-8 h-8 items-center justify-center ${themeStyles.buttonBg} rounded-full mr-4`}
+          >
             <MaterialIcons
               name={theme === 'dark' ? 'light-mode' : 'dark-mode'}
               size={20}
@@ -153,21 +203,37 @@ const ProfileScreen = ({ route }) => {
             />
           </View>
           <Text className={`flex-1 text-lg ${themeStyles.textPrimary}`}>
-            {theme === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
+            {theme === 'dark'
+              ? 'Switch to Light Theme'
+              : 'Switch to Dark Theme'}
           </Text>
-          <Ionicons name="chevron-forward" size={20} color={themeStyles.iconColor} />
+          <Ionicons
+            name="chevron-forward"
+            size={20}
+            color={themeStyles.iconColor}
+          />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={handleSignOut}
-          className={`flex-row items-center p-4 border-b ${themeStyles.borderColor}`} 
+          className={`flex-row items-center p-4 border-b ${themeStyles.borderColor}`}
         >
-          <View className={`w-8 h-8 items-center justify-center ${themeStyles.buttonBg} rounded-full mr-4`}>
-            <MaterialIcons name="logout" size={20} color={themeStyles.iconColor} />
+          <View
+            className={`w-8 h-8 items-center justify-center ${themeStyles.buttonBg} rounded-full mr-4`}
+          >
+            <MaterialIcons
+              name="logout"
+              size={20}
+              color={themeStyles.iconColor}
+            />
           </View>
           <Text className={`flex-1 text-lg ${themeStyles.textPrimary}`}>
             Sign Out
           </Text>
-          <Ionicons name="chevron-forward" size={20} color={themeStyles.iconColor} />
+          <Ionicons
+            name="chevron-forward"
+            size={20}
+            color={themeStyles.iconColor}
+          />
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
