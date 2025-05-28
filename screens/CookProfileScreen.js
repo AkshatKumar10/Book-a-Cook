@@ -1,130 +1,114 @@
-import React, { useState } from "react";
+import React from 'react';
 import {
   View,
   Text,
   Image,
   ScrollView,
   TouchableOpacity,
-  Alert,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { useNavigation } from "@react-navigation/native";
+  useWindowDimensions,
+  StatusBar,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import Navbar from '../components/Navbar';
+import useCooksData from '../hooks/useCooksData';
 
-const CookProfileScreen = ({ route, navigation }) => {
+const CookProfileScreen = ({ route }) => {
   const { cook } = route.params;
+  const navigation = useNavigation();
+  const { width } = useWindowDimensions();
+  const { cooksData } = useCooksData();
 
-  // // State to track if the cook is a favorite
-  // const [isFavorite, setIsFavorite] = useState(false);
+  const handleBookNow = () => {
+    const allCooksPricing = cooksData.reduce((acc, currentCook) => {
+      const pricingMatch = currentCook.pricing?.match(/\d+/);
+      const price = pricingMatch ? parseInt(pricingMatch[0]) : 0;
+      acc[currentCook.cuisine] = {
+        cook: currentCook.name,
+        price: price,
+        rating: currentCook.rating,
+        image: currentCook.image,
+      };
+      return acc;
+    }, {});
 
-  // const handleFavoriteToggle = () => {
-  //   setIsFavorite((prevState) => {
-  //     const newState = !prevState;
-  //     Alert.alert(
-  //       newState ? "Added to Favorites!" : "Removed from Favorites!",
-  //       newState
-  //         ? "This item is now saved in your favorites"
-  //         : "You can always add it back if you change your mind."
-  //     );
-  //     return newState;
-  //   });
-  // };
+    navigation.navigate('BookingPage', {
+      cook: cook.name,
+      cuisine: cook.cuisine,
+      pricing: allCooksPricing,
+    });
+  };
 
   return (
-    <SafeAreaView>
-      <ScrollView>
-        <View>
+    <SafeAreaView className="flex-1 bg-gray-100">
+      <StatusBar barStyle="light-content" backgroundColor="#000000" />
+      <Navbar title="Chef Profile" />
+      <ScrollView contentContainerStyle={{ paddingBottom: 10 }}>
+        <View className="items-center mt-4">
           <Image
             source={{ uri: cook.image }}
-            className="w-52 h-52 rounded-full ml-32 flex-row justify-center items-center"
+            className="rounded-full mb-4"
+            style={{
+              width: width * 0.3,
+              height: width * 0.3,
+            }}
+            resizeMode="cover"
           />
-          <Text className="font-bold text-4xl mt-5 text-center">
-            {cook.name}
+          <Text className="font-semibold text-3xl">Chef {cook.name}</Text>
+          <Text className="text-lg text-red-400">
+            {cook.cuisine} Cuisine Expert
           </Text>
-          <Text className="text-center text-xl mx-4">{cook.bio}</Text>
+          <Text className="text-lg text-red-400">{cook.rating}</Text>
         </View>
-
-        <View>
-          <Text className="font-bold text-2xl ml-6 text-slate-600">
-            Specialties:
-          </Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            className="mt-2"
-          >
+        <Text className="font-bold text-2xl ml-4 mt-6">Bio</Text>
+        <Text className="text-lg mx-4 mt-2">{cook.bio}</Text>
+        <View className="mt-6">
+          <Text className="font-bold text-2xl ml-4">Specialties</Text>
+          <View className="flex-row flex-wrap ml-4 mt-2">
             {cook.specialties.map((specialty, index) => (
               <View
                 key={index}
-                className="bg-white border border-gray-300 rounded-lg shadow-md mx-2 p-4"
-                style={{ width: 120 }}
+                className="bg-[#f9f7f7] border rounded-full py-2 px-3 mr-3 mb-2"
+                style={{ alignSelf: 'flex-start' }}
               >
-                <Image
-                  source={{ uri: specialty.image }}
-                  className="h-24 w-24 rounded-lg mb-2"
-                />
-                <Text className="text-center items-center text-xl font-semibold">
+                <Text className="text-base font-semibold text-gray-900">
                   {specialty.name}
                 </Text>
               </View>
             ))}
-          </ScrollView>
-        </View>
-
-        <View>
-          <Text className="font-bold text-2xl mt-3 ml-6 text-slate-600">
-            Years of Experience:
-          </Text>
-          <Text className="ml-6 text-xl">{cook.yearsOfExperience}</Text>
-        </View>
-
-        <View>
-          <Text className="font-bold mt-3 text-2xl ml-6 text-slate-600">
-            Services:
-          </Text>
-          <Text className="ml-6 text-xl">{cook.services.join(", ")}</Text>
-        </View>
-
-        <View>
-          <Text className="font-bold mt-3 text-2xl ml-6 text-slate-600">
-            Pricing:
-          </Text>
-          <Text className="ml-6 text-xl">{cook.pricing}</Text>
-        </View>
-        <View>
-          <Text className="font-bold mt-3 text-2xl ml-6 text-slate-600">
-            Availability:
-          </Text>
-          <Text className="ml-6 text-xl mb-8">{cook.availability}</Text>
-        </View>
-        {/* <View className="bg-gray-200">
-          <View className="flex-row justify-center gap-4 mb-7 bg-gray-200 ">
-            <TouchableOpacity
-              className="bg-amber-900 rounded-full flex-row px-12 py-2 ml-32 justify-center mx-auto mt-5 "
-              onPress={() => {
-                // navigation.navigate("BookingPage");
-                const allCooksPricing = {};
-
-                const cuisineType = cook.cuisine;
-                const pricing = parseInt(cook.pricing.match(/\d+/)[0]);
-
-                allCooksPricing[cuisineType] = {
-                  cook: cook.name,
-                  price: pricing,
-                };
-                // Navigate to BookingPage with all cooks' pricing
-                navigation.navigate("BookingPage", {
-                  cook: cook.name,
-                  pricing: allCooksPricing,
-                });
-              }}
-            >
-              <Text className="font-bold text-2xl mt-2 text-center mb-2 text-gray-900">
-                Book Now
-              </Text>
-            </TouchableOpacity>
           </View>
-        </View> */}
+        </View>
+
+        <View className="mt-6 px-4">
+          <Text className="font-bold text-2xl ">Experience</Text>
+          <Text className="text-lg  mt-1">{cook.yearsOfExperience}</Text>
+        </View>
+
+        <View className="mt-6 px-4">
+          <Text className="font-bold text-2xl ">Services</Text>
+          <Text className="text-lg  mt-1">{cook.services.join(', ')}</Text>
+        </View>
+
+        <View className="mt-6 px-4">
+          <Text className="font-bold text-2xl ">Pricing</Text>
+          <Text className="text-lg  mt-1">{cook.pricing}</Text>
+        </View>
+
+        <View className="mt-6 px-4">
+          <Text className="font-bold text-2xl ">Availability</Text>
+          <Text className="text-lg mt-1 mb-8">{cook.availability}</Text>
+        </View>
+
+        <View className="px-4 mb-8">
+          <TouchableOpacity
+            onPress={handleBookNow}
+            className="rounded-full shadow-lg overflow-hidden bg-orange-700 py-4"
+          >
+            <Text className="font-bold text-white text-lg ml-2 text-center">
+              Book Now
+            </Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

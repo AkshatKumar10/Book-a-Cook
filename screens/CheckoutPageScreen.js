@@ -1,256 +1,109 @@
-// // CheckoutPageScreen.js
-// import React, { useState } from "react";
-// import {
-//   View,
-//   Text,
-//   TouchableOpacity,
-//   StyleSheet,
-//   Button,
-//   Image,
-//   Alert,
-// } from "react-native";
-// import { useNavigation } from "@react-navigation/native";
-// import RazorpayCheckout from "react-native-razorpay";
-
-// export default function CheckoutPageScreen({ route }) {
-//   const navigation = useNavigation();
-//   const {
-//     mealType,
-//     guestCount,
-//     address,
-//     selectedDate,
-//     selectedTime,
-//     selectedCuisine,
-//     cookName,
-//     totalAmount, // Assuming totalAmount is passed from the previous screen
-//   } = route.params;
-
-//   // const [paymentSuccess, setPaymentSuccess] = useState(false);
-//   // if (!RazorpayCheckout) {
-//   //   console.error("RazorpayCheckout module is not loaded correctly.");
-//   //   return;
-//   // }
-
-//   const handlePayment = () => {
-//     const options = {
-//       description: "Sample Payment",
-//       image: "https://i.imgur.com/3g7nmJC.jpg",
-//       currency: "INR",
-//       key: "rzp_test_t86tDGCZODCoNY",
-//       amount: totalAmount * 100,
-//       name: "Acme Corp",
-//       // order_id: "order_PR6aC0aEHXlBPJ", //Replace this with an order_id created using Orders API.
-//       prefill: {
-//         email: "user@example.com",
-//         contact: "9023415172",
-//         name: "JOhn",
-//       },
-//       theme: { color: "#53a20e" },
-//     };
-//     console.log("Payment options: ", options);
-//     console.log("Opening Razorpay Checkout...");
-//     RazorpayCheckout.open(options)
-//       .then((data) => {
-//         console.log("Payment successful: ", data);
-//         Alert.alert(`Success: ${data.razorpay_payment_id}`);
-//       })
-//       .catch((error) => {
-//         console.error("Payment error: ", error);
-//         Alert.alert(`Error: ${error.code} | ${error.description}`);
-//       });
-//   };
-//   //   RazorpayCheckout.open({
-//   //     description: "Test payment",
-//   //     image: "https://i.imgur.com/3g7nmJC.jpg",
-//   //     currency: "INR",
-//   //     key: "", // Replace with your actual API key
-//   //     amount: 100, // Amount in paise
-//   //     name: "Test Merchant",
-//   //     prefill: {
-//   //       email: "test@example.com",
-//   //       contact: "9999999999",
-//   //       name: "Test User",
-//   //     },
-//   //     theme: { color: "#53a20e" },
-//   //   })
-//   //     .then((data) => {
-//   //       console.log(`Payment successful: ${data.razorpay_payment_id}`);
-//   //     })
-//   //     .catch((error) => {
-//   //       console.error("Error in payment: ", error);
-//   //     });
-//   // };
-
-//   return (
-//     <View style={styles.container}>
-//       <View style={styles.detailsContainer}>
-//         <Text style={styles.title}>Meal Details</Text>
-//         <Text style={styles.detailText}>
-//           Meal Type: <Text style={styles.boldText}>{mealType}</Text>
-//         </Text>
-//         <Text style={styles.detailText}>
-//           Number of Guests: <Text style={styles.boldText}>{guestCount}</Text>
-//         </Text>
-//         <Text style={styles.detailText}>
-//           Address: <Text style={styles.boldText}>{address}</Text>
-//         </Text>
-//         <Text style={styles.detailText}>
-//           Date: <Text style={styles.boldText}>{selectedDate}</Text>
-//         </Text>
-//         <Text style={styles.detailText}>
-//           Time: <Text style={styles.boldText}>{selectedTime}</Text>
-//         </Text>
-//         <Text style={styles.detailText}>
-//           Cuisine: <Text style={styles.boldText}>{selectedCuisine}</Text>
-//         </Text>
-//         <Text style={styles.detailText}>
-//           Cook: <Text style={styles.boldText}>{cookName}</Text>
-//         </Text>
-//       </View>
-//       <View style={styles.amountContainer}>
-//         <Text style={styles.amountTitle}>Total Amount</Text>
-//         <Text style={styles.amountText}>₹{totalAmount.toFixed(2)}</Text>
-//         {/* Display the total amount */}
-//       </View>
-//       {/* {paymentSuccess ? ( */}
-//       {/* <View style={styles.paymentContainer}>
-//         <Image
-//           source={{
-//             uri: "https://maigha.com/wp-content/uploads/2023/10/Untitled_design-2-removebg-preview.png",
-//           }}
-//           style={styles.image}
-//         />
-//         <Text style={styles.description}>Thank you for your purchase!</Text>
-//         <Text style={styles.amount}>Amount: ₹{totalAmount.toFixed(2)} INR</Text>
-
-//       </View> */}
-//       {/* ) : ( */}
-//       <View style={styles.buttonContainer}>
-//         <Button title="Pay Now" onPress={handlePayment} color="#09518e" />
-//       </View>
-//       {/* )} */}
-//     </View>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: "white",
-//     padding: 16,
-//   },
-//   detailsContainer: {
-//     backgroundColor: "#f3f4f6",
-//     padding: 16,
-//     borderRadius: 8,
-//     marginBottom: 16,
-//     shadowColor: "#000",
-//     shadowOffset: { width: 0, height: 2 },
-//     shadowOpacity: 0.25,
-//     shadowRadius: 3.84,
-//     elevation: 5,
-//   },
-//   title: {
-//     fontSize: 24,
-//     textAlign: "center",
-//     fontWeight: "bold",
-//     marginBottom: 8,
-//   },
-//   detailText: {
-//     fontSize: 18,
-//     marginBottom: 4,
-//   },
-//   boldText: {
-//     fontWeight: "500",
-//   },
-//   amountContainer: {
-//     backgroundColor: "#fffbeb",
-//     padding: 16,
-//     borderRadius: 8,
-//     marginBottom: 16,
-//   },
-//   amountTitle: {
-//     fontSize: 20,
-//     fontWeight: "600",
-//     marginBottom: 4,
-//   },
-//   amountText: {
-//     fontSize: 24,
-//     fontWeight: "bold",
-//     color: "#4caf50",
-//   },
-//   paymentContainer: {
-//     alignItems: "center",
-//     backgroundColor: "#fff",
-//     padding: 20,
-//     borderRadius: 10,
-//     shadowColor: "#000",
-//     shadowOffset: {
-//       width: 0,
-//       height: 2,
-//     },
-//     shadowOpacity: 0.25,
-//     shadowRadius: 3.84,
-//     elevation: 5,
-//   },
-//   image: {
-//     width: 150,
-//     height: 100,
-//     resizeMode: "cover",
-//     borderRadius: 10,
-//     marginBottom: 10,
-//   },
-//   description: {
-//     fontSize: 18,
-//     marginBottom: 10,
-//   },
-//   amount: {
-//     fontSize: 16,
-//     marginBottom: 20,
-//   },
-//   buttonContainer: {
-//     width: "100%",
-//     alignItems: "center",
-//   },
-// });
-
-import React, { useState } from "react";
+import { useState } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
-  Button,
+  TouchableOpacity,
   Alert,
   ActivityIndicator,
-} from "react-native";
-import { WebView } from "react-native-webview";
+  ScrollView,
+  StatusBar,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { WebView } from 'react-native-webview';
+import Feather from '@expo/vector-icons/Feather';
+import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Navbar from '../components/Navbar';
 
 export default function CheckoutPageScreen({ route }) {
   const [showWebView, setShowWebView] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const navigation = useNavigation();
 
   const {
     mealType,
     guestCount,
-    address,
     selectedDate,
     selectedTime,
     selectedCuisine,
     cookName,
     totalAmount,
+    cookRating,
+    cookImage,
+    address,
   } = route.params;
+
+  const formatDateTime = (dateStr, timeStr) => {
+    const [day, month, year] = dateStr.split('/').map(Number);
+
+    const convertTo24Hour = (time12h) => {
+      const [time, modifier] = time12h.toLowerCase().split(/(am|pm)/);
+      let [hours, minutes] = time.split(':').map(Number);
+
+      if (modifier === 'pm' && hours !== 12) hours += 12;
+      if (modifier === 'am' && hours === 12) hours = 0;
+
+      return `${hours.toString().padStart(2, '0')}:${minutes
+        .toString()
+        .padStart(2, '0')}`;
+    };
+
+    const time24 = convertTo24Hour(timeStr);
+    const date = new Date(`${year}-${month}-${day}T${time24}`);
+
+    return date.toLocaleString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+  };
+
+  const formattedDateTime = formatDateTime(selectedDate, selectedTime);
+
+  const saveBooking = async () => {
+    try {
+      const newBooking = {
+        id: Date.now(),
+        createdAt: new Date().toISOString(),
+        cook: {
+          name: cookName,
+          cuisine: selectedCuisine,
+          rating: cookRating,
+          image: cookImage,
+        },
+        status: 'upcoming',
+        date: selectedDate,
+        time: selectedTime,
+        pricing: `₹${totalAmount.toFixed(2)}`,
+        mealType,
+        guestCount,
+      };
+      const existingBookings = await AsyncStorage.getItem('bookings');
+      const bookings = existingBookings ? JSON.parse(existingBookings) : [];
+      bookings.push(newBooking);
+      await AsyncStorage.setItem('bookings', JSON.stringify(bookings));
+      // Navigate to MyBookingsScreen with a refresh trigger
+      navigation.navigate('MyBookings', { refresh: true });
+    } catch (error) {
+      console.error('Error saving booking:', error);
+    }
+  };
 
   const razorpayHTML = `
     <html>
       <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
         <script>
           window.onload = function() {
             var options = {
               key: "rzp_test_t86tDGCZODCoNY",
-              amount: ${totalAmount * 100}, // Amount in paise
+              amount: ${totalAmount * 100},
               currency: "INR",
-              name: "Book A Cook",
+              name: "BookACook",
               description: "Meal Payment",
               image: "https://i.imgur.com/3g7nmJC.jpg",
               handler: function(response) {
@@ -279,8 +132,8 @@ export default function CheckoutPageScreen({ route }) {
           };
         </script>
       </head>
-      <body style="background-color:#f2f2f2;">
-        <h3 style="text-align:center; margin-top:50px;">
+      <body style="background-color:#f2f2f2; display:flex; align-items:center; justify-content:center; height:100vh; margin:0;">
+        <h3 style="text-align:center; color:#333;">
           Redirecting to payment...
         </h3>
       </body>
@@ -289,16 +142,17 @@ export default function CheckoutPageScreen({ route }) {
 
   const handleWebViewMessage = (event) => {
     const data = JSON.parse(event.nativeEvent.data);
-    if (data.event === "SUCCESS") {
+    if (data.event === 'SUCCESS') {
       Alert.alert(
-        "Payment Successful",
-        `Payment ID: ${data.response.razorpay_payment_id}`
+        'Payment Successful',
+        'Thank you for your payment!\nYour booking is confirmed.',
       );
+      saveBooking();
       setShowWebView(false);
-    } else if (data.event === "DISMISS") {
+    } else if (data.event === 'DISMISS') {
       Alert.alert(
-        "Payment Cancelled",
-        "The payment was dismissed by the user."
+        'Payment Cancelled',
+        'The payment process was cancelled. You can try again anytime.',
       );
       setShowWebView(false);
     }
@@ -314,101 +168,103 @@ export default function CheckoutPageScreen({ route }) {
 
   if (showWebView) {
     return (
-      <WebView
-        originWhitelist={["*"]}
-        source={{ html: razorpayHTML }}
-        onMessage={handleWebViewMessage}
-        style={{ flex: 1 }}
-      />
+      <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
+        <StatusBar barStyle="light-content" backgroundColor="#000000" />
+        <WebView
+          originWhitelist={['*']}
+          source={{ html: razorpayHTML }}
+          onMessage={handleWebViewMessage}
+          style={{ flex: 1 }}
+        />
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView className="flex-1 bg-white">
+      <StatusBar barStyle="light-content" backgroundColor="#000000" />
+      <Navbar title="Checkout" onBackPress={() => navigation.goBack()} />
       {isLoading ? (
-        <ActivityIndicator size="large" color="#53a20e" />
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="large" color="#38bdf8" />
+        </View>
       ) : (
         <>
-          <View style={styles.detailsContainer}>
-            <Text style={styles.title}>Meal Details</Text>
-            <Text style={styles.detailText}>
-              Meal Type: <Text style={styles.boldText}>{mealType}</Text>
-            </Text>
-            <Text style={styles.detailText}>
-              Number of Guests:{" "}
-              <Text style={styles.boldText}>{guestCount}</Text>
-            </Text>
-            <Text style={styles.detailText}>
-              Address: <Text style={styles.boldText}>{address}</Text>
-            </Text>
-            <Text style={styles.detailText}>
-              Date: <Text style={styles.boldText}>{selectedDate}</Text>
-            </Text>
-            <Text style={styles.detailText}>
-              Time: <Text style={styles.boldText}>{selectedTime}</Text>
-            </Text>
-            <Text style={styles.detailText}>
-              Cuisine: <Text style={styles.boldText}>{selectedCuisine}</Text>
-            </Text>
-            <Text style={styles.detailText}>
-              Cook: <Text style={styles.boldText}>{cookName}</Text>
-            </Text>
-          </View>
-          <View style={styles.amountContainer}>
-            <Text style={styles.amountTitle}>Total Amount</Text>
-            <Text style={styles.amountText}>₹{totalAmount.toFixed(2)}</Text>
-          </View>
-          <View style={styles.buttonContainer}>
-            <Button title="Pay Now" onPress={handlePayment} color="#09518e" />
+          <ScrollView
+            className="px-4 py-6"
+            showsVerticalScrollIndicator={false}
+          >
+            <Text className="text-2xl font-bold">Order Summary</Text>
+
+            <View className="mt-6 flex-row justify-between items-center">
+              <View>
+                <Text className="text-xl text-gray-700">Meal Type</Text>
+                <Text className="text-lg text-red-400">{mealType}</Text>
+              </View>
+              <Text className="text-xl">{mealType}</Text>
+            </View>
+
+            <View className="mt-6 flex-row justify-between items-center">
+              <View>
+                <Text className="text-xl text-gray-700">Number of Guests</Text>
+                <Text className="text-lg text-red-400">{guestCount}</Text>
+              </View>
+              <Text className="text-xl">{guestCount}</Text>
+            </View>
+
+            <View className="mt-6 flex-row justify-between items-center">
+              <View>
+                <Text className="text-xl text-gray-700">Date & Time</Text>
+                <Text className="text-lg text-red-400">
+                  {formattedDateTime}
+                </Text>
+              </View>
+              <Text className="text-xl">{formattedDateTime}</Text>
+            </View>
+
+            <View className="mt-6 flex-row justify-between items-center">
+              <View>
+                <Text className="text-xl text-gray-700">Cuisine</Text>
+                <Text className="text-lg text-red-400">{selectedCuisine}</Text>
+              </View>
+              <Text className="text-xl">{selectedCuisine}</Text>
+            </View>
+
+            <View className="mt-6 flex-row justify-between items-center">
+              <View>
+                <Text className="text-xl text-gray-700">Assigned Cook</Text>
+                <Text className="text-lg text-red-400">Chef {cookName}</Text>
+              </View>
+              <Text className="text-xl">Chef {cookName}</Text>
+            </View>
+
+            <View className="mt-6">
+              <Text className="text-xl text-gray-700">Address:</Text>
+              <View className="">
+                <Text className="text-red-400 text-lg">{address}</Text>
+              </View>
+            </View>
+
+            <Text className="text-2xl font-bold mt-12">Payment Details</Text>
+
+            <View className="mt-6 flex-row justify-between items-center">
+              <Text className="text-xl">Total</Text>
+              <Text className="text-xl">₹{totalAmount.toFixed(2)}</Text>
+            </View>
+          </ScrollView>
+
+          <View className="absolute bottom-0 left-0 right-0 px-4 py-4">
+            <TouchableOpacity
+              onPress={handlePayment}
+              className="bg-orange-700 py-4 rounded-lg items-center"
+            >
+              <Text className="text-white text-lg font-medium">
+                Confirm Order
+              </Text>
+            </TouchableOpacity>
           </View>
         </>
       )}
-    </View>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "white",
-    padding: 16,
-  },
-  detailsContainer: {
-    backgroundColor: "#f3f4f6",
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 16,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
-  detailText: {
-    fontSize: 18,
-    marginBottom: 4,
-  },
-  boldText: {
-    fontWeight: "500",
-  },
-  amountContainer: {
-    backgroundColor: "#fffbeb",
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 16,
-  },
-  amountTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    marginBottom: 4,
-  },
-  amountText: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#4caf50",
-  },
-  buttonContainer: {
-    width: "100%",
-    alignItems: "center",
-  },
-});
