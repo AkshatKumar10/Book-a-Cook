@@ -8,15 +8,30 @@ import {
   StatusBar,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { useContext } from 'react';
 import Navbar from '../components/Navbar';
 import useCooksData from '../hooks/useCooksData';
+import { ThemeContext } from '../context/ThemeContext';
 
-const CookProfileScreen = ({ route }) => {
-  const { cook } = route.params;
+const CookProfileScreen = () => {
+  const { params: { cook } = {} } = useRoute();
   const navigation = useNavigation();
   const { width } = useWindowDimensions();
   const { cooksData } = useCooksData();
+  const { theme } = useContext(ThemeContext);
+
+  const themeStyles = {
+    container: theme === 'dark' ? 'bg-black' : 'bg-gray-100',
+    textPrimary: theme === 'dark' ? 'text-white' : 'text-gray-800',
+    textSecondary: theme === 'dark' ? 'text-gray-300' : 'text-gray-900',
+    textAccent: theme === 'dark' ? 'text-red-300' : 'text-red-400',
+    buttonBg: theme === 'dark' ? 'bg-orange-600' : 'bg-orange-700',
+    buttonText: theme === 'dark' ? 'text-white' : 'text-white',
+    specialtyBg: theme === 'dark' ? 'bg-gray-800' : 'bg-[#f9f7f7]',
+    specialtyBorder: theme === 'dark' ? 'border-gray-700' : 'border-gray-300',
+    specialtyText: theme === 'dark' ? 'text-gray-200' : 'text-gray-900',
+  };
 
   const handleBookNow = () => {
     const allCooksPricing = cooksData.reduce((acc, currentCook) => {
@@ -39,8 +54,11 @@ const CookProfileScreen = ({ route }) => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100">
-      <StatusBar barStyle="light-content" backgroundColor="#000000" />
+    <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
+      <StatusBar
+        barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
+        backgroundColor={theme === 'dark' ? '#000000' : '#F3F4F6'} // Matches bg-gray-100
+      />
       <Navbar title="Chef Profile" />
       <ScrollView contentContainerStyle={{ paddingBottom: 10 }}>
         <View className="items-center mt-4">
@@ -53,57 +71,80 @@ const CookProfileScreen = ({ route }) => {
             }}
             resizeMode="cover"
           />
-          <Text className="font-semibold text-3xl">Chef {cook.name}</Text>
-          <Text className="text-lg text-red-400">
+          <Text className={`font-semibold text-3xl ${themeStyles.textPrimary}`}>
+            Chef {cook.name}
+          </Text>
+          <Text className={`text-center ${themeStyles.textAccent}`}>
             {cook.cuisine} Cuisine Expert
           </Text>
-          <Text className="text-lg text-red-400">{cook.rating}</Text>
+            <Text className={`text-center ${themeStyles.textAccent}`}>
+            {cook.rating}
+          </Text>
         </View>
-        <Text className="font-bold text-2xl ml-4 mt-6">Bio</Text>
-        <Text className="text-lg mx-4 mt-2">{cook.bio}</Text>
+        <View>
+          <Text className={`font-bold text-2xl ml-6 mt-6 ${themeStyles.textPrimary}`}>
+            Bio
+          </Text>
+            <Text className={`text-lg mx-6 mt-2 ${themeStyles.textSecondary}`}>
+              {cook.bio}
+            </Text>
+        </View>
         <View className="mt-6">
-          <Text className="font-bold text-2xl ml-4">Specialties</Text>
-          <View className="flex-row flex-wrap ml-4 mt-2">
+          <Text className={`font-bold text-2xl ml-6 ${themeStyles.textPrimary}`}>
+            Specialties
+          </Text>
+          <View className="flex-row flex-wrap ml-6 mt-4">
             {cook.specialties.map((specialty, index) => (
               <View
                 key={index}
-                className="bg-[#f9f7f7] border rounded-full py-2 px-3 mr-3 mb-2"
+                className={`rounded-full py-2 px-3 mr-3 mb-2 ${themeStyles.specialtyBg} ${themeStyles.specialtyBorder}`}
                 style={{ alignSelf: 'flex-start' }}
               >
-                <Text className="text-base font-semibold text-gray-900">
+                <Text className={`text-base font-semibold ${themeStyles.specialtyText}`}>
                   {specialty.name}
                 </Text>
               </View>
             ))}
           </View>
         </View>
-
-        <View className="mt-6 px-4">
-          <Text className="font-bold text-2xl ">Experience</Text>
-          <Text className="text-lg  mt-1">{cook.yearsOfExperience}</Text>
+        <View className="mt-6 px-6">
+          <Text className={`font-bold text-2xl ${themeStyles.textPrimary}`}>
+            Experience
+          </Text>
+          <Text className={`text-lg mt-1 ${themeStyles.textSecondary}`}>
+            {cook.yearsOfExperience}
+          </Text>
         </View>
-
-        <View className="mt-6 px-4">
-          <Text className="font-bold text-2xl ">Services</Text>
-          <Text className="text-lg  mt-1">{cook.services.join(', ')}</Text>
+        <View className="mt-6 px-6">
+          <Text className={`font-bold text-2xl ${themeStyles.textPrimary}`}>
+            Services
+          </Text>
+          <Text className={`text-lg mt-1 ${themeStyles.textSecondary}`}>
+            {cook.services.join(', ')}
+          </Text>
         </View>
-
-        <View className="mt-6 px-4">
-          <Text className="font-bold text-2xl ">Pricing</Text>
-          <Text className="text-lg  mt-1">{cook.pricing}</Text>
+        <View className="mt-6 px-6">
+          <Text className={`font-bold text-2xl ${themeStyles.textPrimary}`}>
+            Pricing
+          </Text>
+          <Text className={`text-lg mt-1 ${themeStyles.textSecondary}`}>
+            {cook.pricing}
+          </Text>
         </View>
-
-        <View className="mt-6 px-4">
-          <Text className="font-bold text-2xl ">Availability</Text>
-          <Text className="text-lg mt-1 mb-8">{cook.availability}</Text>
+        <View className="mt-6 px-6">
+          <Text className={`font-bold text-2xl ${themeStyles.textPrimary}`}>
+            Availability
+          </Text>
+          <Text className={`text-lg mt-1 mb-8 ${themeStyles.textSecondary}`}>
+            {cook.availability}
+          </Text>
         </View>
-
-        <View className="px-4 mb-8">
+        <View className="px-6 mb-8">
           <TouchableOpacity
             onPress={handleBookNow}
-            className="rounded-full shadow-lg overflow-hidden bg-orange-700 py-4"
+            className={`rounded-full shadow-lg overflow-hidden ${themeStyles.buttonBg} py-4`}
           >
-            <Text className="font-bold text-white text-lg ml-2 text-center">
+            <Text className={`font-bold text-lg text-center ${themeStyles.buttonText}`}>
               Book Now
             </Text>
           </TouchableOpacity>

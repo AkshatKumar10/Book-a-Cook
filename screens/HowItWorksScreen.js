@@ -9,6 +9,8 @@ import {
 import { FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import { useContext } from 'react';
+import { ThemeContext } from '../context/ThemeContext';
 import Navbar from '../components/Navbar';
 
 const steps = [
@@ -74,12 +76,24 @@ const steps = [
 const HowItWorksScreen = () => {
   const { width } = Dimensions.get('window');
   const navigation = useNavigation();
+  const { theme } = useContext(ThemeContext);
+
+  const themeStyles = {
+    container: theme === 'dark' ? 'bg-black' : 'bg-white',
+    cardBg: theme === 'dark' ? 'bg-gray-800' : 'bg-white',
+    textPrimary: theme === 'dark' ? 'text-white' : 'text-gray-800',
+    textSecondary: theme === 'dark' ? 'text-gray-300' : 'text-gray-600',
+    iconColor: theme === 'dark' ? '#DAA520' : '#8B4513', 
+    shadowColor: theme === 'dark' ? '#FFFFFF' : '#000000',
+  };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <StatusBar barStyle="light-content" backgroundColor="#000000" />
+    <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
+      <StatusBar
+        barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
+        backgroundColor={theme === 'dark' ? '#000000' : '#FFFFFF'}
+      />
       <Navbar title="How It Works" onBackPress={() => navigation.goBack()} />
-
       <ScrollView
         contentContainerStyle={{ padding: width * 0.05, paddingBottom: 20 }}
         showsVerticalScrollIndicator={false}
@@ -87,26 +101,34 @@ const HowItWorksScreen = () => {
         {steps.map((step) => (
           <View
             key={step.id}
-            className="bg-white rounded-xl shadow-md p-4 mb-4"
+            className={`rounded-xl shadow-md p-4 mb-4 ${themeStyles.cardBg}`}
             style={{
-              shadowColor: '#000',
+              shadowColor: themeStyles.shadowColor,
               shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.1,
+              shadowOpacity: theme === 'dark' ? 0.2 : 0.1,
               shadowRadius: 4,
               elevation: 2,
             }}
           >
             <View className="flex-row items-center">
               {step.iconLibrary === 'FontAwesome5' ? (
-                <FontAwesome5 name={step.icon} size={20} color="#8B4513" />
+                <FontAwesome5
+                  name={step.icon}
+                  size={20}
+                  color={themeStyles.iconColor}
+                />
               ) : (
-                <Ionicons name={step.icon} size={20} color="#8B4513" />
+                <Ionicons
+                  name={step.icon}
+                  size={20}
+                  color={themeStyles.iconColor}
+                />
               )}
-              <Text className="ml-3 text-lg font-semibold text-gray-800">
+              <Text className={`ml-3 text-lg font-semibold ${themeStyles.textPrimary}`}>
                 {step.title}
               </Text>
             </View>
-            <Text className="mt-2 text-base text-gray-600">
+            <Text className={`mt-2 text-base ${themeStyles.textSecondary}`}>
               {step.description}
             </Text>
           </View>

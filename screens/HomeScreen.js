@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
   TextInput,
 } from 'react-native';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useContext } from 'react';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -20,13 +20,32 @@ import useCooksData from '../hooks/useCooksData';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import useCuisinesData from '../hooks/useCuisineData';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { ThemeContext } from '../context/ThemeContext';
 
 export default function HomeScreen() {
   const { width, height } = useWindowDimensions();
   const navigation = useNavigation();
   const { cooksData, allCooksPricing, loading } = useCooksData();
   const { cuisines, loading: cuisinesLoading } = useCuisinesData();
+  const { theme } = useContext(ThemeContext);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const themeStyles = {
+    container: theme === 'dark' ? 'bg-black' : 'bg-white',
+    textPrimary: theme === 'dark' ? 'text-white' : 'text-gray-800',
+    textSecondary: theme === 'dark' ? 'text-gray-300' : 'text-gray-600',
+    textAccent: theme === 'dark' ? 'text-red-300' : 'text-red-400',
+    textNoResults: theme === 'dark' ? 'text-gray-400' : 'text-gray-500',
+    iconColor: theme === 'dark' ? 'white' : 'black',
+    searchBg: theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200',
+    searchIconColor: theme === 'dark' ? '#f4a8a8' : '#f87171',
+    searchText: theme === 'dark' ? 'text-gray-300' : 'text-gray-600',
+    searchPlaceholder: theme === 'dark' ? '#f4a8a8' : '#f87171',
+    buttonBg: theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200',
+    buttonText: theme === 'dark' ? 'text-white' : 'text-black',
+    loadingColor: theme === 'dark' ? '#60a5fa' : '#38bdf8',
+    empty: theme === 'dark' ? '#ffffff' : '#000000',
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -64,37 +83,54 @@ export default function HomeScreen() {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#38bdf8" />
+      <View
+        className={`flex-1 justify-center items-center ${themeStyles.container}`}
+      >
+        <ActivityIndicator size="large" color={themeStyles.loadingColor} />
       </View>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1">
-      <StatusBar barStyle="light-content" backgroundColor="#000000" />
+    <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
+      <StatusBar
+        barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
+        backgroundColor={theme === 'dark' ? '#000000' : '#FFFFFF'}
+      />
       <View className="flex-row items-center px-4 py-2">
         <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-          <FontAwesome name="user-circle" size={30} color="black" />
+          <FontAwesome
+            name="user-circle"
+            size={30}
+            color={themeStyles.iconColor}
+          />
         </TouchableOpacity>
-        <Text className="font-bold text-red-400 text-center text-3xl pl-6">
+        <Text
+          className={`font-bold ${themeStyles.textAccent} text-center text-3xl pl-6`}
+        >
           BookAChef
         </Text>
         <TouchableOpacity onPress={() => navigation.navigate('Notifications')}>
-          {/* <Icon name="bell" size={width * 0.06} color="black" /> */}
+          {/* <Icon name="bell" size={width * 0.06} color={themeStyles.iconColor} /> */}
         </TouchableOpacity>
       </View>
       <View className="px-4 py-2">
-        <View className="flex-row items-center px-3 bg-gray-200 rounded-full">
-          <AntDesign name="search1" size={20} color="#f87171" />
+        <View
+          className={`flex-row items-center px-3 ${themeStyles.searchBg} rounded-full`}
+        >
+          <AntDesign
+            name="search1"
+            size={20}
+            color={themeStyles.searchIconColor}
+          />
           <TextInput
-            className=" flex-1  px-4 py-3 text-base text-gray-600"
+            className={`flex-1 px-4 py-3 text-base ${themeStyles.searchText}`}
             placeholder="Search for chefs or cuisines..."
             value={searchQuery}
             onChangeText={setSearchQuery}
             autoCapitalize="none"
-            placeholderTextColor="#f87171"
-            selectionColor="#f87171"
+            placeholderTextColor={themeStyles.searchPlaceholder}
+            selectionColor={themeStyles.searchIconColor}
           />
         </View>
       </View>
@@ -103,13 +139,20 @@ export default function HomeScreen() {
         contentContainerStyle={{ paddingBottom: 10 }}
       >
         <View>
-          <Text className="font-bold text-2xl mt-4 pl-2 mb-2">
+          <Text
+            className={`font-bold text-2xl mt-4 pl-2 mb-2 ${themeStyles.textPrimary}`}
+          >
             Recommended Chefs
           </Text>
           {filteredCooks.length === 0 && searchQuery ? (
-            <Text className="text-center text-gray-500 mt-4 text-xl">
-              No chefs found for "{searchQuery}"
-            </Text>
+            <View className="items-center justify-center mt-4">
+              <AntDesign name="frown" size={80} color={themeStyles.empty} />
+              <Text
+                className={`ml-2 text-center mt-2 ${themeStyles.textNoResults} text-xl`}
+              >
+                No chefs found for "{searchQuery}"
+              </Text>
+            </View>
           ) : (
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {filteredCooks.map((cook) => (
@@ -139,13 +182,17 @@ export default function HomeScreen() {
                       />
                     </TouchableOpacity>
                   </View>
-                  <Text className="font-semibold mt-2 text-lg">
+                  <Text
+                    className={`font-semibold mt-2 text-lg ${themeStyles.textPrimary}`}
+                  >
                     Chef {cook.name}
                   </Text>
-                  <Text className="text-base text-red-400">
+                  <Text className={`text-base ${themeStyles.textAccent}`}>
                     {cook.cuisine} cuisine
                   </Text>
-                  <Text className="text-base font-semibold text-red-400">
+                  <Text
+                    className={`text-base font-semibold ${themeStyles.textAccent}`}
+                  >
                     ({cook.rating})
                   </Text>
                 </View>
@@ -154,15 +201,26 @@ export default function HomeScreen() {
           )}
         </View>
         <View className="mt-4">
-          <Text className="font-bold text-2xl mt-4 px-2 mb-2">
+          <Text
+            className={`font-bold text-2xl mt-4 px-2 mb-2 ${themeStyles.textPrimary}`}
+          >
             Popular Cuisines
           </Text>
           {cuisinesLoading ? (
-            <ActivityIndicator size="large" color="#38bdf8" />
+            <ActivityIndicator size="large" color={themeStyles.loadingColor} />
           ) : filteredCuisines.length === 0 && searchQuery ? (
-            <Text className="text-center text-gray-500 mt-4 text-xl">
-              No cuisines found for "{searchQuery}"
-            </Text>
+            <View className="items-center justify-center mt-4">
+              <AntDesign
+                name="frown"
+                size={80}
+                color={themeStyles.empty}
+              />
+              <Text
+                className={`ml-2 text-center mt-2 ${themeStyles.textNoResults} text-xl`}
+              >
+                No cuisines found for "{searchQuery}"
+              </Text>
+            </View>
           ) : (
             <View className="flex-row flex-wrap justify-between px-2">
               {filteredCuisines.map((item, index) => (
@@ -194,7 +252,9 @@ export default function HomeScreen() {
                       resizeMode="cover"
                     />
                   </TouchableOpacity>
-                  <Text className="font-semibold text-xl mt-2">
+                  <Text
+                    className={`font-semibold text-xl mt-2 ${themeStyles.textPrimary}`}
+                  >
                     {item.cuisine}
                   </Text>
                 </View>
@@ -203,14 +263,22 @@ export default function HomeScreen() {
           )}
         </View>
         <View className="mt-4 mb-6">
-          <Text className="font-bold text-2xl px-2 mb-2">Special Offers</Text>
+          <Text
+            className={`font-bold text-2xl px-2 mb-2 ${themeStyles.textPrimary}`}
+          >
+            Special Offers
+          </Text>
           <View className="flex-row px-2 items-center justify-between">
             <View className="w-[60%] pr-2">
-              <Text className="text-red-500 text-lg">Limited Time Offer</Text>
-              <Text className="font-semibold text-xl">
+              <Text className={`text-lg ${themeStyles.textAccent}`}>
+                Limited Time Offer
+              </Text>
+              <Text
+                className={`font-semibold text-xl ${themeStyles.textPrimary}`}
+              >
                 10% off on your first booking
               </Text>
-              <Text className="text-red-500 text-lg mb-2">
+              <Text className={`text-lg ${themeStyles.textAccent} mb-2`}>
                 Book a chef today and enjoy a discount on your first meal.
               </Text>
               <TouchableOpacity
@@ -220,9 +288,11 @@ export default function HomeScreen() {
                     isDiscounted: true,
                   })
                 }
-                className="bg-gray-200 py-2 px-4 rounded-full mt-2 self-start"
+                className={`${themeStyles.buttonBg} py-2 px-4 rounded-full mt-2 self-start`}
               >
-                <Text className="text-black font-semibold text-base text-center">
+                <Text
+                  className={`font-semibold text-base text-center ${themeStyles.buttonText}`}
+                >
                   Book Now
                 </Text>
               </TouchableOpacity>

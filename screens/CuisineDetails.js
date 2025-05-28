@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import {
   View,
   Text,
@@ -12,12 +12,25 @@ import { useRoute } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Navbar from '../components/Navbar';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { ThemeContext } from '../context/ThemeContext';
 
 export default function CuisineDetails() {
   const { width, height } = useWindowDimensions();
   const route = useRoute();
   const { cuisine, cooks } = route.params;
+  const { theme } = useContext(ThemeContext);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const themeStyles = {
+    container: theme === 'dark' ? 'bg-black' : 'bg-white',
+    textPrimary: theme === 'dark' ? 'text-white' : 'text-gray-800',
+    textSecondary: theme === 'dark' ? 'text-gray-300' : 'text-gray-600',
+    searchBg: theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100',
+    searchBorder: theme === 'dark' ? 'border-gray-700' : 'border-gray-300',
+    searchIconColor: theme === 'dark' ? '#f4a8a8' : '#f87171', // Lighter red for dark mode
+    searchText: theme === 'dark' ? 'text-gray-300' : 'text-gray-600',
+    searchPlaceholder: theme === 'dark' ? '#f4a8a8' : '#f87171',
+  };
 
   const specialties = cooks.reduce((acc, cook) => {
     return [...acc, ...cook.specialties];
@@ -28,20 +41,23 @@ export default function CuisineDetails() {
   );
 
   return (
-    <SafeAreaView className="flex-1">
-      <StatusBar barStyle="light-content" backgroundColor="#000000" />
+    <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
+      <StatusBar
+        barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
+        backgroundColor={theme === 'dark' ? '#000000' : '#FFFFFF'}
+      />
       <Navbar title={cuisine} />
       <View className="px-6 pt-2 pb-6">
-        <View className="flex-row items-center border border-gray-300 rounded-lg bg-gray-100 px-3">
-          <AntDesign name="search1" size={20} color="#f87171" />
+        <View className={`flex-row items-center ${themeStyles.searchBg} ${themeStyles.searchBorder} rounded-lg px-3`}>
+          <AntDesign name="search1" size={20} color={themeStyles.searchIconColor} />
           <TextInput
-            className="flex-1 pl-3 py-3 text-gray-600"
+            className={`flex-1 pl-3 py-3 ${themeStyles.searchText}`}
             placeholder="Search for a dish..."
             value={searchQuery}
             onChangeText={setSearchQuery}
             autoCapitalize="none"
-            placeholderTextColor="#f87171"
-            selectionColor="#f87171"
+            placeholderTextColor={themeStyles.searchPlaceholder}
+            selectionColor={themeStyles.searchIconColor}
           />
         </View>
       </View>
@@ -66,13 +82,13 @@ export default function CuisineDetails() {
                   }}
                   resizeMode="cover"
                 />
-                <Text className="font-semibold text-lg mt-2">
+                <Text className={`font-semibold text-lg mt-2 ${themeStyles.textPrimary}`}>
                   {specialty.name}
                 </Text>
               </View>
             ))
           ) : (
-            <Text className="text-center text-lg text-gray-600">
+            <Text className={`text-center text-lg ${themeStyles.textSecondary}`}>
               No specialties found for {cuisine}.
             </Text>
           )}
