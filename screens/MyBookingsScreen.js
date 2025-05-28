@@ -201,10 +201,14 @@ const MyBookingsScreen = () => {
         <View className="ml-4 flex-1">
           <View className="flex-row items-start justify-between">
             <View className="flex-col">
-              <Text className={`text-lg font-semibold ${themeStyles.textPrimary}`}>
+              <Text
+                className={`text-lg font-semibold ${themeStyles.textPrimary}`}
+              >
                 Chef {booking.cook.name}
               </Text>
-              <Text className={`text-base font-semibold ${themeStyles.textSecondary}`}>
+              <Text
+                className={`text-base font-semibold ${themeStyles.textSecondary}`}
+              >
                 ({booking.cook.rating})
               </Text>
               <Text className={`text-base ${themeStyles.textAccent}`}>
@@ -227,7 +231,9 @@ const MyBookingsScreen = () => {
                 className={`${themeStyles.buttonBg} rounded-full px-6 py-2 mt-2`}
                 onPress={() => handleModifyBooking(booking)}
               >
-                <Text className={`text-base font-medium ${themeStyles.buttonText}`}>
+                <Text
+                  className={`text-base font-medium ${themeStyles.buttonText}`}
+                >
                   Modify
                 </Text>
               </TouchableOpacity>
@@ -263,7 +269,11 @@ const MyBookingsScreen = () => {
       <ScrollView showsVerticalScrollIndicator={false}>
         {bookings.length === 0 ? (
           <View className="flex-1 justify-center items-center py-10">
-            <FontAwesome5 name="sad-tear" size={64} color={themeStyles.iconColor} />
+            <FontAwesome5
+              name="sad-tear"
+              size={64}
+              color={themeStyles.iconColor}
+            />
             <Text className={`text-lg ${themeStyles.textTertiary} mt-4`}>
               No bookings found
             </Text>
@@ -282,7 +292,9 @@ const MyBookingsScreen = () => {
 
             return filteredBookings.length > 0 ? (
               <View key={section} className="mb-6 mt-6 ml-1">
-                <Text className={`text-2xl font-semibold ${themeStyles.textPrimary} ml-4`}>
+                <Text
+                  className={`text-2xl font-semibold ${themeStyles.textPrimary} ml-4`}
+                >
                   {section === 'past' ? 'Past' : 'Upcoming'}
                 </Text>
                 {filteredBookings.map(renderBooking)}

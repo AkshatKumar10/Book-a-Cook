@@ -77,20 +77,24 @@ const CookProfileScreen = () => {
           <Text className={`text-center ${themeStyles.textAccent}`}>
             {cook.cuisine} Cuisine Expert
           </Text>
-            <Text className={`text-center ${themeStyles.textAccent}`}>
+          <Text className={`text-center ${themeStyles.textAccent}`}>
             {cook.rating}
           </Text>
         </View>
         <View>
-          <Text className={`font-bold text-2xl ml-6 mt-6 ${themeStyles.textPrimary}`}>
+          <Text
+            className={`font-bold text-2xl ml-6 mt-6 ${themeStyles.textPrimary}`}
+          >
             Bio
           </Text>
-            <Text className={`text-lg mx-6 mt-2 ${themeStyles.textSecondary}`}>
-              {cook.bio}
-            </Text>
+          <Text className={`text-lg mx-6 mt-2 ${themeStyles.textSecondary}`}>
+            {cook.bio}
+          </Text>
         </View>
         <View className="mt-6">
-          <Text className={`font-bold text-2xl ml-6 ${themeStyles.textPrimary}`}>
+          <Text
+            className={`font-bold text-2xl ml-6 ${themeStyles.textPrimary}`}
+          >
             Specialties
           </Text>
           <View className="flex-row flex-wrap ml-6 mt-4">
@@ -100,7 +104,9 @@ const CookProfileScreen = () => {
                 className={`rounded-full py-2 px-3 mr-3 mb-2 ${themeStyles.specialtyBg} ${themeStyles.specialtyBorder}`}
                 style={{ alignSelf: 'flex-start' }}
               >
-                <Text className={`text-base font-semibold ${themeStyles.specialtyText}`}>
+                <Text
+                  className={`text-base font-semibold ${themeStyles.specialtyText}`}
+                >
                   {specialty.name}
                 </Text>
               </View>
@@ -144,7 +150,9 @@ const CookProfileScreen = () => {
             onPress={handleBookNow}
             className={`rounded-full shadow-lg overflow-hidden ${themeStyles.buttonBg} py-4`}
           >
-            <Text className={`font-bold text-lg text-center ${themeStyles.buttonText}`}>
+            <Text
+              className={`font-bold text-lg text-center ${themeStyles.buttonText}`}
+            >
               Book Now
             </Text>
           </TouchableOpacity>

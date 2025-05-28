@@ -24,7 +24,9 @@ export default function BottomNavigation() {
 
   if (loading) {
     return (
-      <View className={`flex-1 justify-center items-center ${themeStyles.container}`}>
+      <View
+        className={`flex-1 justify-center items-center ${themeStyles.container}`}
+      >
         <ActivityIndicator size="large" color={themeStyles.loadingColor} />
       </View>
     );

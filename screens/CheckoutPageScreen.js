@@ -47,8 +47,8 @@ export default function CheckoutPageScreen() {
     borderColor: theme === 'dark' ? 'border-gray-700' : 'border-gray-300',
     discountText: theme === 'dark' ? 'text-green-400' : 'text-green-500',
     loadingColor: theme === 'dark' ? '#60a5fa' : '#38bdf8',
-    webViewBg: theme === 'dark' ? '#1F2937' : '#F2F2F2', 
-    webViewText: theme === 'dark' ? '#D1D5DB' : '#333333', 
+    webViewBg: theme === 'dark' ? '#1F2937' : '#F2F2F2',
+    webViewText: theme === 'dark' ? '#D1D5DB' : '#333333',
   };
 
   const originalAmount = isDiscounted ? totalAmount / 0.9 : totalAmount;
@@ -317,7 +317,9 @@ export default function CheckoutPageScreen() {
               </View>
             </View>
 
-            <Text className={`text-2xl font-bold mt-12 ${themeStyles.textPrimary}`}>
+            <Text
+              className={`text-2xl font-bold mt-12 ${themeStyles.textPrimary}`}
+            >
               Payment Details
             </Text>
 
@@ -340,22 +342,34 @@ export default function CheckoutPageScreen() {
                       -₹{discountAmount.toFixed(2)}
                     </Text>
                   </View>
-                  <View className={`border-t ${themeStyles.borderColor} mt-2 pt-2 flex-row justify-between items-center`}>
-                    <Text className={`text-xl font-bold ${themeStyles.textPrimary}`}>
+                  <View
+                    className={`border-t ${themeStyles.borderColor} mt-2 pt-2 flex-row justify-between items-center`}
+                  >
+                    <Text
+                      className={`text-xl font-bold ${themeStyles.textPrimary}`}
+                    >
                       Total
                     </Text>
-                    <Text className={`text-xl font-bold ${themeStyles.textSecondary}`}>
+                    <Text
+                      className={`text-xl font-bold ${themeStyles.textSecondary}`}
+                    >
                       ₹{finalAmount.toFixed(2)}
                     </Text>
                   </View>
                 </>
               )}
               {!isDiscounted && (
-                <View className={`border-t ${themeStyles.borderColor} mt-2 pt-2 flex-row justify-between items-center`}>
-                  <Text className={`text-xl font-bold ${themeStyles.textPrimary}`}>
+                <View
+                  className={`border-t ${themeStyles.borderColor} mt-2 pt-2 flex-row justify-between items-center`}
+                >
+                  <Text
+                    className={`text-xl font-bold ${themeStyles.textPrimary}`}
+                  >
                     Total
                   </Text>
-                  <Text className={`text-xl font-bold ${themeStyles.textSecondary}`}>
+                  <Text
+                    className={`text-xl font-bold ${themeStyles.textSecondary}`}
+                  >
                     ₹{finalAmount.toFixed(2)}
                   </Text>
                 </View>

@@ -169,7 +169,9 @@ export default function LoginScreen() {
                 className={`rounded-full py-3 ${themeStyles.buttonBg} mt-20 ${loading ? 'opacity-50' : ''}`}
                 disabled={loading}
               >
-                <Text className={`font-bold text-center text-xl ${themeStyles.buttonText}`}>
+                <Text
+                  className={`font-bold text-center text-xl ${themeStyles.buttonText}`}
+                >
                   {loading ? 'Signing In...' : 'Sign In'}
                 </Text>
               </TouchableOpacity>
@@ -181,7 +183,9 @@ export default function LoginScreen() {
                   onPress={() => navigation.navigate('SignUp')}
                   disabled={loading}
                 >
-                  <Text className={`font-semibold ml-2 ${themeStyles.textAccent}`}>
+                  <Text
+                    className={`font-semibold ml-2 ${themeStyles.textAccent}`}
+                  >
                     Sign Up
                   </Text>
                 </TouchableOpacity>

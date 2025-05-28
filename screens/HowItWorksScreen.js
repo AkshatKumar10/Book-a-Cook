@@ -83,7 +83,7 @@ const HowItWorksScreen = () => {
     cardBg: theme === 'dark' ? 'bg-gray-800' : 'bg-white',
     textPrimary: theme === 'dark' ? 'text-white' : 'text-gray-800',
     textSecondary: theme === 'dark' ? 'text-gray-300' : 'text-gray-600',
-    iconColor: theme === 'dark' ? '#DAA520' : '#8B4513', 
+    iconColor: theme === 'dark' ? '#DAA520' : '#8B4513',
     shadowColor: theme === 'dark' ? '#FFFFFF' : '#000000',
   };
 
@@ -124,7 +124,9 @@ const HowItWorksScreen = () => {
                   color={themeStyles.iconColor}
                 />
               )}
-              <Text className={`ml-3 text-lg font-semibold ${themeStyles.textPrimary}`}>
+              <Text
+                className={`ml-3 text-lg font-semibold ${themeStyles.textPrimary}`}
+              >
                 {step.title}
               </Text>
             </View>
