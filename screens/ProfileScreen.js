@@ -1,4 +1,11 @@
-import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+  StatusBar,
+} from 'react-native';
 import {
   FontAwesome5,
   MaterialIcons,
@@ -36,6 +43,7 @@ const ProfileScreen = ({ route }) => {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
+      <StatusBar barStyle="light-content" backgroundColor="#000000" />
       <Navbar title="Profile" />
       <View className="flex items-center mt-10">
         <FontAwesome name="user-circle" size={100} color="black" />

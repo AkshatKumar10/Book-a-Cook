@@ -1,35 +1,57 @@
-import React from 'react';
+import { useState } from 'react';
 import {
   View,
   Text,
   Image,
   ScrollView,
-  TouchableOpacity,
+  TextInput,
   useWindowDimensions,
+  StatusBar,
 } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useRoute } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Navbar from '../components/Navbar';
+import AntDesign from '@expo/vector-icons/AntDesign';
 
 export default function CuisineDetails() {
   const { width, height } = useWindowDimensions();
   const route = useRoute();
   const { cuisine, cooks } = route.params;
+  const [searchQuery, setSearchQuery] = useState('');
 
   const specialties = cooks.reduce((acc, cook) => {
     return [...acc, ...cook.specialties];
   }, []);
 
+  const filteredSpecialties = specialties.filter((specialty) =>
+    specialty.name.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+
   return (
     <SafeAreaView className="flex-1">
+      <StatusBar barStyle="light-content" backgroundColor="#000000" />
       <Navbar title={cuisine} />
+      <View className="px-6 pt-2 pb-6">
+        <View className="flex-row items-center border border-gray-300 rounded-lg bg-gray-100 px-3">
+          <AntDesign name="search1" size={20} color="#f87171" />
+          <TextInput
+            className="flex-1 pl-3 py-3 text-gray-600"
+            placeholder="Search for a dish..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            autoCapitalize="none"
+            placeholderTextColor="#f87171"
+            selectionColor="#f87171"
+          />
+        </View>
+      </View>
       <ScrollView
-        className="flex-1 px-6  pt-6"
+        className="flex-1 px-6"
         contentContainerStyle={{ paddingBottom: 20 }}
       >
         <View className="flex-row flex-wrap justify-between">
-          {specialties.length > 0 ? (
-            specialties.map((specialty, index) => (
+          {filteredSpecialties.length > 0 ? (
+            filteredSpecialties.map((specialty, index) => (
               <View
                 key={index}
                 className="rounded-xl mb-8"

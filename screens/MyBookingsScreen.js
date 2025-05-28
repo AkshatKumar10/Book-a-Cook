@@ -52,7 +52,7 @@ const MyBookingsScreen = () => {
   useFocusEffect(
     useCallback(() => {
       const onBackPress = () => {
-        navigation.navigate('Home');
+        navigation.goBack();
         return true;
       };
 

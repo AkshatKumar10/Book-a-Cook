@@ -6,12 +6,12 @@ import {
   TouchableOpacity,
   Dimensions,
   Alert,
+  StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ArrowLeftIcon } from 'react-native-heroicons/solid';
 import Navbar from '../components/Navbar';
 
 const EditProfileScreen = ({ route }) => {
@@ -49,6 +49,7 @@ const EditProfileScreen = ({ route }) => {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
+      <StatusBar barStyle="light-content" backgroundColor="#000000" />
       <Navbar
         title="Edit Profile"
         onBackPress={() => {

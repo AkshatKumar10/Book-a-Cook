@@ -1,4 +1,11 @@
-import { View, Text, TouchableOpacity, Alert, TextInput } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Alert,
+  TextInput,
+  StatusBar,
+} from 'react-native';
 import { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -79,11 +86,10 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView className="flex-1">
+      <StatusBar barStyle="light-content" backgroundColor="#000000" />
       <View className="flex-1 bg-brown-100">
         <View className="px-16 mt-16">
-          <Text className="text-5xl mb-3 font-bold text-yellow-600 ">
-            Hello
-          </Text>
+          <Text className="text-5xl mb-3 font-bold text-yellow-600">Hello</Text>
           <Text className="text-5xl font-bold text-yellow-600">Sign in!</Text>
         </View>
         <View
@@ -96,8 +102,11 @@ export default function LoginScreen() {
           }}
         >
           <KeyboardAwareScrollView
-            style={{ borderTopLeftRadius: 50, borderTopRightRadius: 50 }}
+            style={{ flex: 1 }}
             keyboardShouldPersistTaps="handled"
+            enableOnAndroid={true}
+            extraScrollHeight={100}
+            showsVerticalScrollIndicator={false}
           >
             <View className="form space-y-2 px-8 pt-8">
               <Text className="text-gray-700 ml-2 text-xl mb-3">
@@ -141,19 +150,19 @@ export default function LoginScreen() {
                   {loading ? 'Signing In...' : 'Sign In'}
                 </Text>
               </TouchableOpacity>
-            </View>
-            <View className="flex-row justify-center mt-4">
-              <Text className="text-slate-950 font-semibold">
-                Don't have an account?
-              </Text>
-              <TouchableOpacity
-                onPress={() => navigation.navigate('SignUp')}
-                disabled={loading}
-              >
-                <Text className="text-yellow-600 font-semibold mb-10 ml-2">
-                  Sign Up
+              <View className="flex-row justify-center mt-4">
+                <Text className="text-slate-950 font-semibold">
+                  Don't have an account?
                 </Text>
-              </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('SignUp')}
+                  disabled={loading}
+                >
+                  <Text className="text-yellow-600 font-semibold ml-2">
+                    Sign Up
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </KeyboardAwareScrollView>
         </View>
