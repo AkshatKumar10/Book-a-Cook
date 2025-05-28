@@ -1,13 +1,13 @@
-import React, { useState } from "react";
-import { View, Text, ScrollView, Image, TextInput } from "react-native";
+import React, { useState } from 'react';
+import { View, Text, ScrollView, Image, TextInput } from 'react-native';
 
 const ViewAllScreen = ({ route }) => {
   const { cooksData } = route.params;
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
 
   const allSpecialties = cooksData.flatMap((cook) => cook.specialties);
   const filteredSpecialties = allSpecialties.filter((item) =>
-    item.name.toLowerCase().includes(searchQuery.toLowerCase())
+    item.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
@@ -15,7 +15,7 @@ const ViewAllScreen = ({ route }) => {
       <TextInput
         style={{
           borderWidth: 1,
-          borderColor: "#ccc",
+          borderColor: '#ccc',
           borderRadius: 5,
           padding: 10,
           margin: 10,
@@ -30,7 +30,7 @@ const ViewAllScreen = ({ route }) => {
           {filteredSpecialties.length > 0 ? (
             filteredSpecialties.map((item, index) => {
               const cook = cooksData.find((cook) =>
-                cook.specialties.includes(item)
+                cook.specialties.includes(item),
               );
               return (
                 <View

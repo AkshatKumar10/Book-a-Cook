@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,73 +7,142 @@ import {
   ScrollView,
   Alert,
   Linking,
-} from "react-native";
-import Feather from "@expo/vector-icons/Feather";
-import DateTimePickerModal from "react-native-modal-datetime-picker";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { Picker } from "@react-native-picker/picker";
-import { useNavigation } from "@react-navigation/native";
+  StatusBar,
+  Dimensions,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Feather from '@expo/vector-icons/Feather';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { Picker } from '@react-native-picker/picker';
+import { useNavigation } from '@react-navigation/native';
+import MapView, { Marker } from 'react-native-maps';
+import * as Location from 'expo-location';
+import Navbar from '../components/Navbar';
 
 export default function BookingPageScreen({ route }) {
-  const { cook, pricing } = route.params;
+  const { pricing, cook, cuisine } = route.params;
+  const navigation = useNavigation();
+
+  const validCuisine =
+    cuisine && pricing[cuisine]
+      ? cuisine
+      : Object.keys(pricing)[0] || 'North Indian';
+  const initialPricing = pricing[validCuisine] || {
+    cook: 'Sanjay Kumar',
+    price: 500,
+    rating: 4.5,
+    image: 'https://i.postimg.cc/d3b0kbcM/cook1-removebg-preview.png',
+  };
 
   const [mealType, setMealType] = useState(null);
   const [guestCount, setGuestCount] = useState(2);
-  const [address, setAddress] = useState("Select Address");
-  const [selectedDate, setSelectedDate] = useState("");
-  const [selectedTime, setSelectedTime] = useState("");
+  const [address, setAddress] = useState('Select Address');
+  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedTime, setSelectedTime] = useState('');
   const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-  const [selectedCuisine, setSelectedCuisine] = useState("North Indian"); // State for selected cuisine
-  const [cookName, setCookName] = useState(pricing[selectedCuisine].cook); // Set initial cook based on default cuisine
-  const [cookPrice, setCookPrice] = useState(pricing[selectedCuisine].price); // Set initial price based on default cuisine
+  const [selectedCuisine, setSelectedCuisine] = useState(validCuisine);
+  const [cookName, setCookName] = useState(initialPricing.cook);
+  const [cookPrice, setCookPrice] = useState(initialPricing.price);
+  const [cookRating, setCookRating] = useState(initialPricing.rating);
+  const [cookImage, setCookImage] = useState(initialPricing.image);
+  const [region, setRegion] = useState({
+    latitude: 12.9716,
+    longitude: 77.5946,
+    latitudeDelta: 0.05,
+    longitudeDelta: 0.05,
+  });
+  const [marker, setMarker] = useState(null);
 
-  // Update cook and price when cuisine changes
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert(
+          'Permission Denied',
+          'Location permission is required to select an address.',
+        );
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setRegion({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        latitudeDelta: 0.05,
+        longitudeDelta: 0.05,
+      });
+    })();
+  }, []);
+
+  const handleMapPress = async (event) => {
+    const { latitude, longitude } = event.nativeEvent.coordinate;
+    setMarker({ latitude, longitude });
+
+    try {
+      const location = await Location.reverseGeocodeAsync({
+        latitude,
+        longitude,
+      });
+      if (location.length > 0) {
+        const { street, city, region, postalCode, country } = location[0];
+        const formattedAddress = `${street || ''}, ${city || ''}, ${region || ''}, ${postalCode || ''}, ${country || ''}`;
+        setAddress(formattedAddress);
+      } else {
+        setAddress('Address not found');
+      }
+    } catch (error) {
+      console.error('Error fetching address:', error);
+      setAddress('Unable to fetch address');
+    }
+  };
+
   const handleCuisineChange = (itemValue) => {
     setSelectedCuisine(itemValue);
-    // Update cook name
     setCookName(pricing[itemValue].cook);
-    setCookPrice(pricing[itemValue].price); // Update cook price
+    setCookPrice(pricing[itemValue].price);
+    setCookRating(pricing[itemValue].rating);
+    setCookImage(pricing[itemValue].image);
   };
-  const navigation = useNavigation();
-  const incrementGuests = () => {
-    setGuestCount((prev) => prev + 1);
-  };
+
+  const incrementGuests = () => setGuestCount((prev) => prev + 1);
+
+  const decrementGuests = () =>
+    setGuestCount((prev) => (prev > 1 ? prev - 1 : prev));
 
   const handleContactSupport = () => {
-    const email = "bookachef@gmail.com";
-    const subject = "Support Request"; // Optional subject
-    const body = ""; // Optional body content
-    const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(
-      subject
-    )}&body=${encodeURIComponent(body)}`;
-
+    const email = 'bookachef@gmail.com';
+    const subject = 'Support Request';
+    const body = '';
+    const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     Linking.openURL(mailtoLink).catch((err) =>
-      console.error("Error opening email client", err)
+      console.error('Error opening email client', err),
     );
   };
-  const calculateTotalAmount = (guestCount, cookPrice) => {
-    return guestCount * cookPrice; // Calculate total based on guest count and selected cook's price
-  };
+
+  const calculateTotalAmount = (guestCount, cookPrice) =>
+    guestCount * cookPrice;
 
   const totalAmount = calculateTotalAmount(guestCount, cookPrice);
+
   const handleNext = () => {
-    // Validate all fields
     if (
       !mealType ||
       !guestCount ||
-      !address ||
+      address === 'Select Address' ||
       !selectedDate ||
       !selectedTime ||
       !selectedCuisine ||
       !cookName
     ) {
-      alert("Please fill in all fields before proceeding to checkout.");
+      Alert.alert(
+        'Error',
+        'Please fill in all fields, including the address, before proceeding to checkout.',
+      );
       return;
     }
-
-    // Navigate to CheckoutPageScreen if all fields are filled
-    navigation.navigate("CheckoutPageScreen", {
+    navigation.navigate('CheckoutPageScreen', {
       mealType,
       guestCount,
       address,
@@ -82,106 +151,111 @@ export default function BookingPageScreen({ route }) {
       selectedCuisine,
       cookName,
       totalAmount,
+      cookRating,
+      cookImage,
     });
   };
 
-  const decrementGuests = () => {
-    setGuestCount((prev) => (prev > 1 ? prev - 1 : prev));
-  };
-
   const showTimePicker = () => {
-    setTimePickerVisibility(false); // Reset before showing again
-    setTimeout(() => {
-      setTimePickerVisibility(true);
-    }, 100); // Small delay to avoid race conditions
+    if (!selectedDate) {
+      Alert.alert(
+        'Date Required',
+        'Please select a date before choosing a time.',
+      );
+      return;
+    }
+    setTimePickerVisibility(false);
+    setTimeout(() => setTimePickerVisibility(true), 100);
   };
 
-  const hideTimePicker = () => {
-    setTimePickerVisibility(false);
-  };
+  const hideTimePicker = () => setTimePickerVisibility(false);
 
   const timeRestrictions = {
-    "North Indian": { start: 10, end: 20 }, // 10 AM to 8 PM
-    "South Indian": { start: 11, end: 21 }, // 11 AM to 9 PM
-    Chinese: { start: 12, end: 22 }, // 12 PM to 10 PM
-    Western: { start: 9, end: 21 }, // 9 AM to 9 PM
+    'North Indian': { start: 10, end: 20 },
+    'South Indian': { start: 11, end: 21 },
+    Chinese: { start: 12, end: 22 },
+    Western: { start: 9, end: 21 },
   };
 
   const handleConfirmTime = (time) => {
     const formattedTime = time.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
+      hour: '2-digit',
+      minute: '2-digit',
       hour12: true,
     });
-
     const selectedHour = time.getHours();
     const selectedMinute = time.getMinutes();
     const selectedTotalMinutes = selectedHour * 60 + selectedMinute;
-
-    // Get the allowed time range for the selected cuisine
     const { start, end } = timeRestrictions[selectedCuisine];
     const startTotalMinutes = start * 60;
     const endTotalMinutes = end * 60;
 
-    // Check if the selected time is within the allowed range
     if (
       selectedTotalMinutes < startTotalMinutes ||
       selectedTotalMinutes > endTotalMinutes
     ) {
       Alert.alert(
-        "Time Selection Error",
-        `For ${selectedCuisine} cuisine, please select a time between ${start} AM and ${end} PM.`
+        'Time Selection Error',
+        `For ${selectedCuisine} cuisine, please select a time between ${start} AM and ${end} PM.`,
       );
-      return; // Exit the function if the time is not valid
+      return;
     }
 
     setSelectedTime(formattedTime);
     hideTimePicker();
   };
 
-  const showDatePicker = () => {
-    setDatePickerVisibility(true);
-  };
+  const showDatePicker = () => setDatePickerVisibility(true);
 
-  const hideDatePicker = () => {
-    setDatePickerVisibility(false);
-  };
+  const hideDatePicker = () => setDatePickerVisibility(false);
 
   const handleConfirmDate = (date) => {
     const formattedDate = date.toLocaleDateString();
-    const today = new Date();
     setSelectedDate(formattedDate);
     hideDatePicker();
   };
 
   return (
-    <View className="flex-1 bg-white">
-      <ScrollView className="px-4 py-6">
+    <SafeAreaView className="flex-1">
+      <StatusBar barStyle="light-content" backgroundColor="#000000" />
+      <Navbar title="Booking Page" />
+      <ScrollView
+        className="px-4 pb-6 pt-4"
+        showsVerticalScrollIndicator={false}
+      >
         <View className="mb-6">
-          <Text className="text-lg font-medium mb-2">Select Address:</Text>
-          <TouchableOpacity
-            onPress={() => {
-              const addressUrl =
-                "https://www.google.com/maps/search/?api=1&query=Dayananda+Sagar+College+of+Engineering"; // Replace 'Your+Address' with the actual address or a variable containing the address
-              Linking.openURL(addressUrl).catch((err) =>
-                console.error("Error opening Google Maps", err)
-              );
-            }}
-            className="flex-row items-center justify-between border border-gray-300 rounded-lg px-4 py-3"
+          <Text className="text-lg font-medium">Select Address:</Text>
+          <Text className="text-sm text-gray-500 mb-2">
+            Tap on the map to select your address
+          </Text>
+          <View
+            className="border border-gray-300 rounded-lg mb-2"
+            style={{ height: 400, width: '100%' }}
           >
-            <Text className="text-gray-700">{address}</Text>
-            <MaterialCommunityIcons
-              name="chevron-right"
-              size={20}
-              color="gray"
-            />
-          </TouchableOpacity>
+            <MapView
+              style={{ flex: 1 }}
+              region={region}
+              onPress={handleMapPress}
+              showsUserLocation={true}
+            >
+              {marker && (
+                <Marker
+                  coordinate={marker}
+                  title="Selected Location"
+                  description={address}
+                />
+              )}
+            </MapView>
+          </View>
+          <View className="mt-2 p-3 border border-gray-300 rounded-md flex-row items-center">
+            <Feather name="map-pin" size={18} color="black" className="mr-2" />
+            <Text className="text-gray-800 text-base flex-1">{address}</Text>
+          </View>
         </View>
 
-        {/* Guest Count */}
         <View className="mb-6">
           <Text className="text-lg font-medium mb-2">For how many people?</Text>
-          <View className="flex-row items-center border border-gray-300 rounded-lg px-4 py-3 justify-between">
+          <View className="flex-row items-center border border-gray-300 rounded-lg px-4 py-2 justify-between">
             <TouchableOpacity
               onPress={decrementGuests}
               className="border border-gray-300 rounded-full p-2"
@@ -198,16 +272,15 @@ export default function BookingPageScreen({ route }) {
           </View>
         </View>
 
-        {/* Date Picker */}
         <View className="mb-6">
           <Text className="text-lg font-medium mb-2">Select Date:</Text>
           <TouchableOpacity
             onPress={showDatePicker}
-            className="flex-row items-center border border-gray-300 rounded-lg px-4 py-3"
+            className="flex-row items-center border border-gray-300 rounded-lg px-4 py-2"
           >
             <TextInput
               placeholder="DD/MM/YYYY"
-              className="flex-1 text-gray-700 h-10"
+              className="flex-1 text-gray-700"
               editable={false}
               value={selectedDate}
             />
@@ -223,24 +296,25 @@ export default function BookingPageScreen({ route }) {
           <Text className="text-lg font-medium mb-2">Select Time:</Text>
           <TouchableOpacity
             onPress={showTimePicker}
-            className="flex-row items-center border border-gray-300 rounded-lg px-4 py-3"
+            className="flex-row items-center border border-gray-300 rounded-lg px-4 py-2"
           >
             <TextInput
               placeholder="HH:MM AM/PM"
-              className="flex-1 text-gray-700 h-10"
+              className="flex-1 text-gray-700"
               value={selectedTime}
               editable={false}
             />
             <Feather name="clock" size={24} color="black" />
           </TouchableOpacity>
         </View>
+
         <DateTimePickerModal
           isVisible={isDatePickerVisible}
           mode="date"
           onConfirm={handleConfirmDate}
           onCancel={hideDatePicker}
           is24Hour={false}
-          minimumDate={new Date()}
+          minimumDate={new Date(new Date().setDate(new Date().getDate() + 1))}
         />
         <DateTimePickerModal
           isVisible={isTimePickerVisible}
@@ -249,9 +323,10 @@ export default function BookingPageScreen({ route }) {
           onCancel={hideTimePicker}
           is24Hour={false}
         />
+
         <View className="mb-6">
           <Text className="text-lg font-medium mb-2">Select Cuisine:</Text>
-          <View className="border border-gray-300 rounded-lg px-4">
+          <View className="border border-gray-300 rounded-lg">
             <Picker
               selectedValue={selectedCuisine}
               onValueChange={handleCuisineChange}
@@ -263,41 +338,41 @@ export default function BookingPageScreen({ route }) {
           </View>
         </View>
 
-        {/* Display Cook's Name */}
         <View className="mb-6 flex-row">
-          <Text className="text-lg mt-0.5">Cook:</Text>
-          <Text className="text-2xl font-medium ml-2 ">{cookName}</Text>
+          <Text className="text-lg">
+            Cook: <Text className="font-medium text-red-400">{cookName}</Text>
+          </Text>
         </View>
 
         <Text className="text-lg font-medium mb-2">Choose Meal</Text>
         <View className="flex-row space-x-2 gap-5 mb-6">
           <TouchableOpacity
-            onPress={() => setMealType("Lunch")}
+            onPress={() => setMealType('Lunch')}
             className={`flex-1 py-3 rounded-lg border ${
-              mealType === "Lunch"
-                ? "border-orange-500 bg-orange-100"
-                : "border-gray-300"
+              mealType === 'Lunch'
+                ? 'border-orange-500 bg-orange-100'
+                : 'border-gray-300'
             }`}
           >
             <Text
               className={`text-center font-medium ${
-                mealType === "Lunch" ? "text-orange-700" : "text-gray-700"
+                mealType === 'Lunch' ? 'text-orange-700' : 'text-gray-700'
               }`}
             >
               Lunch
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => setMealType("Dinner")}
+            onPress={() => setMealType('Dinner')}
             className={`flex-1 py-3 rounded-lg border ${
-              mealType === "Dinner"
-                ? "border-orange-500 bg-orange-100"
-                : "border-gray-300"
+              mealType === 'Dinner'
+                ? 'border-orange-500 bg-orange-100'
+                : 'border-gray-300'
             }`}
           >
             <Text
               className={`text-center font-medium ${
-                mealType === "Dinner" ? "text-orange-700" : "text-gray-700"
+                mealType === 'Dinner' ? 'text-orange-700' : 'text-gray-700'
               }`}
             >
               Dinner
@@ -305,7 +380,6 @@ export default function BookingPageScreen({ route }) {
           </TouchableOpacity>
         </View>
 
-        {/* Support Link */}
         <Text className="text-center text-lg text-gray-500 mt-3">
           Need assistance?
           <Text
@@ -316,7 +390,6 @@ export default function BookingPageScreen({ route }) {
           </Text>
         </Text>
 
-        {/* Next Button */}
         <TouchableOpacity
           onPress={handleNext}
           className="mt-6 bg-orange-700 py-4 rounded-lg mb-10"
@@ -324,6 +397,6 @@ export default function BookingPageScreen({ route }) {
           <Text className="text-center text-white font-medium">Next</Text>
         </TouchableOpacity>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
