@@ -21,7 +21,7 @@ import * as Location from 'expo-location';
 import Navbar from '../components/Navbar';
 
 export default function BookingPageScreen({ route }) {
-  const { pricing, cook, cuisine } = route.params;
+  const { pricing, cook, cuisine, isDiscounted = false } = route.params;
   const navigation = useNavigation();
 
   const validCuisine =
@@ -44,7 +44,9 @@ export default function BookingPageScreen({ route }) {
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [selectedCuisine, setSelectedCuisine] = useState(validCuisine);
   const [cookName, setCookName] = useState(initialPricing.cook);
-  const [cookPrice, setCookPrice] = useState(initialPricing.price);
+  const [cookPrice, setCookPrice] = useState(
+    isDiscounted ? initialPricing.price * 0.9 : initialPricing.price,
+  );
   const [cookRating, setCookRating] = useState(initialPricing.rating);
   const [cookImage, setCookImage] = useState(initialPricing.image);
   const [region, setRegion] = useState({
@@ -101,7 +103,9 @@ export default function BookingPageScreen({ route }) {
   const handleCuisineChange = (itemValue) => {
     setSelectedCuisine(itemValue);
     setCookName(pricing[itemValue].cook);
-    setCookPrice(pricing[itemValue].price);
+    setCookPrice(
+      isDiscounted ? pricing[itemValue].price * 0.9 : pricing[itemValue].price,
+    );
     setCookRating(pricing[itemValue].rating);
     setCookImage(pricing[itemValue].image);
   };
@@ -153,6 +157,7 @@ export default function BookingPageScreen({ route }) {
       totalAmount,
       cookRating,
       cookImage,
+      isDiscounted,
     });
   };
 
@@ -343,7 +348,22 @@ export default function BookingPageScreen({ route }) {
             Cook: <Text className="font-medium text-red-400">{cookName}</Text>
           </Text>
         </View>
-
+        <View className="mb-6">
+          <Text className="text-lg font-medium mb-2">Pricing Details:</Text>
+          <Text className="text-base">
+            Price per guest:{' '}
+            <Text className="font-medium">
+              ₹{cookPrice.toFixed(2)}
+              {isDiscounted && (
+                <Text className="text-green-500"> (10% discount applied)</Text>
+              )}
+            </Text>
+          </Text>
+          <Text className="text-base">
+            Total Amount:{' '}
+            <Text className="font-medium">₹{totalAmount.toFixed(2)}</Text>
+          </Text>
+        </View>
         <Text className="text-lg font-medium mb-2">Choose Meal</Text>
         <View className="flex-row space-x-2 gap-5 mb-6">
           <TouchableOpacity

@@ -1,4 +1,4 @@
-import { View, Text, Image, TouchableOpacity } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 
@@ -7,6 +7,7 @@ export default function WelcomeScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-brown-100">
+      <StatusBar barStyle="light-content" backgroundColor="#000000" />
       <View className="flex-1 flex justify-normal my-4">
         <View className="flex-row justify-center mt-20 mb-10">
           <Image

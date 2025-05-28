@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  StatusBar,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -17,19 +23,19 @@ const FAQScreen = () => {
 
   const faqs = [
     {
-      question: 'What types of cuisines can I book a cook for?',
+      question: 'What types of cuisines can I book a chef for?',
       answer:
         'Our platform offers a variety of cuisines, including North Indian, Chinese, South Indian, and more.',
     },
     {
-      question: 'How do I book a cook?',
+      question: 'How do I book a chef?',
       answer:
         'You can select their profile and click on the "Book Now" button.',
       // },
       // {
-      //   question: 'What happens after I book a cook?',
+      //   question: 'What happens after I book a chef?',
       //   answer:
-      //     'The cook will confirm your booking, and you’ll receive a notification.',
+      //     'The chef will confirm your booking, and you’ll receive a notification.',
       // },
     },
     {
@@ -38,14 +44,15 @@ const FAQScreen = () => {
         'Go to "Bookings," select the booking, and choose the "Cancel Booking" option.',
     },
     {
-      question: "What if my cook doesn't show up?",
+      question: "What if my chef doesn't show up?",
       answer:
-        'In the rare event that your cook does not show up, please contact our support team immediately. We will assist you in finding a replacement cook or provide a full refund.',
+        'In the rare event that your chef does not show up, please contact our support team immediately. We will assist you in finding a replacement chef or provide a full refund.',
     },
   ];
 
   return (
     <SafeAreaView className="flex-1 bg-white">
+      <StatusBar barStyle="light-content" backgroundColor="#000000" />
       <Navbar title="FAQs" onBackPress={() => navigation.goBack()} />
       <ScrollView
         className="flex-1 px-5"

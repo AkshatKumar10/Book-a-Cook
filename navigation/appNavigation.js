@@ -10,7 +10,6 @@ import ProfileScreen from '../screens/ProfileScreen';
 import BookingPage from '../screens/BookingPageScreen';
 import MyBookingsScreen from '../screens/MyBookingsScreen';
 import HowItWorksScreen from '../screens/HowItWorksScreen';
-import ViewAllScreen from '../screens/ViewAllScreen';
 import EditProfileScreen from '../screens/EditProfileScreen';
 import FAQScreen from '../screens/FAQScreen';
 import BottomNavigation from './bottomNavigation';
@@ -128,13 +127,6 @@ export default function AppNavigation() {
         <Stack.Screen
           name="MyBookings"
           component={MyBookingsScreen}
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="ViewAllScreen"
-          component={ViewAllScreen}
           options={{
             headerShown: false,
           }}

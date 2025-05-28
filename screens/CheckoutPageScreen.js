@@ -31,7 +31,12 @@ export default function CheckoutPageScreen({ route }) {
     cookRating,
     cookImage,
     address,
+    isDiscounted = false,
   } = route.params;
+
+  const originalAmount = isDiscounted ? totalAmount / 0.9 : totalAmount;
+  const discountAmount = isDiscounted ? originalAmount * 0.1 : 0;
+  const finalAmount = isDiscounted ? totalAmount : originalAmount;
 
   const formatDateTime = (dateStr, timeStr) => {
     const [day, month, year] = dateStr.split('/').map(Number);
@@ -77,16 +82,25 @@ export default function CheckoutPageScreen({ route }) {
         status: 'upcoming',
         date: selectedDate,
         time: selectedTime,
-        pricing: `₹${totalAmount.toFixed(2)}`,
+        pricing: `₹${finalAmount.toFixed(2)}`,
         mealType,
         guestCount,
+        discount: isDiscounted ? '10% off' : 'None',
       };
       const existingBookings = await AsyncStorage.getItem('bookings');
       const bookings = existingBookings ? JSON.parse(existingBookings) : [];
       bookings.push(newBooking);
       await AsyncStorage.setItem('bookings', JSON.stringify(bookings));
-      // Navigate to MyBookingsScreen with a refresh trigger
-      navigation.navigate('MyBookings', { refresh: true });
+      navigation.reset({
+        index: 1,
+        routes: [
+          { name: 'HomeTabs', params: { screen: 'Home' } },
+          {
+            name: 'HomeTabs',
+            params: { screen: 'Bookings', params: { refresh: true } },
+          },
+        ],
+      });
     } catch (error) {
       console.error('Error saving booking:', error);
     }
@@ -101,7 +115,7 @@ export default function CheckoutPageScreen({ route }) {
           window.onload = function() {
             var options = {
               key: "rzp_test_t86tDGCZODCoNY",
-              amount: ${totalAmount * 100},
+              amount: ${finalAmount * 100},
               currency: "INR",
               name: "BookACook",
               description: "Meal Payment",
@@ -247,9 +261,37 @@ export default function CheckoutPageScreen({ route }) {
 
             <Text className="text-2xl font-bold mt-12">Payment Details</Text>
 
-            <View className="mt-6 flex-row justify-between items-center">
-              <Text className="text-xl">Total</Text>
-              <Text className="text-xl">₹{totalAmount.toFixed(2)}</Text>
+            <View className="mt-6">
+              <View className="flex-row justify-between items-center">
+                <Text className="text-xl">Subtotal</Text>
+                <Text className="text-xl">₹{originalAmount.toFixed(2)}</Text>
+              </View>
+              {isDiscounted && (
+                <>
+                  <View className="flex-row justify-between items-center mt-2">
+                    <Text className="text-xl text-green-500">
+                      Discount (10%)
+                    </Text>
+                    <Text className="text-xl text-green-500">
+                      -₹{discountAmount.toFixed(2)}
+                    </Text>
+                  </View>
+                  <View className="border-t border-gray-300 mt-2 pt-2 flex-row justify-between items-center">
+                    <Text className="text-xl font-bold">Total</Text>
+                    <Text className="text-xl font-bold">
+                      ₹{finalAmount.toFixed(2)}
+                    </Text>
+                  </View>
+                </>
+              )}
+              {!isDiscounted && (
+                <View className="border-t border-gray-300 mt-2 pt-2 flex-row justify-between items-center">
+                  <Text className="text-xl font-bold">Total</Text>
+                  <Text className="text-xl font-bold">
+                    ₹{finalAmount.toFixed(2)}
+                  </Text>
+                </View>
+              )}
             </View>
           </ScrollView>
 

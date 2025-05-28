@@ -5,6 +5,7 @@ import {
   ScrollView,
   Dimensions,
   TouchableOpacity,
+  StatusBar,
 } from 'react-native';
 import { FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -14,22 +15,22 @@ import Navbar from '../components/Navbar';
 const steps = [
   {
     id: 1,
-    title: 'Find a Cook',
-    description: 'Browse through our list of talented cooks.',
+    title: 'Find a Chef',
+    description: 'Browse through our list of talented chefs.',
     icon: 'search',
     iconLibrary: 'FontAwesome5',
   },
   {
     id: 2,
-    title: 'Select a Cook',
-    description: 'Click on the cook you want to know more about.',
+    title: 'Select a Chef',
+    description: 'Click on the chef you want to know more about.',
     icon: 'user',
     iconLibrary: 'FontAwesome5',
   },
   {
     id: 3,
     title: 'Book Now',
-    description: "If you like the cook, click on 'Book Now'.",
+    description: "If you like the chef, click on 'Book Now'.",
     icon: 'calendar-check',
     iconLibrary: 'FontAwesome5',
   },
@@ -37,7 +38,7 @@ const steps = [
     id: 4,
     title: 'Select Address',
     description:
-      'Enter your address so the cook can reach you for meal preparation.',
+      'Enter your address so the chef can reach you for meal preparation.',
     icon: 'map-marker-alt',
     iconLibrary: 'FontAwesome5',
   },
@@ -77,6 +78,7 @@ const HowItWorksScreen = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
+      <StatusBar barStyle="light-content" backgroundColor="#000000" />
       <Navbar title="How It Works" onBackPress={() => navigation.goBack()} />
 
       <ScrollView
