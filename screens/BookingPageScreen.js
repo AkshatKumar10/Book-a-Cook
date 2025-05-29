@@ -23,11 +23,10 @@ import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import Navbar from '../components/Navbar';
 import { ThemeContext } from '../context/ThemeContext';
-import { set } from 'lodash';
 
 export default function BookingPageScreen() {
   const { params } = useRoute();
-  const { pricing, cook, cuisine, isDiscounted = false } = params || {};
+  const { pricing, cuisine, isDiscounted = false } = params || {};
   const navigation = useNavigation();
   const { theme } = useContext(ThemeContext);
 

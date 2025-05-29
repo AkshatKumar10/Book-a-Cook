@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import WelcomeScreen from '../screens/WelcomeScreen';
@@ -17,12 +17,19 @@ import CheckoutPageScreen from '../screens/CheckoutPageScreen';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../firebase';
 import { ActivityIndicator, View } from 'react-native';
+import { ThemeContext } from '../context/ThemeContext';
 
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigation() {
   const [initialRoute, setInitialRoute] = useState('Welcome');
   const [loading, setLoading] = useState(true);
+  const { theme } = useContext(ThemeContext);
+
+  const themeStyles = {
+    container: theme === 'dark' ? 'bg-black' : 'bg-white',
+    loadingColor: theme === 'dark' ? '#60a5fa' : '#38bdf8',
+  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -38,8 +45,10 @@ export default function AppNavigation() {
 
   if (loading) {
     return (
-      <View className="flex-1 justify-center items-center bg-black">
-        <ActivityIndicator size="large" color="#38bdf8" />
+      <View
+        className={`flex-1 justify-center items-center ${themeStyles.container}`}
+      >
+        <ActivityIndicator size="large" color={themeStyles.loadingColor} />
       </View>
     );
   }
@@ -117,7 +126,7 @@ export default function AppNavigation() {
           }}
         />
         <Stack.Screen
-          name="BookingPage"
+          name="BookNow"
           component={BookingPage}
           options={{
             headerShown: false,

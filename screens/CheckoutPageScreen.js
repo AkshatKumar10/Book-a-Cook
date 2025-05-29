@@ -4,7 +4,6 @@ import {
   Text,
   TouchableOpacity,
   Alert,
-  ActivityIndicator,
   ScrollView,
   StatusBar,
 } from 'react-native';
@@ -17,7 +16,6 @@ import { ThemeContext } from '../context/ThemeContext';
 
 export default function CheckoutPageScreen() {
   const [showWebView, setShowWebView] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const navigation = useNavigation();
   const { params } = useRoute();
   const { theme } = useContext(ThemeContext);
@@ -46,7 +44,6 @@ export default function CheckoutPageScreen() {
     buttonText: theme === 'dark' ? 'text-white' : 'text-white',
     borderColor: theme === 'dark' ? 'border-gray-700' : 'border-gray-300',
     discountText: theme === 'dark' ? 'text-green-400' : 'text-green-500',
-    loadingColor: theme === 'dark' ? '#60a5fa' : '#38bdf8',
     webViewBg: theme === 'dark' ? '#1F2937' : '#F2F2F2',
     webViewText: theme === 'dark' ? '#D1D5DB' : '#333333',
   };
@@ -191,9 +188,7 @@ export default function CheckoutPageScreen() {
   };
 
   const handlePayment = () => {
-    setIsLoading(true);
     setTimeout(() => {
-      setIsLoading(false);
       setShowWebView(true);
     }, 500);
   };
@@ -222,173 +217,156 @@ export default function CheckoutPageScreen() {
         backgroundColor={theme === 'dark' ? '#000000' : '#FFFFFF'}
       />
       <Navbar title="Checkout" onBackPress={() => navigation.goBack()} />
-      {isLoading ? (
-        <View className="flex-1 justify-center items-center">
-          <ActivityIndicator size="large" color={themeStyles.loadingColor} />
-        </View>
-      ) : (
-        <>
-          <ScrollView
-            className="px-4 py-6"
-            showsVerticalScrollIndicator={false}
-          >
-            <Text className={`text-2xl font-bold ${themeStyles.textPrimary}`}>
-              Order Summary
+      <ScrollView className="px-4 py-6" showsVerticalScrollIndicator={false}>
+        <Text className={`text-2xl font-bold ${themeStyles.textPrimary}`}>
+          Order Summary
+        </Text>
+
+        <View className="mt-6 flex-row justify-between items-center">
+          <View>
+            <Text className={`text-xl ${themeStyles.textPrimary}`}>
+              Meal Type
             </Text>
-
-            <View className="mt-6 flex-row justify-between items-center">
-              <View>
-                <Text className={`text-xl ${themeStyles.textPrimary}`}>
-                  Meal Type
-                </Text>
-                <Text className={`text-lg ${themeStyles.textAccent}`}>
-                  {mealType}
-                </Text>
-              </View>
-              <Text className={`text-xl ${themeStyles.textSecondary}`}>
-                {mealType}
-              </Text>
-            </View>
-
-            <View className="mt-6 flex-row justify-between items-center">
-              <View>
-                <Text className={`text-xl ${themeStyles.textPrimary}`}>
-                  Number of Guests
-                </Text>
-                <Text className={`text-lg ${themeStyles.textAccent}`}>
-                  {guestCount}
-                </Text>
-              </View>
-              <Text className={`text-xl ${themeStyles.textSecondary}`}>
-                {guestCount}
-              </Text>
-            </View>
-
-            <View className="mt-6 flex-row justify-between items-center">
-              <View>
-                <Text className={`text-xl ${themeStyles.textPrimary}`}>
-                  Date & Time
-                </Text>
-                <Text className={`text-lg ${themeStyles.textAccent}`}>
-                  {formattedDateTime}
-                </Text>
-              </View>
-              <Text className={`text-xl ${themeStyles.textSecondary}`}>
-                {formattedDateTime}
-              </Text>
-            </View>
-
-            <View className="mt-6 flex-row justify-between items-center">
-              <View>
-                <Text className={`text-xl ${themeStyles.textPrimary}`}>
-                  Cuisine
-                </Text>
-                <Text className={`text-lg ${themeStyles.textAccent}`}>
-                  {selectedCuisine}
-                </Text>
-              </View>
-              <Text className={`text-xl ${themeStyles.textSecondary}`}>
-                {selectedCuisine}
-              </Text>
-            </View>
-
-            <View className="mt-6 flex-row justify-between items-center">
-              <View>
-                <Text className={`text-xl ${themeStyles.textPrimary}`}>
-                  Assigned Cook
-                </Text>
-                <Text className={`text-lg ${themeStyles.textAccent}`}>
-                  Chef {cookName}
-                </Text>
-              </View>
-              <Text className={`text-xl ${themeStyles.textSecondary}`}>
-                Chef {cookName}
-              </Text>
-            </View>
-
-            <View className="mt-6">
-              <Text className={`text-xl ${themeStyles.textPrimary}`}>
-                Address
-              </Text>
-              <View>
-                <Text className={`text-lg ${themeStyles.textAccent}`}>
-                  {address}
-                </Text>
-              </View>
-            </View>
-
-            <Text
-              className={`text-2xl font-bold mt-12 ${themeStyles.textPrimary}`}
-            >
-              Payment Details
+            <Text className={`text-lg ${themeStyles.textAccent}`}>
+              {mealType}
             </Text>
-
-            <View className="mt-6">
-              <View className="flex-row justify-between items-center">
-                <Text className={`text-xl ${themeStyles.textPrimary}`}>
-                  Subtotal
-                </Text>
-                <Text className={`text-xl ${themeStyles.textSecondary}`}>
-                  ₹{originalAmount.toFixed(2)}
-                </Text>
-              </View>
-              {isDiscounted && (
-                <>
-                  <View className="flex-row justify-between items-center mt-2">
-                    <Text className={`text-xl ${themeStyles.discountText}`}>
-                      Discount (10%)
-                    </Text>
-                    <Text className={`text-xl ${themeStyles.discountText}`}>
-                      -₹{discountAmount.toFixed(2)}
-                    </Text>
-                  </View>
-                  <View
-                    className={`border-t ${themeStyles.borderColor} mt-2 pt-2 flex-row justify-between items-center`}
-                  >
-                    <Text
-                      className={`text-xl font-bold ${themeStyles.textPrimary}`}
-                    >
-                      Total
-                    </Text>
-                    <Text
-                      className={`text-xl font-bold ${themeStyles.textSecondary}`}
-                    >
-                      ₹{finalAmount.toFixed(2)}
-                    </Text>
-                  </View>
-                </>
-              )}
-              {!isDiscounted && (
-                <View
-                  className={`border-t ${themeStyles.borderColor} mt-2 pt-2 flex-row justify-between items-center`}
-                >
-                  <Text
-                    className={`text-xl font-bold ${themeStyles.textPrimary}`}
-                  >
-                    Total
-                  </Text>
-                  <Text
-                    className={`text-xl font-bold ${themeStyles.textSecondary}`}
-                  >
-                    ₹{finalAmount.toFixed(2)}
-                  </Text>
-                </View>
-              )}
-            </View>
-          </ScrollView>
-
-          <View className="absolute bottom-0 left-0 right-0 px-4 py-4">
-            <TouchableOpacity
-              onPress={handlePayment}
-              className={`${themeStyles.buttonBg} py-4 rounded-lg items-center`}
-            >
-              <Text className={`text-lg font-medium ${themeStyles.buttonText}`}>
-                Confirm Order
-              </Text>
-            </TouchableOpacity>
           </View>
-        </>
-      )}
+          <Text className={`text-xl ${themeStyles.textSecondary}`}>
+            {mealType}
+          </Text>
+        </View>
+
+        <View className="mt-6 flex-row justify-between items-center">
+          <View>
+            <Text className={`text-xl ${themeStyles.textPrimary}`}>
+              Number of Guests
+            </Text>
+            <Text className={`text-lg ${themeStyles.textAccent}`}>
+              {guestCount}
+            </Text>
+          </View>
+          <Text className={`text-xl ${themeStyles.textSecondary}`}>
+            {guestCount}
+          </Text>
+        </View>
+
+        <View className="mt-6 flex-row justify-between items-center">
+          <View>
+            <Text className={`text-xl ${themeStyles.textPrimary}`}>
+              Date & Time
+            </Text>
+            <Text className={`text-lg ${themeStyles.textAccent}`}>
+              {formattedDateTime}
+            </Text>
+          </View>
+          <Text className={`text-xl ${themeStyles.textSecondary}`}>
+            {formattedDateTime}
+          </Text>
+        </View>
+
+        <View className="mt-6 flex-row justify-between items-center">
+          <View>
+            <Text className={`text-xl ${themeStyles.textPrimary}`}>
+              Cuisine
+            </Text>
+            <Text className={`text-lg ${themeStyles.textAccent}`}>
+              {selectedCuisine}
+            </Text>
+          </View>
+          <Text className={`text-xl ${themeStyles.textSecondary}`}>
+            {selectedCuisine}
+          </Text>
+        </View>
+
+        <View className="mt-6 flex-row justify-between items-center">
+          <View>
+            <Text className={`text-xl ${themeStyles.textPrimary}`}>
+              Assigned Cook
+            </Text>
+            <Text className={`text-lg ${themeStyles.textAccent}`}>
+              Chef {cookName}
+            </Text>
+          </View>
+          <Text className={`text-xl ${themeStyles.textSecondary}`}>
+            Chef {cookName}
+          </Text>
+        </View>
+
+        <View className="mt-6">
+          <Text className={`text-xl ${themeStyles.textPrimary}`}>Address</Text>
+          <View>
+            <Text className={`text-lg ${themeStyles.textAccent}`}>
+              {address}
+            </Text>
+          </View>
+        </View>
+
+        <Text className={`text-2xl font-bold mt-12 ${themeStyles.textPrimary}`}>
+          Payment Details
+        </Text>
+
+        <View className="mt-6">
+          <View className="flex-row justify-between items-center">
+            <Text className={`text-xl ${themeStyles.textPrimary}`}>
+              Subtotal
+            </Text>
+            <Text className={`text-xl ${themeStyles.textSecondary}`}>
+              ₹{originalAmount.toFixed(2)}
+            </Text>
+          </View>
+          {isDiscounted && (
+            <>
+              <View className="flex-row justify-between items-center mt-2">
+                <Text className={`text-xl ${themeStyles.discountText}`}>
+                  Discount (10%)
+                </Text>
+                <Text className={`text-xl ${themeStyles.discountText}`}>
+                  -₹{discountAmount.toFixed(2)}
+                </Text>
+              </View>
+              <View
+                className={`border-t ${themeStyles.borderColor} mt-2 pt-2 flex-row justify-between items-center`}
+              >
+                <Text
+                  className={`text-xl font-bold ${themeStyles.textPrimary}`}
+                >
+                  Total
+                </Text>
+                <Text
+                  className={`text-xl font-bold ${themeStyles.textSecondary}`}
+                >
+                  ₹{finalAmount.toFixed(2)}
+                </Text>
+              </View>
+            </>
+          )}
+          {!isDiscounted && (
+            <View
+              className={`border-t ${themeStyles.borderColor} mt-2 pt-2 flex-row justify-between items-center`}
+            >
+              <Text className={`text-xl font-bold ${themeStyles.textPrimary}`}>
+                Total
+              </Text>
+              <Text
+                className={`text-xl font-bold ${themeStyles.textSecondary}`}
+              >
+                ₹{finalAmount.toFixed(2)}
+              </Text>
+            </View>
+          )}
+        </View>
+      </ScrollView>
+
+      <View className="absolute bottom-0 left-0 right-0 px-4 py-4">
+        <TouchableOpacity
+          onPress={handlePayment}
+          className={`${themeStyles.buttonBg} py-4 rounded-lg items-center`}
+        >
+          <Text className={`text-lg font-medium ${themeStyles.buttonText}`}>
+            Confirm Order
+          </Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }

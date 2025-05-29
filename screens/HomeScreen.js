@@ -8,7 +8,6 @@ import {
   Alert,
   BackHandler,
   StatusBar,
-  ActivityIndicator,
   TextInput,
 } from 'react-native';
 import { useCallback, useState, useContext } from 'react';
@@ -21,6 +20,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import useCuisinesData from '../hooks/useCuisineData';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { ThemeContext } from '../context/ThemeContext';
+import { Skeleton, SkeletonGroup } from 'moti/skeleton';
 
 export default function HomeScreen() {
   const { width, height } = useWindowDimensions();
@@ -81,13 +81,118 @@ export default function HomeScreen() {
     cuisine.cuisine.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  if (loading) {
+  if (loading || cuisinesLoading) {
     return (
-      <View
-        className={`flex-1 justify-center items-center ${themeStyles.container}`}
+      <SafeAreaView
+        className={`flex-1 ${themeStyles.container}`}
+        style={{ padding: 16 }}
       >
-        <ActivityIndicator size="large" color={themeStyles.loadingColor} />
-      </View>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <StatusBar
+            barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
+            backgroundColor={theme === 'dark' ? '#000000' : '#FFFFFF'}
+          />
+          <View className="flex-row items-center mb-4 gap-8">
+            <Skeleton colorMode={theme} width={40} height={40} radius="round" />
+            <Skeleton colorMode={theme} width={'60%'} height={30} />
+          </View>
+          <View className="mb-6">
+            <Skeleton colorMode={theme} width="100%" height={40} radius={20} />
+          </View>
+          <View className="mb-4">
+            <Skeleton colorMode={theme} width={'60%'} height={30} />
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {[...Array(3)].map((_, i) => (
+              <View key={i} style={{ marginBottom: 20, marginRight: 16 }}>
+                <Skeleton
+                  colorMode={theme}
+                  width={width * 0.4}
+                  height={height * 0.2}
+                  radius={10}
+                />
+                <View style={{ height: 12 }} />
+                <Skeleton
+                  colorMode={theme}
+                  width={width * 0.35}
+                  height={20}
+                  radius={10}
+                />
+                <View style={{ height: 8 }} />
+                <Skeleton
+                  colorMode={theme}
+                  width={width * 0.3}
+                  height={20}
+                  radius={10}
+                />
+                <View style={{ height: 8 }} />
+                <Skeleton
+                  colorMode={theme}
+                  width={width * 0.1}
+                  height={20}
+                  radius={10}
+                />
+              </View>
+            ))}
+          </ScrollView>
+          <View style={{ height: 10 }} />
+          <Skeleton colorMode={theme} width={'55%'} height={30} />
+          <View style={{ height: 14 }} />
+          <View
+            style={{
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              justifyContent: 'space-between',
+              marginBottom: 20,
+            }}
+          >
+            {[...Array(4)].map((_, i) => (
+              <View
+                key={i}
+                style={{
+                  width: (width - 48) / 2,
+                  marginBottom: 20,
+                  borderRadius: 10,
+                }}
+              >
+                <Skeleton
+                  colorMode={theme}
+                  width="100%"
+                  height={height * 0.2}
+                  radius={10}
+                />
+                <View style={{ height: 12 }} />
+                <Skeleton
+                  colorMode={theme}
+                  width="70%"
+                  height={20}
+                  radius={10}
+                />
+              </View>
+            ))}
+          </View>
+          <View style={{ height: 10 }} />
+          <Skeleton colorMode={theme} width={'50%'} height={30} />
+          <View style={{ flexDirection: 'row', width: '100%', gap: 16 }}>
+            <View style={{ width: '60%' }}>
+              <View style={{ height: 24 }} />
+              <Skeleton colorMode={theme} width="100%" height={150} />
+              <View style={{ height: 16 }} />
+              <Skeleton colorMode={theme} width="53%" height={30} radius={20} />
+            </View>
+            <View style={{ width: '35%' }}>
+              <Skeleton
+                colorMode={theme}
+                width="100%"
+                height={200}
+                radius={20}
+              />
+            </View>
+          </View>
+          <View style={{ height: 30 }} />
+          <Skeleton colorMode={theme} width={'100%'} height={60} />
+        </ScrollView>
+      </SafeAreaView>
     );
   }
 
@@ -206,9 +311,7 @@ export default function HomeScreen() {
           >
             Popular Cuisines
           </Text>
-          {cuisinesLoading ? (
-            <ActivityIndicator size="large" color={themeStyles.loadingColor} />
-          ) : filteredCuisines.length === 0 && searchQuery ? (
+          {filteredCuisines.length === 0 && searchQuery ? (
             <View className="items-center justify-center mt-4">
               <AntDesign name="frown" size={80} color={themeStyles.empty} />
               <Text
