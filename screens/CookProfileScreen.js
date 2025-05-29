@@ -46,7 +46,7 @@ const CookProfileScreen = () => {
       return acc;
     }, {});
 
-    navigation.navigate('BookingPage', {
+    navigation.navigate('BookNow', {
       cook: cook.name,
       cuisine: cook.cuisine,
       pricing: allCooksPricing,

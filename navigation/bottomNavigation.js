@@ -4,14 +4,13 @@ import BookNowScreen from '../screens/BookingPageScreen';
 import BookingsScreen from '../screens/MyBookingsScreen';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import useCooksData from '../hooks/useCooksData';
-import { ActivityIndicator, View } from 'react-native';
 import { useContext } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 
 const Tab = createBottomTabNavigator();
 
 export default function BottomNavigation() {
-  const { allCooksPricing, loading } = useCooksData();
+  const { allCooksPricing } = useCooksData();
   const { theme } = useContext(ThemeContext);
 
   const themeStyles = {
@@ -19,18 +18,7 @@ export default function BottomNavigation() {
     tabBarBg: theme === 'dark' ? 'bg-gray-800' : 'bg-white',
     activeTintColor: theme === 'dark' ? '#f06292' : '#e91e63',
     inactiveTintColor: theme === 'dark' ? 'gray-400' : 'gray',
-    loadingColor: theme === 'dark' ? '#60a5fa' : '#38bdf8',
   };
-
-  if (loading) {
-    return (
-      <View
-        className={`flex-1 justify-center items-center ${themeStyles.container}`}
-      >
-        <ActivityIndicator size="large" color={themeStyles.loadingColor} />
-      </View>
-    );
-  }
 
   return (
     <Tab.Navigator
