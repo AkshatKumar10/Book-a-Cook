@@ -1,8 +1,9 @@
-import { View, Text, Image, TouchableOpacity, StatusBar } from 'react-native';
+import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useContext } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
+import { StatusBar } from 'expo-status-bar';
 
 export default function WelcomeScreen() {
   const navigation = useNavigation();
@@ -19,10 +20,7 @@ export default function WelcomeScreen() {
 
   return (
     <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
-      <StatusBar
-        barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
-        backgroundColor={theme === 'dark' ? '#000000' : '#4A3728'} // Matches bg-brown-100
-      />
+      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
       <View className="flex-1 flex justify-normal my-4">
         <View className="flex-row justify-center mt-20 mb-10">
           <Image

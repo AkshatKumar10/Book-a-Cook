@@ -5,7 +5,6 @@ import {
   ScrollView,
   TouchableOpacity,
   useWindowDimensions,
-  StatusBar,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -13,6 +12,7 @@ import { useContext } from 'react';
 import Navbar from '../components/Navbar';
 import useCooksData from '../hooks/useCooksData';
 import { ThemeContext } from '../context/ThemeContext';
+import { StatusBar } from 'expo-status-bar';
 
 const CookProfileScreen = () => {
   const { params: { cook } = {} } = useRoute();
@@ -22,7 +22,7 @@ const CookProfileScreen = () => {
   const { theme } = useContext(ThemeContext);
 
   const themeStyles = {
-    container: theme === 'dark' ? 'bg-black' : 'bg-gray-100',
+    container: theme === 'dark' ? 'bg-black' : 'bg-white',
     textPrimary: theme === 'dark' ? 'text-white' : 'text-gray-800',
     textSecondary: theme === 'dark' ? 'text-gray-300' : 'text-gray-900',
     textAccent: theme === 'dark' ? 'text-red-300' : 'text-red-400',
@@ -46,19 +46,17 @@ const CookProfileScreen = () => {
       return acc;
     }, {});
 
-    navigation.navigate('BookNow', {
+    navigation.navigate('BookingPageScreen', {
       cook: cook.name,
       cuisine: cook.cuisine,
       pricing: allCooksPricing,
+      isDiscounted: false,
     });
   };
 
   return (
     <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
-      <StatusBar
-        barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
-        backgroundColor={theme === 'dark' ? '#000000' : '#F3F4F6'} // Matches bg-gray-100
-      />
+      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
       <Navbar title="Chef Profile" />
       <ScrollView contentContainerStyle={{ paddingBottom: 10 }}>
         <View className="items-center mt-4">

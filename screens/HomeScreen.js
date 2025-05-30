@@ -7,7 +7,6 @@ import {
   useWindowDimensions,
   Alert,
   BackHandler,
-  StatusBar,
   TextInput,
 } from 'react-native';
 import { useCallback, useState, useContext } from 'react';
@@ -20,7 +19,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import useCuisinesData from '../hooks/useCuisineData';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { ThemeContext } from '../context/ThemeContext';
-import { Skeleton, SkeletonGroup } from 'moti/skeleton';
+import { Skeleton } from 'moti/skeleton';
+import { StatusBar } from 'expo-status-bar';
 
 export default function HomeScreen() {
   const { width, height } = useWindowDimensions();
@@ -29,6 +29,10 @@ export default function HomeScreen() {
   const { cuisines, loading: cuisinesLoading } = useCuisinesData();
   const { theme } = useContext(ThemeContext);
   const [searchQuery, setSearchQuery] = useState('');
+  const [imageLoadedState, setImageLoadedState] = useState({});
+  const handleImageLoad = (id) => {
+    setImageLoadedState((prev) => ({ ...prev, [id]: true }));
+  };
 
   const themeStyles = {
     container: theme === 'dark' ? 'bg-black' : 'bg-white',
@@ -88,10 +92,7 @@ export default function HomeScreen() {
         style={{ padding: 16 }}
       >
         <ScrollView showsVerticalScrollIndicator={false}>
-          <StatusBar
-            barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
-            backgroundColor={theme === 'dark' ? '#000000' : '#FFFFFF'}
-          />
+          <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
           <View className="flex-row items-center mb-4 gap-8">
             <Skeleton colorMode={theme} width={40} height={40} radius="round" />
             <Skeleton colorMode={theme} width={'60%'} height={30} />
@@ -198,10 +199,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
-      <StatusBar
-        barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
-        backgroundColor={theme === 'dark' ? '#000000' : '#FFFFFF'}
-      />
+      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
       <View className="flex-row items-center px-4 py-2">
         <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
           <FontAwesome
@@ -272,6 +270,14 @@ export default function HomeScreen() {
                       height: height * 0.2,
                     }}
                   >
+                    {!imageLoadedState[cook.id] && (
+                      <Skeleton
+                        colorMode={theme}
+                        width="100%"
+                        height={'100%'}
+                        radius={10}
+                      />
+                    )}
                     <TouchableOpacity
                       onPress={() =>
                         navigation.navigate('CookProfile', { cook })
@@ -284,6 +290,7 @@ export default function HomeScreen() {
                           height: '100%',
                         }}
                         resizeMode="cover"
+                        onLoad={() => handleImageLoad(cook.id)}
                       />
                     </TouchableOpacity>
                   </View>
@@ -330,27 +337,45 @@ export default function HomeScreen() {
                     width: width * 0.45,
                   }}
                 >
-                  <TouchableOpacity
-                    style={{ width: '100%' }}
-                    onPress={() =>
-                      navigation.navigate('CuisineDetails', {
-                        cuisine: item.cuisine,
-                        cooks: filteredCooks.filter(
-                          (cook) => cook.cuisine === item.cuisine,
-                        ),
-                      })
-                    }
+                  <View
+                    style={{
+                      width: '100%',
+                      height: height * 0.2,
+                      borderRadius: width * 0.02,
+                      overflow: 'hidden',
+                    }}
                   >
-                    <Image
-                      source={{ uri: item.image }}
-                      style={{
-                        width: '100%',
-                        height: height * 0.2,
-                        borderRadius: width * 0.02,
-                      }}
-                      resizeMode="cover"
-                    />
-                  </TouchableOpacity>
+                    {!imageLoadedState[item.cuisine] && (
+                      <Skeleton
+                        colorMode={theme}
+                        width="100%"
+                        height="100%"
+                        radius={10}
+                      />
+                    )}
+                    <TouchableOpacity
+                      style={{ width: '100%' }}
+                      onPress={() =>
+                        navigation.navigate('CuisineDetails', {
+                          cuisine: item.cuisine,
+                          cooks: filteredCooks.filter(
+                            (cook) => cook.cuisine === item.cuisine,
+                          ),
+                        })
+                      }
+                    >
+                      <Image
+                        source={{ uri: item.image }}
+                        style={{
+                          width: '100%',
+                          height: height * 0.2,
+                          borderRadius: width * 0.02,
+                        }}
+                        resizeMode="cover"
+                        onLoad={() => handleImageLoad(item.cuisine)}
+                      />
+                    </TouchableOpacity>
+                  </View>
                   <Text
                     className={`font-semibold text-xl mt-2 ${themeStyles.textPrimary}`}
                   >
@@ -382,8 +407,9 @@ export default function HomeScreen() {
               </Text>
               <TouchableOpacity
                 onPress={() =>
-                  navigation.navigate('BookNow', {
-                    pricing: allCooksPricing,
+                  navigation.navigate('BookingPageScreen', {
+                    pricing: allCooksPricing || {},
+                    cuisine: Object.keys(allCooksPricing)[0] || 'North Indian',
                     isDiscounted: true,
                   })
                 }

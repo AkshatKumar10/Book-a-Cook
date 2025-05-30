@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Dimensions,
   Alert,
-  StatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -14,6 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Navbar from '../components/Navbar';
 import { ThemeContext } from '../context/ThemeContext';
+import { StatusBar } from 'expo-status-bar';
 
 const EditProfileScreen = ({ route }) => {
   const { width, height } = Dimensions.get('window');
@@ -62,16 +62,8 @@ const EditProfileScreen = ({ route }) => {
 
   return (
     <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
-      <StatusBar
-        barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
-        backgroundColor={theme === 'dark' ? '#000000' : '#FFFFFF'}
-      />
-      <Navbar
-        title="Edit Profile"
-        onBackPress={() => {
-          navigation.navigate('Profile');
-        }}
-      />
+      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
+      <Navbar title="Edit Profile" />
       <View className="flex-1 p-6 space-y-5">
         <Text className={`mb-2 font-medium ${themeStyles.textLabel}`}>
           Full Name

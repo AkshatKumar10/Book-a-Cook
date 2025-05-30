@@ -43,7 +43,19 @@ export default function BottomNavigation() {
         tabPress: (e) => {
           if (e.target.includes('BookNow')) {
             e.preventDefault();
-            navigation.navigate('BookNow', { pricing: allCooksPricing });
+            try {
+              const defaultCuisine =
+                allCooksPricing && Object.keys(allCooksPricing).length > 0
+                  ? Object.keys(allCooksPricing)[0]
+                  : 'North Indian';
+              navigation.navigate('BookingPageScreen', {
+                pricing: allCooksPricing || {},
+                cuisine: defaultCuisine,
+                isDiscounted: false,
+              });
+            } catch (error) {
+              console.error('Navigation error:', error);
+            }
           }
         },
       })}

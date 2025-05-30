@@ -6,7 +6,6 @@ import SignInScreen from '../screens/SignInScreen';
 import SignUpScreen from '../screens/SignUpScreen';
 import CookProfileScreen from '../screens/CookProfileScreen';
 import ProfileScreen from '../screens/ProfileScreen';
-import BookingPage from '../screens/BookingPageScreen';
 import MyBookingsScreen from '../screens/MyBookingsScreen';
 import HowItWorksScreen from '../screens/HowItWorksScreen';
 import EditProfileScreen from '../screens/EditProfileScreen';
@@ -18,6 +17,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../firebase';
 import { ActivityIndicator, View } from 'react-native';
 import { ThemeContext } from '../context/ThemeContext';
+import BookingPageScreen from '../screens/BookingPageScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -60,6 +60,8 @@ export default function AppNavigation() {
           name="Welcome"
           component={WelcomeScreen}
           options={{
+            gestureEnabled: false,
+            presentation: 'transparentModal',
             headerShown: false,
           }}
         />
@@ -67,6 +69,8 @@ export default function AppNavigation() {
           name="SignIn"
           component={SignInScreen}
           options={{
+            gestureEnabled: false,
+            presentation: 'transparentModal',
             headerShown: false,
           }}
         />
@@ -74,18 +78,26 @@ export default function AppNavigation() {
           name="SignUp"
           component={SignUpScreen}
           options={{
+            gestureEnabled: false,
+            presentation: 'transparentModal',
             headerShown: false,
           }}
         />
         <Stack.Screen
           name="HomeTabs"
           component={BottomNavigation}
-          options={{ headerShown: false }}
+          options={{
+            gestureEnabled: false,
+            presentation: 'transparentModal',
+            headerShown: false,
+          }}
         />
         <Stack.Screen
           name="Profile"
           component={ProfileScreen}
           options={{
+            gestureEnabled: false,
+            presentation: 'transparentModal',
             headerShown: false,
           }}
         />
@@ -93,6 +105,8 @@ export default function AppNavigation() {
           name="EditProfileScreen"
           component={EditProfileScreen}
           options={{
+            gestureEnabled: false,
+            presentation: 'transparentModal',
             headerShown: false,
           }}
         />
@@ -100,6 +114,8 @@ export default function AppNavigation() {
           name="FAQScreen"
           component={FAQScreen}
           options={{
+            gestureEnabled: false,
+            presentation: 'transparentModal',
             headerShown: false,
           }}
         />
@@ -107,6 +123,8 @@ export default function AppNavigation() {
           name="HowItWorks"
           component={HowItWorksScreen}
           options={{
+            gestureEnabled: false,
+            presentation: 'transparentModal',
             headerShown: false,
           }}
         />
@@ -115,6 +133,8 @@ export default function AppNavigation() {
           name="CookProfile"
           component={CookProfileScreen}
           options={{
+            gestureEnabled: false,
+            presentation: 'transparentModal',
             headerShown: false,
           }}
         />
@@ -122,13 +142,17 @@ export default function AppNavigation() {
           name="CuisineDetails"
           component={CuisineDetails}
           options={{
+            gestureEnabled: false,
+            presentation: 'transparentModal',
             headerShown: false,
           }}
         />
         <Stack.Screen
-          name="BookNow"
-          component={BookingPage}
+          name="BookingPageScreen"
+          component={BookingPageScreen}
           options={{
+            gestureEnabled: false,
+            presentation: 'transparentModal',
             headerShown: false,
           }}
         />
@@ -136,6 +160,8 @@ export default function AppNavigation() {
           name="MyBookings"
           component={MyBookingsScreen}
           options={{
+            gestureEnabled: false,
+            presentation: 'transparentModal',
             headerShown: false,
           }}
         />
@@ -143,6 +169,8 @@ export default function AppNavigation() {
           name="CheckoutPageScreen"
           component={CheckoutPageScreen}
           options={{
+            gestureEnabled: false,
+            presentation: 'transparentModal',
             headerShown: false,
           }}
         />

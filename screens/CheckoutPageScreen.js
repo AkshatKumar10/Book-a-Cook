@@ -1,18 +1,12 @@
 import { useState, useContext } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Alert,
-  ScrollView,
-  StatusBar,
-} from 'react-native';
+import { View, Text, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Navbar from '../components/Navbar';
 import { ThemeContext } from '../context/ThemeContext';
+import { StatusBar } from 'expo-status-bar';
 
 export default function CheckoutPageScreen() {
   const [showWebView, setShowWebView] = useState(false);
@@ -196,10 +190,7 @@ export default function CheckoutPageScreen() {
   if (showWebView) {
     return (
       <SafeAreaView className={`flex-1 ${themeStyles.webViewContainer}`}>
-        <StatusBar
-          barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
-          backgroundColor={theme === 'dark' ? '#000000' : '#FFFFFF'}
-        />
+        <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
         <WebView
           originWhitelist={['*']}
           source={{ html: razorpayHTML }}
@@ -212,10 +203,7 @@ export default function CheckoutPageScreen() {
 
   return (
     <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
-      <StatusBar
-        barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
-        backgroundColor={theme === 'dark' ? '#000000' : '#FFFFFF'}
-      />
+      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
       <Navbar title="Checkout" onBackPress={() => navigation.goBack()} />
       <ScrollView className="px-4 py-6" showsVerticalScrollIndicator={false}>
         <Text className={`text-2xl font-bold ${themeStyles.textPrimary}`}>

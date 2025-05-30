@@ -1,11 +1,4 @@
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Alert,
-  TextInput,
-  StatusBar,
-} from 'react-native';
+import { View, Text, TouchableOpacity, Alert, TextInput } from 'react-native';
 import { useState, useContext } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -13,6 +6,7 @@ import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth } from '../firebase';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { ThemeContext } from '../context/ThemeContext';
+import { StatusBar } from 'expo-status-bar';
 
 export default function SignUpScreen() {
   const navigation = useNavigation();
@@ -73,10 +67,7 @@ export default function SignUpScreen() {
 
   return (
     <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
-      <StatusBar
-        barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
-        backgroundColor={theme === 'dark' ? '#000000' : '#4A3728'} // Matches bg-brown-100
-      />
+      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
       <View className={`flex-1 ${themeStyles.container}`}>
         <View className="px-16 mt-16">
           <Text className={`text-5xl mb-3 font-bold ${themeStyles.textAccent}`}>

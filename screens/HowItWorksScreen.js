@@ -1,17 +1,11 @@
-import {
-  View,
-  Text,
-  ScrollView,
-  Dimensions,
-  TouchableOpacity,
-  StatusBar,
-} from 'react-native';
+import { View, Text, ScrollView, Dimensions } from 'react-native';
 import { FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useContext } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 import Navbar from '../components/Navbar';
+import { StatusBar } from 'expo-status-bar';
 
 const steps = [
   {
@@ -89,10 +83,7 @@ const HowItWorksScreen = () => {
 
   return (
     <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
-      <StatusBar
-        barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
-        backgroundColor={theme === 'dark' ? '#000000' : '#FFFFFF'}
-      />
+      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
       <Navbar title="How It Works" onBackPress={() => navigation.goBack()} />
       <ScrollView
         contentContainerStyle={{ padding: width * 0.05, paddingBottom: 20 }}
