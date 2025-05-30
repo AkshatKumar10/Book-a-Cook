@@ -43,7 +43,14 @@ export default function BottomNavigation() {
         tabPress: (e) => {
           if (e.target.includes('BookNow')) {
             e.preventDefault();
-            navigation.navigate('BookNow', { pricing: allCooksPricing });
+            try {
+              navigation.navigate('BookingPageScreen', {
+                pricing: allCooksPricing || {},
+                isDiscounted: false,
+              });
+            } catch (error) {
+              console.error('Navigation error:', error);
+            }
           }
         },
       })}

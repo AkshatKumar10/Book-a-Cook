@@ -7,7 +7,6 @@ import {
   useWindowDimensions,
   Alert,
   BackHandler,
-  StatusBar,
   TextInput,
 } from 'react-native';
 import { useCallback, useState, useContext } from 'react';
@@ -21,6 +20,7 @@ import useCuisinesData from '../hooks/useCuisineData';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { ThemeContext } from '../context/ThemeContext';
 import { Skeleton, SkeletonGroup } from 'moti/skeleton';
+import { StatusBar } from 'expo-status-bar';
 
 export default function HomeScreen() {
   const { width, height } = useWindowDimensions();
@@ -88,10 +88,7 @@ export default function HomeScreen() {
         style={{ padding: 16 }}
       >
         <ScrollView showsVerticalScrollIndicator={false}>
-          <StatusBar
-            barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
-            backgroundColor={theme === 'dark' ? '#000000' : '#FFFFFF'}
-          />
+          <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
           <View className="flex-row items-center mb-4 gap-8">
             <Skeleton colorMode={theme} width={40} height={40} radius="round" />
             <Skeleton colorMode={theme} width={'60%'} height={30} />
@@ -198,10 +195,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
-      <StatusBar
-        barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
-        backgroundColor={theme === 'dark' ? '#000000' : '#FFFFFF'}
-      />
+      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
       <View className="flex-row items-center px-4 py-2">
         <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
           <FontAwesome
@@ -382,8 +376,8 @@ export default function HomeScreen() {
               </Text>
               <TouchableOpacity
                 onPress={() =>
-                  navigation.navigate('BookNow', {
-                    pricing: allCooksPricing,
+                  navigation.navigate('BookingPageScreen', {
+                    pricing: allCooksPricing || {},
                     isDiscounted: true,
                   })
                 }

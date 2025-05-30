@@ -6,7 +6,6 @@ import SignInScreen from '../screens/SignInScreen';
 import SignUpScreen from '../screens/SignUpScreen';
 import CookProfileScreen from '../screens/CookProfileScreen';
 import ProfileScreen from '../screens/ProfileScreen';
-import BookingPage from '../screens/BookingPageScreen';
 import MyBookingsScreen from '../screens/MyBookingsScreen';
 import HowItWorksScreen from '../screens/HowItWorksScreen';
 import EditProfileScreen from '../screens/EditProfileScreen';
@@ -18,6 +17,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../firebase';
 import { ActivityIndicator, View } from 'react-native';
 import { ThemeContext } from '../context/ThemeContext';
+import BookingPageScreen from '../screens/BookingPageScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -126,11 +126,9 @@ export default function AppNavigation() {
           }}
         />
         <Stack.Screen
-          name="BookNow"
-          component={BookingPage}
-          options={{
-            headerShown: false,
-          }}
+          name="BookingPageScreen"
+          component={BookingPageScreen}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="MyBookings"

@@ -7,7 +7,6 @@ import {
   ScrollView,
   Alert,
   Linking,
-  StatusBar,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Feather from '@expo/vector-icons/Feather';
@@ -23,17 +22,18 @@ import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import Navbar from '../components/Navbar';
 import { ThemeContext } from '../context/ThemeContext';
+import { StatusBar } from 'expo-status-bar';
 
 export default function BookingPageScreen() {
   const { params } = useRoute();
-  const { pricing, cuisine, isDiscounted = false } = params || {};
+  const { pricing = {}, cuisine, isDiscounted = false } = params || {};
   const navigation = useNavigation();
   const { theme } = useContext(ThemeContext);
 
   const validCuisine =
     cuisine && pricing?.[cuisine]
       ? cuisine
-      : Object.keys(pricing || {})[0] || 'North Indian';
+      : Object.keys(pricing)[0] || 'North Indian';
   const initialPricing = pricing?.[validCuisine] || {
     cook: 'Sanjay Kumar',
     price: 500,
@@ -276,10 +276,7 @@ export default function BookingPageScreen() {
 
   return (
     <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
-      <StatusBar
-        barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
-        backgroundColor={theme === 'dark' ? '#000000' : '#FFFFFF'}
-      />
+      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
       <Navbar title="Booking Page" />
       <ScrollView
         className="px-4 pb-6 pt-4"

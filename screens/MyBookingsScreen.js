@@ -6,7 +6,6 @@ import {
   ScrollView,
   Alert,
   Image,
-  StatusBar,
   BackHandler,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -20,6 +19,7 @@ import {
 } from '@react-navigation/native';
 import Navbar from '../components/Navbar';
 import { ThemeContext } from '../context/ThemeContext';
+import { StatusBar } from 'expo-status-bar';
 
 const MyBookingsScreen = () => {
   const navigation = useNavigation();
@@ -261,10 +261,7 @@ const MyBookingsScreen = () => {
 
   return (
     <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
-      <StatusBar
-        barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
-        backgroundColor={theme === 'dark' ? '#000000' : '#FFFFFF'}
-      />
+      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
       <Navbar title="Bookings" />
       <ScrollView showsVerticalScrollIndicator={false}>
         {bookings.length === 0 ? (

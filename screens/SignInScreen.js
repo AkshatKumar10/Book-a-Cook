@@ -4,9 +4,9 @@ import {
   TouchableOpacity,
   Alert,
   TextInput,
-  StatusBar,
+  BackHandler,
 } from 'react-native';
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -17,6 +17,7 @@ import {
 } from 'firebase/auth';
 import { auth } from '../firebase';
 import { ThemeContext } from '../context/ThemeContext';
+import { StatusBar } from 'expo-status-bar';
 
 export default function LoginScreen() {
   const navigation = useNavigation();
@@ -37,6 +38,16 @@ export default function LoginScreen() {
     inputText: theme === 'dark' ? 'text-white' : 'text-gray-700',
     inputPlaceholder: theme === 'dark' ? '#9ca3af' : '#6b7280', // gray-400/gray-500
   };
+
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        return true;
+      },
+    );
+    return () => backHandler.remove();
+  }, []);
 
   const handleSubmit = async () => {
     if (!email || !password) {
@@ -100,10 +111,7 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
-      <StatusBar
-        barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
-        backgroundColor={theme === 'dark' ? '#000000' : '#4A3728'} // Matches bg-brown-100
-      />
+      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
       <View className={`flex-1 ${themeStyles.container}`}>
         <View className="px-16 mt-16">
           <Text className={`text-5xl mb-3 font-bold ${themeStyles.textAccent}`}>

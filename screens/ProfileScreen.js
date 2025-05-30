@@ -1,11 +1,4 @@
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  Alert,
-  StatusBar,
-} from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import {
   FontAwesome5,
   MaterialIcons,
@@ -21,6 +14,7 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Navbar from '../components/Navbar';
 import { useContext } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
+import { StatusBar } from 'expo-status-bar';
 
 const ProfileScreen = ({ route }) => {
   const navigation = useNavigation();
@@ -54,10 +48,7 @@ const ProfileScreen = ({ route }) => {
 
   return (
     <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
-      <StatusBar
-        barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
-        backgroundColor={theme === 'dark' ? '#000000' : '#FFFFFF'}
-      />
+      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
       <Navbar title="Profile" />
       <View className="flex items-center mt-10">
         <FontAwesome
