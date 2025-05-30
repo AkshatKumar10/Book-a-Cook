@@ -26,7 +26,7 @@ import { StatusBar } from 'expo-status-bar';
 
 export default function BookingPageScreen() {
   const { params } = useRoute();
-  const { pricing = {}, cuisine, isDiscounted = false } = params || {};
+  const { pricing = {}, cuisine = {}, isDiscounted = false } = params || {};
   const navigation = useNavigation();
   const { theme } = useContext(ThemeContext);
 

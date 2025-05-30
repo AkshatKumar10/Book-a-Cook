@@ -13,6 +13,7 @@ import Navbar from '../components/Navbar';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { ThemeContext } from '../context/ThemeContext';
 import { StatusBar } from 'expo-status-bar';
+import { Skeleton } from 'moti/skeleton';
 
 export default function CuisineDetails() {
   const { width, height } = useWindowDimensions();
@@ -20,6 +21,10 @@ export default function CuisineDetails() {
   const { cuisine, cooks } = route.params;
   const { theme } = useContext(ThemeContext);
   const [searchQuery, setSearchQuery] = useState('');
+  const [imageLoadedState, setImageLoadedState] = useState({});
+  const handleImageLoad = (id) => {
+    setImageLoadedState((prev) => ({ ...prev, [id]: true }));
+  };
 
   const themeStyles = {
     container: theme === 'dark' ? 'bg-black' : 'bg-white',
@@ -67,6 +72,7 @@ export default function CuisineDetails() {
       <ScrollView
         className="flex-1 px-6"
         contentContainerStyle={{ paddingBottom: 20 }}
+        showsVerticalScrollIndicator={false}
       >
         <View className="flex-row flex-wrap justify-between">
           {filteredSpecialties.length > 0 ? (
@@ -76,15 +82,32 @@ export default function CuisineDetails() {
                 className="rounded-xl mb-8"
                 style={{ width: width * 0.435 }}
               >
-                <Image
-                  source={{ uri: specialty.image }}
+                <View
                   style={{
                     width: '100%',
                     height: height * 0.2,
                     borderRadius: width * 0.02,
+                    overflow: 'hidden',
                   }}
-                  resizeMode="cover"
-                />
+                >
+                  {!imageLoadedState[specialty.id] && (
+                    <Skeleton
+                      colorMode={theme}
+                      width="100%"
+                      height="100%"
+                      radius={10}
+                    />
+                  )}
+                  <Image
+                    source={{ uri: specialty.image }}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                    }}
+                    resizeMode="cover"
+                    onLoad={() => handleImageLoad(specialty.id)}
+                  />
+                </View>
                 <Text
                   className={`font-semibold text-lg mt-2 ${themeStyles.textPrimary}`}
                 >
