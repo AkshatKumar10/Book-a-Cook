@@ -18,15 +18,17 @@ import {
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
-import MapView, { Marker } from 'react-native-maps';
-import * as Location from 'expo-location';
 import Navbar from '../components/Navbar';
 import { ThemeContext } from '../context/ThemeContext';
 import { StatusBar } from 'expo-status-bar';
 
 export default function BookingPageScreen() {
   const { params } = useRoute();
-  const { pricing = {}, cuisine = {}, isDiscounted = false } = params || {};
+  const {
+    pricing = {},
+    cuisine = 'North Indian',
+    isDiscounted = false,
+  } = params || {};
   const navigation = useNavigation();
   const { theme } = useContext(ThemeContext);
 
@@ -43,7 +45,6 @@ export default function BookingPageScreen() {
 
   const [mealType, setMealType] = useState(null);
   const [guestCount, setGuestCount] = useState(2);
-  const [address, setAddress] = useState('Select Address');
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
   const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
@@ -55,13 +56,6 @@ export default function BookingPageScreen() {
   );
   const [cookRating, setCookRating] = useState(initialPricing.rating);
   const [cookImage, setCookImage] = useState(initialPricing.image);
-  const [region, setRegion] = useState({
-    latitude: 12.9716,
-    longitude: 77.5946,
-    latitudeDelta: 0.05,
-    longitudeDelta: 0.05,
-  });
-  const [marker, setMarker] = useState(null);
 
   const themeStyles = {
     container: theme === 'dark' ? 'bg-black' : 'bg-white',
@@ -86,7 +80,6 @@ export default function BookingPageScreen() {
   useFocusEffect(
     React.useCallback(() => {
       setGuestCount(2);
-      setAddress('Select Address');
       setSelectedDate('');
       setSelectedTime('');
       setSelectedCuisine(validCuisine);
@@ -96,60 +89,11 @@ export default function BookingPageScreen() {
       );
       setCookRating(initialPricing.rating);
       setCookImage(initialPricing.image);
-      setRegion({
-        latitude: 12.9716,
-        longitude: 77.5946,
-        latitudeDelta: 0.05,
-        longitudeDelta: 0.05,
-      });
-      setMarker(null);
       setTimePickerVisibility(false);
       setDatePickerVisibility(false);
       setMealType(null);
     }, []),
-  ),
-    useEffect(() => {
-      (async () => {
-        let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-          Alert.alert(
-            'Permission Denied',
-            'Location permission is required to select an address.',
-          );
-          return;
-        }
-
-        let location = await Location.getCurrentPositionAsync({});
-        setRegion({
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05,
-        });
-      })();
-    }, []);
-
-  const handleMapPress = async (event) => {
-    const { latitude, longitude } = event.nativeEvent.coordinate;
-    setMarker({ latitude, longitude });
-
-    try {
-      const location = await Location.reverseGeocodeAsync({
-        latitude,
-        longitude,
-      });
-      if (location.length > 0) {
-        const { street, city, region, postalCode, country } = location[0];
-        const formattedAddress = `${street || ''}, ${city || ''}, ${region || ''}, ${postalCode || ''}, ${country || ''}`;
-        setAddress(formattedAddress);
-      } else {
-        setAddress('Address not found');
-      }
-    } catch (error) {
-      console.error('Error fetching address:', error);
-      setAddress('Unable to fetch address');
-    }
-  };
+  );
 
   const handleCuisineChange = (itemValue) => {
     setSelectedCuisine(itemValue);
@@ -185,7 +129,6 @@ export default function BookingPageScreen() {
     if (
       !mealType ||
       !guestCount ||
-      address === 'Select Address' ||
       !selectedDate ||
       !selectedTime ||
       !selectedCuisine ||
@@ -200,7 +143,6 @@ export default function BookingPageScreen() {
     navigation.navigate('CheckoutPageScreen', {
       mealType,
       guestCount,
-      address,
       selectedDate,
       selectedTime,
       selectedCuisine,
@@ -282,47 +224,6 @@ export default function BookingPageScreen() {
         className="px-4 pb-6 pt-4"
         showsVerticalScrollIndicator={false}
       >
-        <View className="mb-6">
-          <Text className={`text-lg font-medium ${themeStyles.textPrimary}`}>
-            Select Address:
-          </Text>
-          <Text className={`text-sm ${themeStyles.textHint} mb-2`}>
-            Tap on the map to select your address
-          </Text>
-          <View
-            className={`border ${themeStyles.borderColor} rounded-lg mb-2`}
-            style={{ height: 400, width: '100%' }}
-          >
-            <MapView
-              style={{ flex: 1 }}
-              region={region}
-              onPress={handleMapPress}
-              showsUserLocation={true}
-            >
-              {marker && (
-                <Marker
-                  coordinate={marker}
-                  title="Selected Location"
-                  description={address}
-                />
-              )}
-            </MapView>
-          </View>
-          <View
-            className={`mt-2 p-3 border ${themeStyles.borderColor} rounded-md flex-row items-center`}
-          >
-            <Feather
-              name="map-pin"
-              size={18}
-              color={themeStyles.iconColor}
-              className="mr-2"
-            />
-            <Text className={`text-base ${themeStyles.textSecondary} flex-1`}>
-              {address}
-            </Text>
-          </View>
-        </View>
-
         <View className="mb-6">
           <Text
             className={`text-lg font-medium mb-2 ${themeStyles.textPrimary}`}

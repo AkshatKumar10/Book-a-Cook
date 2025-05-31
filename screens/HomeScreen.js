@@ -21,6 +21,7 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { ThemeContext } from '../context/ThemeContext';
 import { Skeleton } from 'moti/skeleton';
 import { StatusBar } from 'expo-status-bar';
+import Feather from '@expo/vector-icons/Feather';
 
 export default function HomeScreen() {
   const { width, height } = useWindowDimensions();
@@ -200,7 +201,7 @@ export default function HomeScreen() {
   return (
     <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
       <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
-      <View className="flex-row items-center px-4 py-2">
+      <View className="flex-row items-center px-4 py-2 justify-between">
         <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
           <FontAwesome
             name="user-circle"
@@ -209,11 +210,16 @@ export default function HomeScreen() {
           />
         </TouchableOpacity>
         <Text
-          className={`font-bold ${themeStyles.textAccent} text-center text-3xl pl-6`}
+          className={`font-bold ${themeStyles.textAccent} text-center text-3xl`}
         >
           BookAChef
         </Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Notifications')}>
+        <TouchableOpacity onPress={() => navigation.navigate('Bookmark')}>
+          <Feather
+            name="bookmark"
+            size={25}
+            color={themeStyles.bookmarkColor}
+          />
           {/* <Icon name="bell" size={width * 0.06} color={themeStyles.iconColor} /> */}
         </TouchableOpacity>
       </View>
