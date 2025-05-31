@@ -13,6 +13,7 @@ import Navbar from '../components/Navbar';
 import useCooksData from '../hooks/useCooksData';
 import { ThemeContext } from '../context/ThemeContext';
 import { StatusBar } from 'expo-status-bar';
+import { useBookmark } from '../context/BookmarkContext';
 
 const CookProfileScreen = () => {
   const { params: { cook } = {} } = useRoute();
@@ -20,6 +21,7 @@ const CookProfileScreen = () => {
   const { width } = useWindowDimensions();
   const { cooksData } = useCooksData();
   const { theme } = useContext(ThemeContext);
+  const { isBookmarked } = useBookmark();
 
   const themeStyles = {
     container: theme === 'dark' ? 'bg-black' : 'bg-white',
@@ -57,7 +59,12 @@ const CookProfileScreen = () => {
   return (
     <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
       <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
-      <Navbar title="Chef Profile" />
+      <Navbar
+        title="Chef Profile"
+        showBookmark={true}
+        cook={cook}
+        isBookmarked={isBookmarked(cook.id)}
+      />
       <ScrollView contentContainerStyle={{ paddingBottom: 10 }}>
         <View className="items-center mt-4">
           <Image

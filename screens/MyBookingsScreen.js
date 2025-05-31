@@ -111,6 +111,33 @@ const MyBookingsScreen = () => {
     );
   };
 
+  const handleDeleteBooking = (id) => {
+    Alert.alert(
+      'Delete Booking',
+      'Are you sure you want to delete this past booking?',
+      [
+        { text: 'Cancel' },
+        {
+          text: 'OK',
+          onPress: async () => {
+            try {
+              const updatedBookings = bookings.filter(
+                (booking) => booking.id !== id,
+              );
+              setBookings(updatedBookings);
+              await AsyncStorage.setItem(
+                'bookings',
+                JSON.stringify(updatedBookings),
+              );
+            } catch (error) {
+              console.error('Error deleting booking:', error);
+            }
+          },
+        },
+      ],
+    );
+  };
+
   const handleModifyBooking = (booking) => {
     setSelectedBooking(booking);
     setNewDate(booking.date);
@@ -241,7 +268,7 @@ const MyBookingsScreen = () => {
           </View>
         </View>
       </View>
-      {booking.status === 'upcoming' && (
+      {booking.status === 'upcoming' ? (
         <View className="flex-row justify-between items-center mt-4">
           <Text className={`text-xl ${themeStyles.textPrimary}`}>
             Cancel Booking
@@ -252,6 +279,20 @@ const MyBookingsScreen = () => {
           >
             <Text className={`text-base font-medium ${themeStyles.buttonText}`}>
               Cancel
+            </Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <View className="flex-row justify-between items-center mt-4">
+          <Text className={`text-xl ${themeStyles.textPrimary}`}>
+            Delete Booking
+          </Text>
+          <TouchableOpacity
+            className={`${themeStyles.buttonBg} rounded-full px-6 py-2`}
+            onPress={() => handleDeleteBooking(booking.id)}
+          >
+            <Text className={`text-base font-medium ${themeStyles.buttonText}`}>
+              Delete
             </Text>
           </TouchableOpacity>
         </View>

@@ -18,6 +18,7 @@ import { auth } from '../firebase';
 import { ActivityIndicator, View } from 'react-native';
 import { ThemeContext } from '../context/ThemeContext';
 import BookingPageScreen from '../screens/BookingPageScreen';
+import BookmarkScreen from '../screens/BookmarkScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -60,8 +61,6 @@ export default function AppNavigation() {
           name="Welcome"
           component={WelcomeScreen}
           options={{
-            gestureEnabled: false,
-            presentation: 'transparentModal',
             headerShown: false,
           }}
         />
@@ -69,8 +68,6 @@ export default function AppNavigation() {
           name="SignIn"
           component={SignInScreen}
           options={{
-            gestureEnabled: false,
-            presentation: 'transparentModal',
             headerShown: false,
           }}
         />
@@ -78,8 +75,6 @@ export default function AppNavigation() {
           name="SignUp"
           component={SignUpScreen}
           options={{
-            gestureEnabled: false,
-            presentation: 'transparentModal',
             headerShown: false,
           }}
         />
@@ -87,8 +82,6 @@ export default function AppNavigation() {
           name="HomeTabs"
           component={BottomNavigation}
           options={{
-            gestureEnabled: false,
-            presentation: 'transparentModal',
             headerShown: false,
           }}
         />
@@ -96,8 +89,6 @@ export default function AppNavigation() {
           name="Profile"
           component={ProfileScreen}
           options={{
-            gestureEnabled: false,
-            presentation: 'transparentModal',
             headerShown: false,
           }}
         />
@@ -105,8 +96,6 @@ export default function AppNavigation() {
           name="EditProfileScreen"
           component={EditProfileScreen}
           options={{
-            gestureEnabled: false,
-            presentation: 'transparentModal',
             headerShown: false,
           }}
         />
@@ -114,8 +103,6 @@ export default function AppNavigation() {
           name="FAQScreen"
           component={FAQScreen}
           options={{
-            gestureEnabled: false,
-            presentation: 'transparentModal',
             headerShown: false,
           }}
         />
@@ -123,8 +110,6 @@ export default function AppNavigation() {
           name="HowItWorks"
           component={HowItWorksScreen}
           options={{
-            gestureEnabled: false,
-            presentation: 'transparentModal',
             headerShown: false,
           }}
         />
@@ -133,8 +118,6 @@ export default function AppNavigation() {
           name="CookProfile"
           component={CookProfileScreen}
           options={{
-            gestureEnabled: false,
-            presentation: 'transparentModal',
             headerShown: false,
           }}
         />
@@ -142,8 +125,6 @@ export default function AppNavigation() {
           name="CuisineDetails"
           component={CuisineDetails}
           options={{
-            gestureEnabled: false,
-            presentation: 'transparentModal',
             headerShown: false,
           }}
         />
@@ -151,8 +132,6 @@ export default function AppNavigation() {
           name="BookingPageScreen"
           component={BookingPageScreen}
           options={{
-            gestureEnabled: false,
-            presentation: 'transparentModal',
             headerShown: false,
           }}
         />
@@ -160,8 +139,6 @@ export default function AppNavigation() {
           name="MyBookings"
           component={MyBookingsScreen}
           options={{
-            gestureEnabled: false,
-            presentation: 'transparentModal',
             headerShown: false,
           }}
         />
@@ -169,8 +146,13 @@ export default function AppNavigation() {
           name="CheckoutPageScreen"
           component={CheckoutPageScreen}
           options={{
-            gestureEnabled: false,
-            presentation: 'transparentModal',
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="Bookmark"
+          component={BookmarkScreen}
+          options={{
             headerShown: false,
           }}
         />

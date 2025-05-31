@@ -24,7 +24,7 @@ export default function CheckoutPageScreen() {
     totalAmount,
     cookRating,
     cookImage,
-    address,
+    // address,
     isDiscounted = false,
   } = params || {};
 
@@ -280,14 +280,14 @@ export default function CheckoutPageScreen() {
           </Text>
         </View>
 
-        <View className="mt-6">
+        {/* <View className="mt-6">
           <Text className={`text-xl ${themeStyles.textPrimary}`}>Address</Text>
           <View>
             <Text className={`text-lg ${themeStyles.textAccent}`}>
               {address}
             </Text>
           </View>
-        </View>
+        </View> */}
 
         <Text className={`text-2xl font-bold mt-12 ${themeStyles.textPrimary}`}>
           Payment Details
