@@ -8,6 +8,7 @@ import {
   Alert,
   BackHandler,
   TextInput,
+  Modal,
 } from 'react-native';
 import { useCallback, useState, useContext } from 'react';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -31,6 +32,11 @@ export default function HomeScreen() {
   const { theme } = useContext(ThemeContext);
   const [searchQuery, setSearchQuery] = useState('');
   const [imageLoadedState, setImageLoadedState] = useState({});
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
+  const [selectedCuisine, setSelectedCuisine] = useState('');
+  const [ratingRange, setRatingRange] = useState([0, 5]);
+  const [tempSelectedCuisine, setTempSelectedCuisine] = useState('');
+  const [tempRatingRange, setTempRatingRange] = useState([0, 5]);
   const handleImageLoad = (id) => {
     setImageLoadedState((prev) => ({ ...prev, [id]: true }));
   };
@@ -51,6 +57,8 @@ export default function HomeScreen() {
     loadingColor: theme === 'dark' ? '#60a5fa' : '#38bdf8',
     empty: theme === 'dark' ? '#ffffff' : '#000000',
     bookmarkColor: theme === 'dark' ? '#FFD700' : '#000000',
+    modalBg: theme === 'dark' ? 'bg-gray-900' : 'bg-white',
+    selected: theme === 'dark' ? 'bg-gray-700' : 'bg-gray-400',
   };
 
   useFocusEffect(
@@ -77,15 +85,51 @@ export default function HomeScreen() {
     }, []),
   );
 
-  const filteredCooks = cooksData.filter(
-    (cook) =>
-      cook.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      cook.cuisine.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  const openModal = () => {
+    setTempSelectedCuisine(selectedCuisine);
+    setTempRatingRange(ratingRange);
+    setFilterModalVisible(true);
+  };
 
-  const filteredCuisines = cuisines.filter((cuisine) =>
-    cuisine.cuisine.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  const applyFilters = () => {
+    setSelectedCuisine(tempSelectedCuisine);
+    setRatingRange(tempRatingRange);
+    setFilterModalVisible(false);
+  };
+
+  const resetFilters = () => {
+    setSelectedCuisine('');
+    setRatingRange([0, 5]);
+    setTempSelectedCuisine('');
+    setTempRatingRange([0, 5]);
+    setFilterModalVisible(false);
+  };
+
+  const filteredCooks = cooksData.filter((cook) => {
+    const matchesSearch =
+      cook.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      cook.cuisine.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCuisine = selectedCuisine
+      ? cook.cuisine === selectedCuisine
+      : true;
+    const matchesRating =
+      cook.rating >= ratingRange[0] && cook.rating <= ratingRange[1];
+    return matchesSearch && matchesCuisine && matchesRating;
+  });
+
+  const filteredCuisines = cuisines.filter((cuisine) => {
+    const matchesSearch = cuisine.cuisine
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    const matchesCuisine = selectedCuisine
+      ? cuisine.cuisine === selectedCuisine
+      : true;
+    return matchesSearch && matchesCuisine;
+  });
+
+  const uniqueCuisines = [
+    ...new Set(cuisines.map((cuisine) => cuisine.cuisine)),
+  ].sort();
 
   if (loading || cuisinesLoading) {
     return (
@@ -221,12 +265,11 @@ export default function HomeScreen() {
             size={25}
             color={themeStyles.bookmarkColor}
           />
-          {/* <Icon name="bell" size={width * 0.06} color={themeStyles.iconColor} /> */}
         </TouchableOpacity>
       </View>
-      <View className="px-4 py-2">
+      <View className="px-4 py-2 flex-row items-center">
         <View
-          className={`flex-row items-center px-3 ${themeStyles.searchBg} rounded-full`}
+          className={`flex-1 flex-row items-center px-3 ${themeStyles.searchBg} rounded-full`}
         >
           <AntDesign
             name="search1"
@@ -243,7 +286,149 @@ export default function HomeScreen() {
             selectionColor={themeStyles.searchIconColor}
           />
         </View>
+        <TouchableOpacity
+          onPress={openModal}
+          className={`ml-2 p-3 rounded-full ${themeStyles.buttonBg}`}
+        >
+          <Feather name="filter" size={20} color={themeStyles.iconColor} />
+        </TouchableOpacity>
       </View>
+      <Modal
+        visible={filterModalVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setFilterModalVisible(false)}
+      >
+        <View
+          className="flex-1 justify-end"
+          style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+        >
+          <View
+            className={`rounded-t-2xl p-6 ${themeStyles.modalBg}`}
+            style={{ maxHeight: height * 0.9 }}
+          >
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingBottom: 16 }}
+            >
+              <View className="flex-row justify-between items-center mb-4">
+                <Text
+                  className={`text-2xl font-bold ${themeStyles.textPrimary}`}
+                >
+                  Filters
+                </Text>
+                <TouchableOpacity onPress={() => setFilterModalVisible(false)}>
+                  <AntDesign
+                    name="close"
+                    size={24}
+                    color={themeStyles.iconColor}
+                  />
+                </TouchableOpacity>
+              </View>
+              <View className="mb-6">
+                <Text
+                  className={`text-lg font-semibold mb-3 ${themeStyles.textPrimary}`}
+                >
+                  Cuisine
+                </Text>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    flexWrap: 'wrap',
+                    gap: 10,
+                  }}
+                >
+                  <TouchableOpacity
+                    onPress={() => setTempSelectedCuisine('')}
+                    className={`px-4 py-2 rounded-full ${
+                      tempSelectedCuisine === ''
+                        ? themeStyles.selected
+                        : themeStyles.searchBg
+                    }`}
+                  >
+                    <Text
+                      className={`text-sm font-medium ${
+                        tempSelectedCuisine === ''
+                          ? themeStyles.buttonText
+                          : themeStyles.searchText
+                      }`}
+                    >
+                      All
+                    </Text>
+                  </TouchableOpacity>
+                  {uniqueCuisines.map((cuisine) => (
+                    <TouchableOpacity
+                      key={cuisine}
+                      onPress={() => setTempSelectedCuisine(cuisine)}
+                      className={`px-4 py-2 rounded-full ${
+                        tempSelectedCuisine === cuisine
+                          ? themeStyles.selected
+                          : themeStyles.searchBg
+                      }`}
+                    >
+                      <Text
+                        className={`text-sm font-medium ${
+                          tempSelectedCuisine === cuisine
+                            ? themeStyles.buttonText
+                            : themeStyles.searchText
+                        }`}
+                      >
+                        {cuisine}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+              <Text
+                className={`text-lg font-semibold mb-3 ${themeStyles.textPrimary}`}
+              >
+                Minimum Rating: {tempRatingRange[1].toFixed(1)}
+              </Text>
+              <View className="flex-row justify-between mb-4">
+                {[1, 2, 3, 4, 5].map((rating) => (
+                  <TouchableOpacity
+                    key={rating}
+                    onPress={() => setTempRatingRange([0, rating])}
+                    className={`px-4 py-2 rounded-full ${
+                      tempRatingRange[1] === rating
+                        ? themeStyles.selected
+                        : themeStyles.searchBg
+                    }`}
+                  >
+                    <Text
+                      className={`text-sm font-medium ${
+                        tempRatingRange[1] === rating
+                          ? themeStyles.buttonText
+                          : themeStyles.searchText
+                      }`}
+                    >
+                      {rating} ★
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <View className="flex-row justify-between mt-8">
+                <TouchableOpacity
+                  onPress={resetFilters}
+                  className={`flex-1 mr-3 py-3 rounded-full items-center ${themeStyles.searchBg}`}
+                >
+                  <Text className={`font-semibold ${themeStyles.searchText}`}>
+                    Reset
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={applyFilters}
+                  className={`flex-1 ml-3 py-3 rounded-full items-center ${themeStyles.buttonBg}`}
+                >
+                  <Text className={`font-semibold ${themeStyles.buttonText}`}>
+                    Apply
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
       <ScrollView
         className="flex-1 px-2"
         contentContainerStyle={{ paddingBottom: 10 }}
@@ -254,13 +439,13 @@ export default function HomeScreen() {
           >
             Recommended Chefs
           </Text>
-          {filteredCooks.length === 0 && searchQuery ? (
+          {filteredCooks.length === 0 ? (
             <View className="items-center justify-center mt-4">
               <AntDesign name="frown" size={80} color={themeStyles.empty} />
               <Text
                 className={`ml-2 text-center mt-2 ${themeStyles.textNoResults} text-xl`}
               >
-                No chefs found for "{searchQuery}"
+                No chefs found
               </Text>
             </View>
           ) : (
@@ -325,13 +510,13 @@ export default function HomeScreen() {
           >
             Popular Cuisines
           </Text>
-          {filteredCuisines.length === 0 && searchQuery ? (
+          {filteredCuisines.length === 0 ? (
             <View className="items-center justify-center mt-4">
               <AntDesign name="frown" size={80} color={themeStyles.empty} />
               <Text
                 className={`ml-2 text-center mt-2 ${themeStyles.textNoResults} text-xl`}
               >
-                No cuisines found for "{searchQuery}"
+                No cuisines found
               </Text>
             </View>
           ) : (
