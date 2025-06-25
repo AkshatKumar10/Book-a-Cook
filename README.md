@@ -17,14 +17,14 @@
 - 🔍 **Search Functionality**  
   Search for cooks or cuisines easily from the home screen.
 
-- 🗺️ **Map Integration for Address Selection**  
-  Use an interactive map to pick your booking address with ease and accuracy.
-
 - 📅 **Smart Booking Flow**  
-  Book a cook by selecting address, guest count, date, time, and cuisine. Auto-calculate total pricing based on your inputs.
+  Book a cook by selecting cuisine, guest count, date and time. Auto-calculate total pricing based on your inputs.
 
-- 💳 **Razorpay Payment Integration**  
+- 💳 **Razorpay Payment Integration**   
   Seamless and secure payments using Razorpay. Confirm bookings after successful transactions.
+
+- 🔔 **Notification on Successful Booking**\
+  Instantly receive a local notification confirming your booking along with cook and event details.
 
 - 📂 **Bookings Management**  
   View Upcoming and Past bookings. Keep track of when a cook is arriving and past events.
