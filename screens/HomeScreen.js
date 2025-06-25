@@ -50,7 +50,7 @@ export default function HomeScreen() {
     buttonText: theme === 'dark' ? 'text-white' : 'text-black',
     loadingColor: theme === 'dark' ? '#60a5fa' : '#38bdf8',
     empty: theme === 'dark' ? '#ffffff' : '#000000',
-    bookmarkColor:theme === 'dark' ? '#FFD700':'#000000',
+    bookmarkColor: theme === 'dark' ? '#FFD700' : '#000000',
   };
 
   useFocusEffect(

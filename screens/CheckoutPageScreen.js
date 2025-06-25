@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { View, Text, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
@@ -7,6 +7,16 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Navbar from '../components/Navbar';
 import { ThemeContext } from '../context/ThemeContext';
 import { StatusBar } from 'expo-status-bar';
+import * as Notifications from 'expo-notifications';
+import * as Device from 'expo-device';
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowBanner: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
 
 export default function CheckoutPageScreen() {
   const [showWebView, setShowWebView] = useState(false);
@@ -41,6 +51,20 @@ export default function CheckoutPageScreen() {
     webViewBg: theme === 'dark' ? '#1F2937' : '#F2F2F2',
     webViewText: theme === 'dark' ? '#D1D5DB' : '#333333',
   };
+
+  useEffect(() => {
+    const requestPermissions = async () => {
+      if (Device.isDevice) {
+        const { status } = await Notifications.requestPermissionsAsync();
+        if (status !== 'granted') {
+          console.warn('Notification permissions not granted!');
+        }
+      } else {
+        console.warn('Use physical device for notifications.');
+      }
+    };
+    requestPermissions();
+  }, []);
 
   const originalAmount = isDiscounted ? totalAmount / 0.9 : totalAmount;
   const discountAmount = isDiscounted ? originalAmount * 0.1 : 0;
@@ -77,6 +101,24 @@ export default function CheckoutPageScreen() {
 
   const formattedDateTime = formatDateTime(selectedDate, selectedTime);
 
+  const scheduleBookingNotification = async () => {
+    try {
+      const time = new Date(Date.now() + 10 * 1000);
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: 'Booking Confirmed!',
+          body: `Your ${mealType} booking with Chef ${cookName} for ${guestCount} guests on ${formattedDateTime} is confirmed.`,
+        },
+        trigger: {
+          type: 'date',
+          date: time,
+        },
+      });
+    } catch (e) {
+      console.error('Failed to schedule notification', e);
+    }
+  };
+
   const saveBooking = async () => {
     try {
       const newBooking = {
@@ -100,6 +142,7 @@ export default function CheckoutPageScreen() {
       const bookings = existingBookings ? JSON.parse(existingBookings) : [];
       bookings.push(newBooking);
       await AsyncStorage.setItem('bookings', JSON.stringify(bookings));
+      await scheduleBookingNotification();
       navigation.reset({
         index: 1,
         routes: [
