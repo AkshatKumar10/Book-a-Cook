@@ -9,6 +9,7 @@ import { ThemeContext } from '../context/ThemeContext';
 import { StatusBar } from 'expo-status-bar';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
+import { RAZORPAY_KEY_ID } from '@env';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -166,7 +167,7 @@ export default function CheckoutPageScreen() {
         <script>
           window.onload = function() {
             var options = {
-              key: "rzp_test_t86tDGCZODCoNY",
+              key: "${RAZORPAY_KEY_ID}",
               amount: ${finalAmount * 100},
               currency: "INR",
               name: "BookACook",
