@@ -271,8 +271,8 @@ export default function HomeScreen() {
         <View
           className={`flex-1 flex-row items-center px-3 ${themeStyles.searchBg} rounded-full`}
         >
-          <AntDesign
-            name="search1"
+          <Feather
+            name="search"
             size={20}
             color={themeStyles.searchIconColor}
           />

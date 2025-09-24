@@ -144,7 +144,7 @@ const ProfileScreen = ({ route }) => {
             className={`w-8 h-8 items-center justify-center ${themeStyles.buttonBg} rounded-full mr-4`}
           >
             <AntDesign
-              name="infocirlce"
+              name="info-circle"
               size={20}
               color={themeStyles.iconColor}
             />

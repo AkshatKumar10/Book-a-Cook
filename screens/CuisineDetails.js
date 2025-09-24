@@ -10,7 +10,7 @@ import {
 import { useRoute } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Navbar from '../components/Navbar';
-import AntDesign from '@expo/vector-icons/AntDesign';
+import Feather from '@expo/vector-icons/Feather';
 import { ThemeContext } from '../context/ThemeContext';
 import { StatusBar } from 'expo-status-bar';
 import { Skeleton } from 'moti/skeleton';
@@ -53,8 +53,8 @@ export default function CuisineDetails() {
         <View
           className={`flex-row items-center ${themeStyles.searchBg} ${themeStyles.searchBorder} rounded-lg px-3`}
         >
-          <AntDesign
-            name="search1"
+          <Feather
+            name="search"
             size={20}
             color={themeStyles.searchIconColor}
           />
