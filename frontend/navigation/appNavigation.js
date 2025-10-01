@@ -2,8 +2,6 @@ import { useContext, useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import WelcomeScreen from '../screens/WelcomeScreen';
-import SignInScreen from '../screens/SignInScreen';
-import SignUpScreen from '../screens/SignUpScreen';
 import CookProfileScreen from '../screens/CookProfileScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import MyBookingsScreen from '../screens/MyBookingsScreen';
@@ -13,12 +11,17 @@ import FAQScreen from '../screens/FAQScreen';
 import BottomNavigation from './bottomNavigation';
 import CuisineDetails from '../screens/CuisineDetails';
 import CheckoutPageScreen from '../screens/CheckoutPageScreen';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../firebase';
 import { ActivityIndicator, View } from 'react-native';
 import { ThemeContext } from '../context/ThemeContext';
 import BookingPageScreen from '../screens/BookingPageScreen';
 import BookmarkScreen from '../screens/BookmarkScreen';
+import UserSignInScreen from '../screens/UserSignInScreen';
+import UserSignUpScreen from '../screens/UserSignUpScreen';
+import CookSignInScreen from '../screens/CookSignInScreen';
+import CookSignUpScreen from '../screens/CookSignUpScreen';
+import { getUserToken, getCookToken } from '../utils/api.js';
+import CookDashboardScreen from '../screens/CookDashboardScreen.js';
+import CuisineChefsScreen from '../screens/CuisineChefsScreen.js';
 
 const Stack = createNativeStackNavigator();
 
@@ -33,15 +36,19 @@ export default function AppNavigation() {
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
+    const checkAuth = async () => {
+      const userToken = await getUserToken();
+      const cookToken = await getCookToken();
+      if (userToken) {
         setInitialRoute('HomeTabs');
+      } else if (cookToken) {
+        setInitialRoute('CookDashboard');
       } else {
         setInitialRoute('Welcome');
       }
       setLoading(false);
-    });
-    return () => unsubscribe();
+    };
+    checkAuth();
   }, []);
 
   if (loading) {
@@ -65,15 +72,43 @@ export default function AppNavigation() {
           }}
         />
         <Stack.Screen
-          name="SignIn"
-          component={SignInScreen}
+          name="UserSignIn"
+          component={UserSignInScreen}
           options={{
             headerShown: false,
           }}
         />
         <Stack.Screen
-          name="SignUp"
-          component={SignUpScreen}
+          name="UserSignUp"
+          component={UserSignUpScreen}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="CookSignIn"
+          component={CookSignInScreen}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="CuisineChefs"
+          component={CuisineChefsScreen}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="CookSignUp"
+          component={CookSignUpScreen}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="CookDashboard"
+          component={CookDashboardScreen}
           options={{
             headerShown: false,
           }}

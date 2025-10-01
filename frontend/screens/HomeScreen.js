@@ -10,36 +10,35 @@ import {
   TextInput,
   Modal,
 } from 'react-native';
-import { useCallback, useState, useContext } from 'react';
+import { useCallback, useState, useContext, useEffect } from 'react';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons } from '@expo/vector-icons';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import useCooksData from '../hooks/useCooksData';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import useCuisinesData from '../hooks/useCuisineData';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { ThemeContext } from '../context/ThemeContext';
 import { Skeleton } from 'moti/skeleton';
 import { StatusBar } from 'expo-status-bar';
 import Feather from '@expo/vector-icons/Feather';
+import useCooksData from '../hooks/useCooksData';
+import { useUser } from '../hooks/useUser';
 
 export default function HomeScreen() {
   const { width, height } = useWindowDimensions();
   const navigation = useNavigation();
-  const { cooksData, allCooksPricing, loading } = useCooksData();
-  const { cuisines, loading: cuisinesLoading } = useCuisinesData();
+  const { cooksData, cooksDataLoading } = useCooksData();
   const { theme } = useContext(ThemeContext);
   const [searchQuery, setSearchQuery] = useState('');
   const [imageLoadedState, setImageLoadedState] = useState({});
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [selectedCuisine, setSelectedCuisine] = useState('');
-  const [ratingRange, setRatingRange] = useState([0, 5]);
   const [tempSelectedCuisine, setTempSelectedCuisine] = useState('');
-  const [tempRatingRange, setTempRatingRange] = useState([0, 5]);
   const handleImageLoad = (id) => {
     setImageLoadedState((prev) => ({ ...prev, [id]: true }));
   };
+
+  const { user } = useUser();
 
   const themeStyles = {
     container: theme === 'dark' ? 'bg-black' : 'bg-white',
@@ -59,7 +58,29 @@ export default function HomeScreen() {
     bookmarkColor: theme === 'dark' ? '#FFD700' : '#000000',
     modalBg: theme === 'dark' ? 'bg-gray-900' : 'bg-white',
     selected: theme === 'dark' ? 'bg-gray-700' : 'bg-gray-400',
+    experienceLevel: theme === 'dark' ? 'text-yellow-300' : 'text-yellow-500',
   };
+
+  const uniqueCuisines = [
+    ...new Set(cooksData.flatMap((cook) => cook.cuisine.split(', '))),
+  ].sort();
+
+  const filteredCooks = cooksData.filter((cook) => {
+    const matchesSearch =
+      cook.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      cook.cuisine.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      cook.specialties.some((specialty) =>
+        specialty.toLowerCase().includes(searchQuery.toLowerCase()),
+      );
+    const matchesCuisine = selectedCuisine
+      ? cook.cuisine.split(', ').includes(selectedCuisine)
+      : true;
+    return matchesSearch && matchesCuisine;
+  });
+
+  // const filteredCuisines = Object.keys(cuisineImages).filter((cuisine) =>
+  //   filteredCooks.some((cook) => cook.cuisine.includes(cuisine)),
+  // );
 
   useFocusEffect(
     useCallback(() => {
@@ -87,51 +108,36 @@ export default function HomeScreen() {
 
   const openModal = () => {
     setTempSelectedCuisine(selectedCuisine);
-    setTempRatingRange(ratingRange);
     setFilterModalVisible(true);
   };
 
   const applyFilters = () => {
     setSelectedCuisine(tempSelectedCuisine);
-    setRatingRange(tempRatingRange);
     setFilterModalVisible(false);
   };
 
   const resetFilters = () => {
     setSelectedCuisine('');
-    setRatingRange([0, 5]);
     setTempSelectedCuisine('');
-    setTempRatingRange([0, 5]);
     setFilterModalVisible(false);
   };
 
-  const filteredCooks = cooksData.filter((cook) => {
-    const matchesSearch =
-      cook.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      cook.cuisine.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCuisine = selectedCuisine
-      ? cook.cuisine === selectedCuisine
-      : true;
-    const matchesRating =
-      cook.rating >= ratingRange[0] && cook.rating <= ratingRange[1];
-    return matchesSearch && matchesCuisine && matchesRating;
-  });
+  const cuisineImages = {
+    Italian:
+      'https://www.tasteofhome.com/wp-content/uploads/2024/05/Cacio-e-Pepe_EXPS_TOHcom23_273412_P2_MD_04_26_5b.jpg',
+    Indian:
+      'https://eastindianrecipes.net/wp-content/uploads/2022/09/How-to-Make-North-Indian-Thali-Vegetarian-7.jpg',
+    Vegan:
+      'https://www.allrecipes.com/thmb/KM0rZgeZNEp8_8AjqK-Ry9A2zP8=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/283090veganalfredowithveggies-cd-3187-2000-47917a0d2a3f4b12aaf91d71dfcbc914.jpg',
+    Mexican:
+      'https://www.tourhero.com/en/magazine/wp-content/uploads/2024/08/jarritos-mexican-soda-PNCPZ-NcTE4-unsplash.jpg',
+    Chinese:
+      'https://www.awesomecuisine.com/wp-content/uploads/2023/03/Schezwan-Hakka-noodles.jpg',
+    French:
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcToiQgEuXfoj_fJSwnsa_aUd-g6dIAsVbgx0g&s',
+  };
 
-  const filteredCuisines = cuisines.filter((cuisine) => {
-    const matchesSearch = cuisine.cuisine
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    const matchesCuisine = selectedCuisine
-      ? cuisine.cuisine === selectedCuisine
-      : true;
-    return matchesSearch && matchesCuisine;
-  });
-
-  const uniqueCuisines = [
-    ...new Set(cuisines.map((cuisine) => cuisine.cuisine)),
-  ].sort();
-
-  if (loading || cuisinesLoading) {
+  if (cooksDataLoading) {
     return (
       <SafeAreaView
         className={`flex-1 ${themeStyles.container}`}
@@ -248,11 +254,18 @@ export default function HomeScreen() {
       <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
       <View className="flex-row items-center px-4 py-2 justify-between">
         <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
-          <FontAwesome
-            name="user-circle"
-            size={30}
-            color={themeStyles.iconColor}
-          />
+          {user?.profileImage ? (
+            <Image
+              source={{ uri: user.profileImage }}
+              className="w-10 h-10 rounded-full"
+            />
+          ) : (
+            <FontAwesome
+              name="user-circle"
+              size={30}
+              color={themeStyles.iconColor}
+            />
+          )}
         </TouchableOpacity>
         <Text
           className={`font-bold ${themeStyles.textAccent} text-center text-3xl`}
@@ -379,34 +392,6 @@ export default function HomeScreen() {
                   ))}
                 </View>
               </View>
-              <Text
-                className={`text-lg font-semibold mb-3 ${themeStyles.textPrimary}`}
-              >
-                Minimum Rating: {tempRatingRange[1].toFixed(1)}
-              </Text>
-              <View className="flex-row justify-between mb-4">
-                {[1, 2, 3, 4, 5].map((rating) => (
-                  <TouchableOpacity
-                    key={rating}
-                    onPress={() => setTempRatingRange([0, rating])}
-                    className={`px-4 py-2 rounded-full ${
-                      tempRatingRange[1] === rating
-                        ? themeStyles.selected
-                        : themeStyles.searchBg
-                    }`}
-                  >
-                    <Text
-                      className={`text-sm font-medium ${
-                        tempRatingRange[1] === rating
-                          ? themeStyles.buttonText
-                          : themeStyles.searchText
-                      }`}
-                    >
-                      {rating} ★
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
               <View className="flex-row justify-between mt-8">
                 <TouchableOpacity
                   onPress={resetFilters}
@@ -472,7 +457,7 @@ export default function HomeScreen() {
                     )}
                     <TouchableOpacity
                       onPress={() =>
-                        navigation.navigate('CookProfile', { cook })
+                        navigation.navigate('CookProfile', { cookId: cook.id })
                       }
                     >
                       <Image
@@ -495,9 +480,9 @@ export default function HomeScreen() {
                     {cook.cuisine} cuisine
                   </Text>
                   <Text
-                    className={`text-base font-semibold ${themeStyles.textAccent}`}
+                    className={`text-base font-semibold ${themeStyles.experienceLevel}`}
                   >
-                    ({cook.rating})
+                    {cook.experienceLevel} yrs experience
                   </Text>
                 </View>
               ))}
@@ -510,24 +495,22 @@ export default function HomeScreen() {
           >
             Popular Cuisines
           </Text>
-          {filteredCuisines.length === 0 ? (
-            <View className="items-center justify-center mt-4">
-              <AntDesign name="frown" size={80} color={themeStyles.empty} />
-              <Text
-                className={`ml-2 text-center mt-2 ${themeStyles.textNoResults} text-xl`}
-              >
-                No cuisines found
-              </Text>
-            </View>
-          ) : (
-            <View className="flex-row flex-wrap justify-between px-2">
-              {filteredCuisines.map((item, index) => (
-                <View
+          <View className="flex-row flex-wrap justify-between px-2">
+            {Object.keys(cuisineImages).map((cuisine, index) => {
+              const imageUri = cuisineImages[cuisine];
+              const cooksForCuisine = cooksData.filter((cook) =>
+                cook.cuisine.includes(cuisine),
+              );
+              return (
+                <TouchableOpacity
                   key={index}
                   className="rounded-xl mb-10"
-                  style={{
-                    width: width * 0.45,
-                  }}
+                  style={{ width: width * 0.45 }}
+                  onPress={() =>
+                    navigation.navigate('CuisineChefs', {
+                      cuisine,
+                    })
+                  }
                 >
                   <View
                     style={{
@@ -537,7 +520,7 @@ export default function HomeScreen() {
                       overflow: 'hidden',
                     }}
                   >
-                    {!imageLoadedState[item.cuisine] && (
+                    {!imageLoadedState[cuisine] && (
                       <Skeleton
                         colorMode={theme}
                         width="100%"
@@ -545,38 +528,29 @@ export default function HomeScreen() {
                         radius={10}
                       />
                     )}
-                    <TouchableOpacity
-                      style={{ width: '100%' }}
-                      onPress={() =>
-                        navigation.navigate('CuisineDetails', {
-                          cuisine: item.cuisine,
-                          cooks: filteredCooks.filter(
-                            (cook) => cook.cuisine === item.cuisine,
-                          ),
-                        })
-                      }
-                    >
-                      <Image
-                        source={{ uri: item.image }}
-                        style={{
-                          width: '100%',
-                          height: height * 0.2,
-                          borderRadius: width * 0.02,
-                        }}
-                        resizeMode="cover"
-                        onLoad={() => handleImageLoad(item.cuisine)}
-                      />
-                    </TouchableOpacity>
+                    <Image
+                      source={{ uri: imageUri }}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        borderRadius: width * 0.02,
+                      }}
+                      resizeMode="cover"
+                      onLoad={() => handleImageLoad(cuisine)}
+                    />
                   </View>
                   <Text
                     className={`font-semibold text-xl mt-2 ${themeStyles.textPrimary}`}
                   >
-                    {item.cuisine}
+                    {cuisine}
                   </Text>
-                </View>
-              ))}
-            </View>
-          )}
+                  <Text className={`text-base ${themeStyles.textSecondary}`}>
+                    {cooksForCuisine.length} Chefs
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
         </View>
         <View className="mt-4 mb-6">
           <Text
@@ -598,13 +572,13 @@ export default function HomeScreen() {
                 Book a chef today and enjoy a discount on your first meal.
               </Text>
               <TouchableOpacity
-                onPress={() =>
-                  navigation.navigate('BookingPageScreen', {
-                    pricing: allCooksPricing || {},
-                    cuisine: Object.keys(allCooksPricing)[0] || 'North Indian',
-                    isDiscounted: true,
-                  })
-                }
+                // onPress={() =>
+                //   navigation.navigate('BookingPageScreen', {
+                //     pricing: allCooksPricing || {},
+                //     cuisine: Object.keys(allCooksPricing)[0] || 'North Indian',
+                //     isDiscounted: true,
+                //   })
+                // }
                 className={`${themeStyles.buttonBg} py-2 px-4 rounded-full mt-2 self-start`}
               >
                 <Text

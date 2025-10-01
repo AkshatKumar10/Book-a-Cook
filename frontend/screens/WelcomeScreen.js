@@ -14,7 +14,8 @@ export default function WelcomeScreen() {
     textPrimary: theme === 'dark' ? 'text-white' : 'text-yellow-950',
     textSecondary: theme === 'dark' ? 'text-gray-300' : 'text-slate-950',
     textAccent: theme === 'dark' ? 'text-amber-500' : 'text-yellow-600',
-    buttonBg: theme === 'dark' ? 'bg-amber-600' : 'bg-amber-700',
+    userButtonBg: theme === 'dark' ? 'bg-amber-600' : 'bg-amber-700',
+    cookButtonBg: theme === 'dark' ? 'bg-teal-600' : 'bg-teal-700',
     buttonText: theme === 'dark' ? 'text-white' : 'text-gray-900',
   };
 
@@ -38,29 +39,30 @@ export default function WelcomeScreen() {
         >
           Book A Cook
         </Text>
+        <Text className={`${themeStyles.textPrimary} text-center text-lg`}>
+          Book a professional cook in minutes.
+        </Text>
         <View className="space-y-2">
           <TouchableOpacity
-            onPress={() => navigation.navigate('SignUp')}
-            className={`py-3 ${themeStyles.buttonBg} mx-7 rounded-full mb-4 mt-10`}
+            onPress={() => navigation.navigate('UserSignIn')}
+            className={`py-3 ${themeStyles.userButtonBg} mx-7 rounded-full mb-2 mt-10`}
           >
             <Text
               className={`text-center text-xl font-bold ${themeStyles.buttonText}`}
             >
-              Sign Up
+              Sign In / Sign Up as User
             </Text>
           </TouchableOpacity>
-          <View className="flex-row justify-center">
-            <Text className={`font-semibold ${themeStyles.textSecondary}`}>
-              Already have an account?
+          <TouchableOpacity
+            onPress={() => navigation.navigate('CookSignIn')}
+            className={`py-3 ${themeStyles.cookButtonBg} mx-7 rounded-full mb-10 mt-2`}
+          >
+            <Text
+              className={`text-center text-xl font-bold ${themeStyles.buttonText}`}
+            >
+              Sign In / Sign Up as Cook
             </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('SignIn')}>
-              <Text
-                className={`font-semibold mb-10 ml-2 ${themeStyles.textAccent}`}
-              >
-                Sign In
-              </Text>
-            </TouchableOpacity>
-          </View>
+          </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>

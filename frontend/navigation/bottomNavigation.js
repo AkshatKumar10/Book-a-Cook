@@ -3,14 +3,14 @@ import HomeScreen from '../screens/HomeScreen';
 import BookNowScreen from '../screens/BookingPageScreen';
 import BookingsScreen from '../screens/MyBookingsScreen';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import useCooksData from '../hooks/useCooksData';
+// import useCooksData from '../hooks/useCooksData';
 import { useContext } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 
 const Tab = createBottomTabNavigator();
 
 export default function BottomNavigation() {
-  const { allCooksPricing } = useCooksData();
+  // const { allCooksPricing } = useCooksData();
   const { theme } = useContext(ThemeContext);
 
   const themeStyles = {
@@ -39,26 +39,26 @@ export default function BottomNavigation() {
         },
         tabBarPressColor: 'transparent',
       })}
-      screenListeners={({ navigation }) => ({
-        tabPress: (e) => {
-          if (e.target.includes('BookNow')) {
-            e.preventDefault();
-            try {
-              const defaultCuisine =
-                allCooksPricing && Object.keys(allCooksPricing).length > 0
-                  ? Object.keys(allCooksPricing)[0]
-                  : 'North Indian';
-              navigation.navigate('BookingPageScreen', {
-                pricing: allCooksPricing || {},
-                cuisine: defaultCuisine,
-                isDiscounted: false,
-              });
-            } catch (error) {
-              console.error('Navigation error:', error);
-            }
-          }
-        },
-      })}
+      // screenListeners={({ navigation }) => ({
+      //   tabPress: (e) => {
+      //     if (e.target.includes('BookNow')) {
+      //       e.preventDefault();
+      //       try {
+      //         const defaultCuisine =
+      //           allCooksPricing && Object.keys(allCooksPricing).length > 0
+      //             ? Object.keys(allCooksPricing)[0]
+      //             : 'North Indian';
+      //         navigation.navigate('BookingPageScreen', {
+      //           pricing: allCooksPricing || {},
+      //           cuisine: defaultCuisine,
+      //           isDiscounted: false,
+      //         });
+      //       } catch (error) {
+      //         console.error('Navigation error:', error);
+      //       }
+      //     }
+      //   },
+      // })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="BookNow" component={BookNowScreen} />
