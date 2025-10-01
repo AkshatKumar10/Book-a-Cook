@@ -1,52 +1,53 @@
-import { useState, useContext } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  Dimensions,
-  Alert,
-} from 'react-native';
+import { useState, useContext, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Navbar from '../components/Navbar';
 import { ThemeContext } from '../context/ThemeContext';
 import { StatusBar } from 'expo-status-bar';
+import { useUser } from '../hooks/useUser';
+import { updateUserProfile } from '../utils/api';
+import SnackbarComponent from '../components/SnackbarComponent';
+import { Keyboard } from 'react-native';
 
-const EditProfileScreen = ({ route }) => {
-  const { width, height } = Dimensions.get('window');
-  const navigation = useNavigation();
+const EditProfileScreen = () => {
+  const { user, userLoading } = useUser();
   const { theme } = useContext(ThemeContext);
+  const [fullName, setFullName] = useState(user?.username || '');
+  const [email, setEmail] = useState(user?.email || '');
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarType, setSnackbarType] = useState('success');
 
-  const { fullName: initialFullName = '', email: initialEmail = '' } =
-    route.params;
+  useEffect(() => {
+    if (user) {
+      setFullName(user.username);
+      setEmail(user.email);
+    }
+  }, [user]);
 
-  const [fullName, setFullName] = useState(initialFullName);
-  const [email, setEmail] = useState(initialEmail);
-
-  const handleSave = () => {
-    if (!fullName.trim() || !email.trim()) {
-      Alert.alert('Error', 'Please fill in all fields.');
+  const handleSave = async () => {
+    if (fullName === user.username && email === user.email) {
+      Keyboard.dismiss();
+      setSnackbarMessage('No changes to save.');
+      setSnackbarType('error');
+      setSnackbarVisible(true);
       return;
     }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      Alert.alert('Error', 'Please enter a valid email address.');
-      return;
+    try {
+      await updateUserProfile({ username: fullName, email });
+      Keyboard.dismiss();
+      setSnackbarMessage('Profile updated successfully');
+      setSnackbarType('success');
+      setSnackbarVisible(true);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      Keyboard.dismiss();
+      setSnackbarMessage('Failed to update profile');
+      setSnackbarType('error');
+      setSnackbarVisible(true);
     }
-    if (fullName === initialFullName && email === initialEmail) {
-      Alert.alert('No Changes', 'No changes to save.');
-      return;
-    }
-    Alert.alert('Profile Updated', 'Your profile details have been updated.', [
-      {
-        text: 'OK',
-        onPress: () => navigation.navigate('Profile', { fullName, email }),
-      },
-    ]);
   };
 
   const themeStyles = {
@@ -59,6 +60,20 @@ const EditProfileScreen = ({ route }) => {
     iconColor: theme === 'dark' ? 'gray' : 'gray',
     buttonText: theme === 'dark' ? 'text-white' : 'text-white',
   };
+
+  if (userLoading) {
+    return (
+      <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
+        <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
+        <Navbar title="Profile" />
+        <View className="flex-1 items-center justify-center">
+          <Text className={`text-lg ${themeStyles.textPrimary}`}>
+            Loading...
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
@@ -125,6 +140,12 @@ const EditProfileScreen = ({ route }) => {
           </LinearGradient>
         </TouchableOpacity>
       </View>
+      <SnackbarComponent
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        message={snackbarMessage}
+        type={snackbarType}
+      />
     </SafeAreaView>
   );
 };

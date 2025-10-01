@@ -35,7 +35,7 @@ const BookmarkScreen = () => {
             <TouchableOpacity
               key={cook.id}
               className="mb-4"
-              onPress={() => navigation.navigate('CookProfile', { cook })}
+              onPress={() => navigation.navigate('CookProfile', { cookId: cook.id })}
             >
               <View className="flex-row items-center">
                 <Image

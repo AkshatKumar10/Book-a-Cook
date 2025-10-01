@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
 import {
   FontAwesome5,
   MaterialIcons,
@@ -7,33 +7,33 @@ import {
 } from '@expo/vector-icons';
 import { Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { signOut } from 'firebase/auth';
-import { auth } from '../firebase';
 import { useNavigation } from '@react-navigation/native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Navbar from '../components/Navbar';
-import { useContext } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 import { StatusBar } from 'expo-status-bar';
+import { removeUserToken } from '../utils/api';
+import { useUser } from '../hooks/useUser';
+import SnackbarComponent from '../components/SnackbarComponent';
 
-const ProfileScreen = ({ route }) => {
+const ProfileScreen = () => {
+  const { user, userLoading } = useUser();
   const navigation = useNavigation();
   const { theme, toggleTheme } = useContext(ThemeContext);
-
-  const user = auth.currentUser;
-  const routeFullName = route?.params?.fullName;
-  const routeEmail = route?.params?.email;
-
-  const fullName = routeFullName || user?.displayName || 'Guest';
-  const email = routeEmail || user?.email || 'guest@example.com';
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarType, setSnackbarType] = useState('success');
 
   const handleSignOut = async () => {
     try {
-      await signOut(auth);
-      navigation.navigate('SignIn');
+      await removeUserToken();
+      navigation.navigate('UserSignIn');
     } catch (error) {
       console.error('Sign out error:', error);
-      Alert.alert('Error', 'Failed to sign out. Please try again.');
+      setSnackbarMessage('Failed to sign out. Please try again.');
+      setSnackbarType('error');
+      setSnackbarVisible(true);
     }
   };
 
@@ -46,23 +46,45 @@ const ProfileScreen = ({ route }) => {
     buttonBg: theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200',
   };
 
+  if (userLoading) {
+    return (
+      <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
+        <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
+        <Navbar title="Profile" />
+        <View className="flex-1 items-center justify-center">
+          <Text className={`text-lg ${themeStyles.textPrimary}`}>
+            Loading...
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
       <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
       <Navbar title="Profile" />
       <View className="flex items-center mt-10">
-        <FontAwesome
-          name="user-circle"
-          size={100}
-          color={themeStyles.iconColor}
-        />
+        {user?.profileImage ? (
+          <Image
+            source={{ uri: user.profileImage }}
+            className={`w-24 h-24 rounded-full border ${themeStyles.borderColor}`}
+          />
+        ) : (
+          <FontAwesome
+            name="user-circle"
+            size={100}
+            color={themeStyles.iconColor}
+          />
+        )}
+
         <Text
           className={`font-bold text-center text-lg ${themeStyles.textPrimary}`}
         >
-          {fullName}
+          {user?.username}
         </Text>
         <Text className={`text-center text-base ${themeStyles.textSecondary}`}>
-          {email}
+          {user?.email}
         </Text>
       </View>
       <ScrollView
@@ -70,12 +92,7 @@ const ProfileScreen = ({ route }) => {
         contentContainerStyle={{ paddingBottom: 20 }}
       >
         <TouchableOpacity
-          onPress={() =>
-            navigation.navigate('EditProfileScreen', {
-              fullName,
-              email,
-            })
-          }
+          onPress={() => navigation.navigate('EditProfileScreen')}
           className={`flex-row items-center p-4 border-b ${themeStyles.borderColor}`}
         >
           <View
@@ -227,6 +244,12 @@ const ProfileScreen = ({ route }) => {
           />
         </TouchableOpacity>
       </ScrollView>
+      <SnackbarComponent
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        message={snackbarMessage}
+        type={snackbarType}
+      />
     </SafeAreaView>
   );
 };

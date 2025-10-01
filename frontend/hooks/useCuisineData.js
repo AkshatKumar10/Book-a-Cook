@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 export default function useCuisinesData() {
   const [cuisines, setCuisines] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [cuisineLoading, setCuisineLoading] = useState(true);
 
   useEffect(() => {
     const fetchCuisines = async () => {
@@ -15,12 +15,12 @@ export default function useCuisinesData() {
       } catch (error) {
         console.error('Failed to fetch cuisines:', error);
       } finally {
-        setLoading(false);
+        setCuisineLoading(false);
       }
     };
 
     fetchCuisines();
   }, []);
 
-  return { cuisines, loading };
+  return { cuisines, cuisineLoading };
 }
