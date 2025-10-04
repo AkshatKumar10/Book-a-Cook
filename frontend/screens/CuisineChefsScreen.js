@@ -43,9 +43,7 @@ export default function CuisineChefsScreen() {
 
   if (chefsLoading) {
     return (
-      <SafeAreaView
-        className={`flex-1 ${themeStyles.container}`}
-      >
+      <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
         <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
         <Navbar title={`${cuisine} Chefs`} />
         <FlatList
@@ -57,7 +55,7 @@ export default function CuisineChefsScreen() {
             marginBottom: 20,
           }}
           renderItem={() => (
-            <View style={{ flex: 1, marginHorizontal: 4 }}>
+            <View style={{ flex: 1, marginHorizontal: 4, marginTop: 12 }}>
               <Skeleton
                 colorMode={theme}
                 width="100%"

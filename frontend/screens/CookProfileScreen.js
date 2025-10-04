@@ -16,6 +16,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useBookmark } from '../context/BookmarkContext';
 import { getTime } from '../utils/getTime';
 import { Calendar } from 'react-native-calendars';
+import { Skeleton } from 'moti/skeleton';
 
 const CookProfileScreen = () => {
   const route = useRoute();
@@ -39,39 +40,11 @@ const CookProfileScreen = () => {
   };
 
   const handleBookNow = () => {
-    const allCooksPricing = cooksData.reduce((acc, currentCook) => {
-      const pricingMatch = currentCook.pricing?.match(/\d+/);
-      const price = pricingMatch ? parseInt(pricingMatch[0]) : 0;
-      acc[currentCook.cuisine] = {
-        cook: currentCook.name,
-        price: price,
-        rating: currentCook.rating,
-        image: currentCook.image,
-      };
-      return acc;
-    }, {});
-
     navigation.navigate('BookingPageScreen', {
-      cook: cook?.name || 'Unknown Chef',
-      cuisine: cook?.cuisine || 'Unknown Cuisine',
-      pricing: allCooksPricing,
+      cookId: cook.id,
       isDiscounted: false,
     });
   };
-
-  if (cookLoading) {
-    return (
-      <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
-        <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
-        <Navbar title="Chef Profile" />
-        <View className="flex-1 items-center justify-center">
-          <Text className={`text-lg ${themeStyles.textPrimary}`}>
-            Loading...
-          </Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
 
   if (!cook) {
     return (
@@ -87,6 +60,83 @@ const CookProfileScreen = () => {
     );
   }
 
+  if (cookLoading) {
+    return (
+      <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
+        <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
+        <Navbar title="Chef Profile" />
+        <ScrollView contentContainerStyle={{ paddingBottom: 10 }} showsVerticalScrollIndicator={false}>
+          <View className="items-center mt-4">
+            <Skeleton
+              colorMode={theme}
+              width={width * 0.3}
+              height={width * 0.3}
+              radius="round"
+            />
+            <View style={{ height: 16 }} />
+            <Skeleton colorMode={theme} width={150} height={24} />
+            <View style={{ height: 8 }} />
+            <Skeleton colorMode={theme} width={200} height={18} />
+            <View style={{ height: 8 }} />
+            <Skeleton colorMode={theme} width={120} height={20} />
+            <View style={{ height: 8 }} />
+            <Skeleton colorMode={theme} width={180} height={18} />
+          </View>
+          <View className="mt-6 pl-4">
+            <Skeleton colorMode={theme} width="40%" height={24} />
+            <View className="flex-row flex-wrap gap-2 mt-4">
+              {[...Array(5)].map((_, index) => (
+                <Skeleton
+                  key={index}
+                  colorMode={theme}
+                  width={100}
+                  height={32}
+                  radius={16}
+                />
+              ))}
+            </View>
+          </View>
+          <View className="mt-8 pl-4">
+            <Skeleton colorMode={theme} width={120} height={24} />
+            <View className="mb-4"></View>
+            <Skeleton colorMode={theme} width="90%" height={60} />
+          </View>
+          <View className="mt-8 pl-4">
+            <Skeleton colorMode={theme} width="50%" height={24} />
+            <View className="mb-4"></View>
+            <Skeleton colorMode={theme} width="80%" height={30} />
+          </View>
+          <View className="mt-8 pl-4">
+            <Skeleton
+              colorMode={theme}
+              width={120}
+              height={24}
+              style={{ marginBottom: 16 }}
+            />
+            <View
+              className={`flex-row justify-around items-center rounded-xl p-5`}
+            >
+              <View className="items-center">
+                <Skeleton colorMode={theme} width={80} height={16} />
+                <View className="mb-2"></View>
+                <Skeleton colorMode={theme} width={60} height={24} />
+              </View>
+              <Skeleton colorMode={theme} width={2} height={48} />
+              <View className="items-center">
+                <Skeleton colorMode={theme} width={80} height={16} />
+                <View className="mb-2"></View>
+                <Skeleton colorMode={theme} width={60} height={24} />
+              </View>
+            </View>
+          </View>
+          <View className="px-6 mb-8 mt-10">
+            <Skeleton colorMode={theme} width="100%" height={48} radius={24} />
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
       <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
@@ -96,7 +146,7 @@ const CookProfileScreen = () => {
         cook={cook}
         isBookmarked={isBookmarked(cook.id)}
       />
-      <ScrollView contentContainerStyle={{ paddingBottom: 10 }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 10 }} showsVerticalScrollIndicator={false}>
         <View className="items-center mt-4">
           <Image
             source={{ uri: cook.image }}

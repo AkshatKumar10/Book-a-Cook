@@ -15,7 +15,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemeContext } from '../context/ThemeContext';
 import { StatusBar } from 'expo-status-bar';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { registerUser, storeUserToken } from '../utils/api.js';
+import {
+  registerUser,
+  storeUserToken,
+  updateUserFcmToken,
+} from '../utils/api.js';
+import { getFcmToken } from '../utils/fcmUtils.js';
 import SnackbarComponent from '../components/SnackbarComponent.js';
 
 export default function UserSignUpScreen() {
@@ -62,8 +67,12 @@ export default function UserSignUpScreen() {
         email,
         password,
       };
-      const { token } = await registerUser(userData);
-      await storeUserToken(token);
+      const response = await registerUser(userData);
+      await storeUserToken(response.token);
+      const fcmToken = await getFcmToken();
+      if (fcmToken) {
+        await updateUserFcmToken({ fcmToken });
+      }
       navigation.navigate('HomeTabs');
     } catch (error) {
       console.error('Registration error:', error);
@@ -91,7 +100,7 @@ export default function UserSignUpScreen() {
 
       <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
         className="flex-1"
       >
         <ScrollView
@@ -101,6 +110,7 @@ export default function UserSignUpScreen() {
             paddingHorizontal: 32,
           }}
           keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
           <View className={`rounded-xl py-6 mx-4 mb-4`}>
             <Text

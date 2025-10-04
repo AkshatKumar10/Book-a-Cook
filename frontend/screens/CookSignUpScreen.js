@@ -9,6 +9,8 @@ import {
   Image,
   BackHandler,
   Keyboard,
+  ScrollView,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { useState, useContext, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
@@ -16,10 +18,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemeContext } from '../context/ThemeContext';
 import { StatusBar } from 'expo-status-bar';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { registerCook, storeCookToken } from '../utils/api';
+import { registerCook, storeCookToken, updateCookFcmToken } from '../utils/api';
 import * as ImagePicker from 'expo-image-picker';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import SnackbarComponent from '../components/SnackbarComponent';
+import { getFcmToken } from '../utils/fcmUtils';
 
 export default function CookSignUpScreen() {
   const navigation = useNavigation();
@@ -126,18 +129,18 @@ export default function CookSignUpScreen() {
 
   const handleNext = async () => {
     if (step === 1) {
-      if (
-        !formData.username ||
-        !formData.email ||
-        !formData.password ||
-        !formData.confirmPassword
-      ) {
-        Keyboard.dismiss();
-        setSnackbarMessage('Please fill all fields');
-        setSnackbarType('error');
-        setSnackbarVisible(true);
-        return;
-      }
+      // if (
+      //   !formData.username ||
+      //   !formData.email ||
+      //   !formData.password ||
+      //   !formData.confirmPassword
+      // ) {
+      //   Keyboard.dismiss();
+      //   setSnackbarMessage('Please fill all fields');
+      //   setSnackbarType('error');
+      //   setSnackbarVisible(true);
+      //   return;
+      // }
       if (formData.password !== formData.confirmPassword) {
         Keyboard.dismiss();
         setSnackbarMessage('Passwords do not match');
@@ -154,7 +157,7 @@ export default function CookSignUpScreen() {
         !formData.bio ||
         !formData.experienceLevel
       ) {
-         Keyboard.dismiss();
+        Keyboard.dismiss();
         setSnackbarMessage('Please fill all required fields');
         setSnackbarType('error');
         setSnackbarVisible(true);
@@ -189,8 +192,12 @@ export default function CookSignUpScreen() {
             perHour: parseFloat(formData.pricing.perHour) || 0,
           },
         };
-        const { token } = await registerCook(cookData);
-        await storeCookToken(token);
+        const response = await registerCook(cookData);
+        await storeCookToken(response.token);
+        const fcmToken = await getFcmToken();
+        if (fcmToken) {
+          await updateCookFcmToken({ fcmToken });
+        }
         navigation.navigate('CookDashboard', {
           username: formData.username,
         });
@@ -580,56 +587,58 @@ export default function CookSignUpScreen() {
         </Text>
       </View>
       <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
-      <KeyboardAwareScrollView
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
         className="flex-1"
-        contentContainerStyle={{
-          flexGrow: 1,
-          paddingTop: 16,
-          paddingHorizontal: 32,
-          paddingBottom: 20,
-        }}
-        keyboardShouldPersistTaps="handled"
-        extraScrollHeight={Platform.select({ ios: 0, android: 20 })}
-        enableAutomaticScroll={true}
       >
-        <View className="mb-4">{renderStep()}</View>
-        {step <= 4 && (
-          <>
-            <TouchableOpacity
-              onPress={handleNext}
-              className={`py-3 ${themeStyles.buttonBg} rounded-xl ${loading ? 'opacity-50' : ''}`}
-              disabled={loading}
-            >
-              <Text
-                className={`text-center text-lg font-bold ${themeStyles.buttonText}`}
+        <ScrollView
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingTop: 16,
+            paddingHorizontal: 32,
+            paddingBottom: 20,
+          }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View className="mb-4">{renderStep()}</View>
+          {step <= 4 && (
+            <>
+              <TouchableOpacity
+                onPress={handleNext}
+                className={`py-3 ${themeStyles.buttonBg} rounded-xl ${loading ? 'opacity-50' : ''}`}
+                disabled={loading}
               >
-                {loading
-                  ? 'Processing...'
-                  : step === 4
-                    ? 'Complete Sign Up'
-                    : 'Next'}
-              </Text>
-            </TouchableOpacity>
-            {step === 1 && (
-              <View className="flex-row justify-center mt-4">
-                <Text className={`text-lg ${themeStyles.textSecondary}`}>
-                  Already have an account?
-                </Text>
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('CookSignIn')}
-                  disabled={loading}
+                <Text
+                  className={`text-center text-lg font-bold ${themeStyles.buttonText}`}
                 >
-                  <Text
-                    className={`text-lg font-semibold ml-2 ${themeStyles.textAccent}`}
-                  >
-                    Sign In
+                  {loading
+                    ? 'Processing...'
+                    : step === 4
+                      ? 'Complete Sign Up'
+                      : 'Next'}
+                </Text>
+              </TouchableOpacity>
+              {step === 1 && (
+                <View className="flex-row justify-center mt-4">
+                  <Text className={`text-lg ${themeStyles.textSecondary}`}>
+                    Already have an account?
                   </Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </>
-        )}
-      </KeyboardAwareScrollView>
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate('CookSignIn')}
+                    disabled={loading}
+                  >
+                    <Text
+                      className={`text-lg font-semibold ml-2 ${themeStyles.textAccent}`}
+                    >
+                      Sign In
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </>
+          )}
+        </ScrollView>
+      </KeyboardAvoidingView>
       <SnackbarComponent
         visible={snackbarVisible}
         onDismiss={() => setSnackbarVisible(false)}

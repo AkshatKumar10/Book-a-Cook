@@ -10,6 +10,7 @@ import { useUser } from '../hooks/useUser';
 import { updateUserProfile } from '../utils/api';
 import SnackbarComponent from '../components/SnackbarComponent';
 import { Keyboard } from 'react-native';
+import { Skeleton } from 'moti/skeleton';
 
 const EditProfileScreen = () => {
   const { user, userLoading } = useUser();
@@ -65,11 +66,27 @@ const EditProfileScreen = () => {
     return (
       <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
         <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
-        <Navbar title="Profile" />
-        <View className="flex-1 items-center justify-center">
-          <Text className={`text-lg ${themeStyles.textPrimary}`}>
-            Loading...
-          </Text>
+        <Navbar title="Edit Profile" />
+        <View className="flex-1 p-6 space-y-5">
+          <Skeleton colorMode={theme} width={100} height={20} />
+          <View className={`rounded-xl mb-6 mt-2`}>
+            <Skeleton colorMode={theme} width="100%" height={40} />
+          </View>
+          <Skeleton
+            colorMode={theme}
+            width={80}
+            height={20}
+          />
+          <View className={`rounded-xl mb-8 mt-2`}>
+            <Skeleton colorMode={theme} width="100%" height={40} />
+          </View>
+          <Skeleton
+            colorMode={theme}
+            width="100%"
+            height={55}
+            radius={12}
+            style={{ marginTop: 24 }}
+          />
         </View>
       </SafeAreaView>
     );

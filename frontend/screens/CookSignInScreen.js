@@ -13,7 +13,9 @@ import { StatusBar } from 'expo-status-bar';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { ThemeContext } from '../context/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { loginCook, storeCookToken } from '../utils/api';
+import { loginCook, storeCookToken, updateCookFcmToken } from '../utils/api';
+import { getFcmToken } from '../utils/fcmUtils';
+import SnackbarComponent from '../components/SnackbarComponent';
 
 export default function CookSignInScreen() {
   const navigation = useNavigation();
@@ -22,6 +24,9 @@ export default function CookSignInScreen() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [snackbarVisible, setSnackbarVisible] = useState(false); 
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarType, setSnackbarType] = useState('success');
 
   const themeStyles = {
     container: theme === 'dark' ? 'bg-black' : 'bg-white',
@@ -39,8 +44,12 @@ export default function CookSignInScreen() {
     setLoading(true);
     try {
       const credentials = { email, password };
-      const { token } = await loginCook(credentials);
-      await storeCookToken(token);
+      const response = await loginCook(credentials);
+      await storeCookToken(response.token);
+      const fcmToken = await getFcmToken();
+      if (fcmToken) {
+        await updateCookFcmToken({ fcmToken });
+      }
       navigation.navigate('CookDashboard');
     } catch (error) {
       console.error('Registration error:', error);
@@ -67,7 +76,7 @@ export default function CookSignInScreen() {
       </View>
       <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
         className="flex-1"
       >
         <ScrollView
@@ -77,6 +86,7 @@ export default function CookSignInScreen() {
             paddingHorizontal: 32,
           }}
           keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
           <View className={`rounded-xl py-6 mx-4 mb-4`}>
             <Text
@@ -152,6 +162,12 @@ export default function CookSignInScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+      <SnackbarComponent
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        message={snackbarMessage}
+        type={snackbarType}
+      />
     </SafeAreaView>
   );
 }

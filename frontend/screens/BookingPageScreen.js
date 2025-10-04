@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,8 @@ import {
   ScrollView,
   Alert,
   Linking,
+  FlatList,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Feather from '@expo/vector-icons/Feather';
@@ -21,27 +23,23 @@ import {
 import Navbar from '../components/Navbar';
 import { ThemeContext } from '../context/ThemeContext';
 import { StatusBar } from 'expo-status-bar';
+import useCooksData from '../hooks/useCooksData';
+import useCook from '../hooks/useCook';
+import { getUserToken } from '../utils/api';
+import { useWindowDimensions } from 'react-native';
+import SnackbarComponent from '../components/SnackbarComponent';
+import { Skeleton } from 'moti/skeleton';
 
 export default function BookingPageScreen() {
   const { params } = useRoute();
-  const {
-    pricing = {},
-    cuisine = 'North Indian',
-    isDiscounted = false,
-  } = params || {};
+  const { cookId, isDiscounted = false } = params || {};
   const navigation = useNavigation();
   const { theme } = useContext(ThemeContext);
+  const { width } = useWindowDimensions();
 
-  const validCuisine =
-    cuisine && pricing?.[cuisine]
-      ? cuisine
-      : Object.keys(pricing)[0] || 'North Indian';
-  const initialPricing = pricing?.[validCuisine] || {
-    cook: 'Sanjay Kumar',
-    price: 500,
-    rating: 4.5,
-    image: 'https://i.postimg.cc/d3b0kbcM/cook1-removebg-preview.png',
-  };
+  const isSpecificCook = !!cookId;
+  const { cooksData, cooksDataLoading } = useCooksData();
+  const { cook: specificCook, cookLoading } = useCook(cookId);
 
   const [mealType, setMealType] = useState(null);
   const [guestCount, setGuestCount] = useState(2);
@@ -49,13 +47,14 @@ export default function BookingPageScreen() {
   const [selectedTime, setSelectedTime] = useState('');
   const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
-  const [selectedCuisine, setSelectedCuisine] = useState(validCuisine);
-  const [cookName, setCookName] = useState(initialPricing.cook);
-  const [cookPrice, setCookPrice] = useState(
-    isDiscounted ? initialPricing.price * 0.9 : initialPricing.price,
-  );
-  const [cookRating, setCookRating] = useState(initialPricing.rating);
-  const [cookImage, setCookImage] = useState(initialPricing.image);
+  const [selectedCuisine, setSelectedCuisine] = useState('');
+  const [selectedCook, setSelectedCook] = useState(null);
+  const [matchingCooks, setMatchingCooks] = useState([]);
+  const [showCookList, setShowCookList] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Renamed to avoid confusion
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarType, setSnackbarType] = useState('success');
 
   const themeStyles = {
     container: theme === 'dark' ? 'bg-black' : 'bg-white',
@@ -75,34 +74,123 @@ export default function BookingPageScreen() {
     pickerBg: theme === 'dark' ? 'bg-gray-900' : 'bg-white',
     discountText: theme === 'dark' ? 'text-green-400' : 'text-green-500',
     placeholderColor: theme === 'dark' ? '#D1D5DB' : '#6B7280',
+    cardBg: theme === 'dark' ? 'bg-gray-800' : 'bg-white',
+    selectedCard: theme === 'dark' ? 'border-orange-500' : 'border-orange-300',
   };
 
+  const uniqueCuisines = cooksDataLoading
+    ? []
+    : [
+        ...new Set(cooksData.flatMap((cook) => cook.cuisine.split(', '))),
+      ].sort();
+
+  const renderCookCard = ({ item: cook }) => {
+    const isSelected = selectedCook?.id === cook.id;
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          setSelectedCook(cook);
+          setShowCookList(false);
+        }}
+        className={`rounded-lg p-3 mr-3 ${isSelected ? themeStyles.selectedCard : ''}`}
+        style={{
+          width: width * 0.4,
+          borderWidth: 2,
+          borderColor: isSelected ? 'orange' : 'transparent',
+        }}
+      >
+        <Image
+          source={{ uri: cook.image }}
+          style={{ width: '100%', height: 80, borderRadius: 8 }}
+          resizeMode="cover"
+        />
+        <Text className={`font-semibold mt-2 ${themeStyles.textPrimary}`}>
+          Chef {cook.name}
+        </Text>
+        <Text className={`text-sm ${themeStyles.textSecondary}`}>
+          {cook.cuisine.split(', ').join(', ')}
+        </Text>
+        <Text className={`text-sm font-medium ${themeStyles.textAccent}`}>
+          {cook.experienceLevel} yrs exp.
+        </Text>
+      </TouchableOpacity>
+    );
+  };
+
+  useEffect(() => {
+    const initCook = async () => {
+      if (isSpecificCook ? cookLoading : cooksDataLoading) {
+        setIsLoading(true);
+        return;
+      }
+
+      try {
+        const token = await getUserToken();
+        if (!token) {
+          Alert.alert('Auth Required', 'Please log in to book.', [
+            { text: 'OK', onPress: () => navigation.navigate('Login') },
+          ]);
+          return;
+        }
+
+        if (isSpecificCook && specificCook) {
+          const primaryCuisine = specificCook.cuisine.split(', ')[0];
+          setSelectedCuisine(primaryCuisine);
+          setSelectedCook(specificCook);
+          setMatchingCooks([specificCook]);
+          setShowCookList(false);
+        } else if (!isSpecificCook && cooksData.length > 0) {
+          const defaultCuisine = uniqueCuisines[0] || '';
+          setSelectedCuisine(defaultCuisine);
+          const defaultCooks = cooksData
+            .filter((cook) => cook.cuisine.split(', ').includes(defaultCuisine))
+            .sort((a, b) => b.experienceLevel - a.experienceLevel);
+          setMatchingCooks(defaultCooks);
+          if (defaultCooks.length > 0) {
+            setSelectedCook(defaultCooks[0]);
+            setShowCookList(defaultCooks.length > 1);
+          }
+        }
+      } catch (error) {
+        console.error('Init error:', error);
+        setSnackbarMessage('Failed to load data. Please try again.');
+        setSnackbarType('Error');
+        setSnackbarVisible(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initCook();
+  }, [isSpecificCook, specificCook, cookLoading, cooksData, cooksDataLoading]);
+
   useFocusEffect(
-    React.useCallback(() => {
-      setGuestCount(2);
-      setSelectedDate('');
-      setSelectedTime('');
-      setSelectedCuisine(validCuisine);
-      setCookName(initialPricing.cook);
-      setCookPrice(
-        isDiscounted ? initialPricing.price * 0.9 : initialPricing.price,
-      );
-      setCookRating(initialPricing.rating);
-      setCookImage(initialPricing.image);
+    useCallback(() => {
+      if (!selectedDate && !selectedTime && !mealType) {
+        setGuestCount(2);
+        setSelectedDate('');
+        setSelectedTime('');
+        setMealType(null);
+      }
       setTimePickerVisibility(false);
       setDatePickerVisibility(false);
-      setMealType(null);
     }, []),
   );
 
   const handleCuisineChange = (itemValue) => {
+    if (isSpecificCook) return;
     setSelectedCuisine(itemValue);
-    setCookName(pricing[itemValue].cook);
-    setCookPrice(
-      isDiscounted ? pricing[itemValue].price * 0.9 : pricing[itemValue].price,
-    );
-    setCookRating(pricing[itemValue].rating);
-    setCookImage(pricing[itemValue].image);
+    const matching = cooksData
+      .filter((cook) => cook.cuisine.split(', ').includes(itemValue))
+      .sort((a, b) => b.experienceLevel - a.experienceLevel);
+    setMatchingCooks(matching);
+    if (matching.length > 0) {
+      setSelectedCook(matching[0]);
+      setShowCookList(matching.length > 1);
+    } else {
+      setSelectedCook(null);
+      setShowCookList(false);
+    }
   };
 
   const incrementGuests = () => setGuestCount((prev) => prev + 1);
@@ -120,59 +208,51 @@ export default function BookingPageScreen() {
     );
   };
 
-  const calculateTotalAmount = (guestCount, cookPrice) =>
-    guestCount * cookPrice;
-
-  const totalAmount = calculateTotalAmount(guestCount, cookPrice);
+  const cookPrice = selectedCook?.pricing?.perDish || 0;
+  const discountedPrice = isDiscounted ? cookPrice * 0.9 : cookPrice;
+  const totalAmount = guestCount * discountedPrice;
 
   const handleNext = () => {
     if (
+      !selectedCook ||
       !mealType ||
-      !guestCount ||
       !selectedDate ||
       !selectedTime ||
-      !selectedCuisine ||
-      !cookName
+      !selectedCuisine
     ) {
-      Alert.alert(
-        'Error',
-        'Please fill in all fields, including the address, before proceeding to checkout.',
-      );
+      setSnackbarMessage('Please fill in all fields before proceeding.');
+      setSnackbarType('Error');
+      setSnackbarVisible(true);
       return;
     }
     navigation.navigate('CheckoutPageScreen', {
+      cookId: selectedCook.id,
+      cookName: selectedCook.name,
+      cookImage: selectedCook.image,
+      selectedCuisine,
       mealType,
       guestCount,
       selectedDate,
       selectedTime,
-      selectedCuisine,
-      cookName,
+      cookPrice,
       totalAmount,
-      cookRating,
-      cookImage,
       isDiscounted,
     });
   };
 
   const showTimePicker = () => {
-    if (!selectedDate) {
-      Alert.alert(
-        'Date Required',
-        'Please select a date before choosing a time.',
-      );
-      return;
-    }
-    setTimePickerVisibility(false);
-    setTimeout(() => setTimePickerVisibility(true), 100);
+    setTimePickerVisibility(true);
   };
 
   const hideTimePicker = () => setTimePickerVisibility(false);
 
   const timeRestrictions = {
-    'North Indian': { start: 10, end: 20 },
-    'South Indian': { start: 11, end: 21 },
-    Chinese: { start: 12, end: 22 },
-    Western: { start: 9, end: 21 },
+    Italian: { start: 10, end: 20 },
+    Indian: { start: 11, end: 21 },
+    Vegan: { start: 9, end: 21 },
+    Mexican: { start: 9, end: 22 },
+    Chinese: { start: 11, end: 22 },
+    French: { start: 9, end: 21 },
   };
 
   const handleConfirmTime = (time) => {
@@ -184,10 +264,7 @@ export default function BookingPageScreen() {
     const selectedHour = time.getHours();
     const selectedMinute = time.getMinutes();
     const selectedTotalMinutes = selectedHour * 60 + selectedMinute;
-    const { start, end } = timeRestrictions[selectedCuisine] || {
-      start: 0,
-      end: 24,
-    };
+    const { start = 0, end = 24 } = timeRestrictions[selectedCuisine] || {};
     const startTotalMinutes = start * 60;
     const endTotalMinutes = end * 60;
 
@@ -195,10 +272,12 @@ export default function BookingPageScreen() {
       selectedTotalMinutes < startTotalMinutes ||
       selectedTotalMinutes > endTotalMinutes
     ) {
-      Alert.alert(
-        'Time Selection Error',
-        `For ${selectedCuisine} cuisine, please select a time between ${start} AM and ${end} PM.`,
+      setSnackbarMessage(
+        `Please select a time between ${start} AM and ${end} PM.`,
       );
+      setSnackbarType('Error');
+      setSnackbarVisible(true);
+      hideTimePicker();
       return;
     }
 
@@ -207,7 +286,6 @@ export default function BookingPageScreen() {
   };
 
   const showDatePicker = () => setDatePickerVisibility(true);
-
   const hideDatePicker = () => setDatePickerVisibility(false);
 
   const handleConfirmDate = (date) => {
@@ -215,6 +293,133 @@ export default function BookingPageScreen() {
     setSelectedDate(formattedDate);
     hideDatePicker();
   };
+
+  if (isLoading || cooksDataLoading || (isSpecificCook && cookLoading)) {
+    return (
+      <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
+        <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
+        <Navbar title="Booking Page" />
+        <ScrollView
+          className="px-4 pb-6 pt-4"
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 30 }}
+        >
+          <View className="mb-6">
+            <Skeleton colorMode={theme} width="50%" height={20} />
+            <View style={{ height: 8 }} />
+            <View
+              className={`flex-row items-center border ${themeStyles.borderColor} rounded-lg px-4 py-2 justify-between`}
+            >
+              <Skeleton colorMode={theme} width={40} height={40} radius={20} />
+              <Skeleton colorMode={theme} width={40} height={20} />
+              <Skeleton colorMode={theme} width={40} height={40} radius={20} />
+            </View>
+          </View>
+          <View className="mb-6">
+            <Skeleton colorMode={theme} width={120} height={20} />
+            <View style={{ height: 8 }} />
+            <View
+              className={`flex-row items-center justify-between border ${themeStyles.borderColor} rounded-lg px-4 py-2`}
+            >
+              <Skeleton colorMode={theme} width="50%" height={40} />
+              <Skeleton
+                colorMode={theme}
+                width={24}
+                height={24}
+                radius={12}
+                style={{ marginLeft: 8 }}
+              />
+            </View>
+          </View>
+          <View className="mb-6">
+            <Skeleton colorMode={theme} width={120} height={20} />
+            <View style={{ height: 8 }} />
+            <View
+              className={`flex-row items-center justify-between border ${themeStyles.borderColor} rounded-lg px-4 py-2`}
+            >
+              <Skeleton colorMode={theme} width="50%" height={40} />
+              <Skeleton
+                colorMode={theme}
+                width={24}
+                height={24}
+                radius={12}
+                style={{ marginLeft: 8 }}
+              />
+            </View>
+          </View>
+          <View className="mb-6">
+            <Skeleton colorMode={theme} width={120} height={20} />
+            <View style={{ height: 8 }} />
+            <Skeleton colorMode={theme} width="100%" height={40} radius={8} />
+          </View>
+          <View className="mb-6">
+            <Skeleton colorMode={theme} width={120} height={20} />
+            <View style={{ height: 8 }} />
+            <View className={`flex-row items-center p-3 rounded-lg`}>
+              <Skeleton
+                colorMode={theme}
+                width={48}
+                height={48}
+                radius="round"
+              />
+              <View className="flex-1 ml-3">
+                <Skeleton colorMode={theme} width="60%" height={20} />
+                <View style={{ height: 8 }} />
+                <Skeleton colorMode={theme} width="50%" height={16} />
+              </View>
+              <Skeleton colorMode={theme} width={24} height={24} radius={12} />
+            </View>
+          </View>
+          <View className="mb-6 p-4 rounded-lg border border-gray-50">
+            <Skeleton colorMode={theme} width={140} height={20} />
+            <View style={{ height: 8 }} />
+            <View className="flex-row justify-between items-center">
+              <Skeleton colorMode={theme} width={120} height={16} />
+              <Skeleton colorMode={theme} width={80} height={16} />
+            </View>
+            <View style={{ height: 8 }} />
+            <View className="flex-row justify-between items-center mt-2 pt-2 border-t border-gray-300 dark:border-gray-700">
+              <Skeleton colorMode={theme} width={120} height={16} />
+              <Skeleton colorMode={theme} width={80} height={20} />
+            </View>
+          </View>
+          <View className="mb-6">
+            <Skeleton colorMode={theme} width={120} height={20} />
+            <View style={{ height: 8 }} />
+            <View className="flex-row gap-2">
+              <View className="flex-1">
+                <Skeleton
+                  colorMode={theme}
+                  width="100%"
+                  height={40}
+                  radius={8}
+                />
+              </View>
+              <View className="flex-1">
+                <Skeleton
+                  colorMode={theme}
+                  width="100%"
+                  height={40}
+                  radius={8}
+                />
+              </View>
+            </View>
+          </View>
+          <View className="self-center">
+            <Skeleton colorMode={theme} width={180} height={20} />
+          </View>
+          <View style={{ height: 16 }} />
+          <Skeleton
+            colorMode={theme}
+            width="100%"
+            height={48}
+            radius={8}
+            style={{ marginBottom: 40 }}
+          />
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
@@ -317,60 +522,141 @@ export default function BookingPageScreen() {
           is24Hour={false}
         />
 
-        <View className="mb-6">
-          <Text
-            className={`text-lg font-medium mb-2 ${themeStyles.textPrimary}`}
-          >
-            Select Cuisine:
-          </Text>
-          <View
-            className={`border ${themeStyles.borderColor} rounded-lg ${themeStyles.pickerBg}`}
-          >
-            <Picker
-              selectedValue={selectedCuisine}
-              onValueChange={handleCuisineChange}
-              style={{ color: theme === 'dark' ? '#D1D5DB' : '#000000' }}
+        {!isSpecificCook && (
+          <View className="mb-6">
+            <Text
+              className={`text-lg font-medium mb-2 ${themeStyles.textPrimary}`}
             >
-              {Object.keys(pricing).map((cuisine) => (
-                <Picker.Item key={cuisine} label={cuisine} value={cuisine} />
-              ))}
-            </Picker>
+              Select Cuisine:
+            </Text>
+            <View
+              className={`border ${themeStyles.borderColor} rounded-lg ${themeStyles.pickerBg}`}
+            >
+              <Picker
+                selectedValue={selectedCuisine}
+                onValueChange={handleCuisineChange}
+                style={{ color: theme === 'dark' ? '#D1D5DB' : '#000000' }}
+              >
+                <Picker.Item label="Select Cuisine" value="" />
+                {uniqueCuisines.map((cuisine) => (
+                  <Picker.Item key={cuisine} label={cuisine} value={cuisine} />
+                ))}
+              </Picker>
+            </View>
+          </View>
+        )}
+
+        {isSpecificCook && specificCook?.cuisine && (
+          <View className="mb-6">
+            <Text
+              className={`text-base font-medium mb-2 ${themeStyles.textPrimary}`}
+            >
+              Cuisines:
+            </Text>
+            <View className="flex-row flex-wrap gap-2">
+              <Text className={`text-lg ${themeStyles.textAccent}`}>
+                {specificCook.cuisine.split(', ').join(' • ')}
+              </Text>
+            </View>
+          </View>
+        )}
+
+        {selectedCuisine && (
+          <View className="mb-6">
+            <Text
+              className={`text-lg font-medium mb-2 ${themeStyles.textPrimary}`}
+            >
+              {isSpecificCook ? 'Selected Cook:' : 'Select Cook:'}
+            </Text>
+            {selectedCook && (
+              <View
+                className={`flex-row items-center p-3 rounded-lg ${themeStyles.cardBg} mb-2`}
+              >
+                <Image
+                  source={{ uri: selectedCook.image }}
+                  className="w-12 h-12 rounded-full mr-3"
+                />
+                <View className="flex-1">
+                  <Text className={`font-semibold ${themeStyles.textPrimary}`}>
+                    Chef {selectedCook.name}
+                  </Text>
+                  <Text className={`text-sm ${themeStyles.textSecondary}`}>
+                    {selectedCuisine}
+                  </Text>
+                </View>
+                {!isSpecificCook && (
+                  <TouchableOpacity
+                    onPress={() => setShowCookList(!showCookList)}
+                    className="p-2"
+                  >
+                    <Feather
+                      name={showCookList ? 'chevron-up' : 'chevron-down'}
+                      size={20}
+                      color={themeStyles.iconColor}
+                    />
+                  </TouchableOpacity>
+                )}
+              </View>
+            )}
+            {showCookList && !isSpecificCook && matchingCooks.length > 1 && (
+              <View>
+                <Text className={`text-sm ${themeStyles.textHint} mb-2`}>
+                  Choose from available chefs:
+                </Text>
+                <FlatList
+                  horizontal
+                  data={matchingCooks}
+                  renderItem={renderCookCard}
+                  keyExtractor={(item) => item.id}
+                  showsHorizontalScrollIndicator={false}
+                />
+              </View>
+            )}
+            {matchingCooks.length === 0 && (
+              <Text className={`text-sm ${themeStyles.textHint}`}>
+                No cooks available for this cuisine.
+              </Text>
+            )}
+          </View>
+        )}
+
+        <View className="mb-6 p-4 rounded-lg border border-gray-300">
+          <Text
+            className={`text-lg font-semibold mb-2 ${themeStyles.textPrimary}`}
+          >
+            Pricing Details
+          </Text>
+
+          <View className="flex-row justify-between items-center mb-1">
+            <Text className={`text-base ${themeStyles.textSecondary}`}>
+              Price per guest:
+            </Text>
+            <View className="flex-row items-center">
+              <Text
+                className={`text-base font-bold ${themeStyles.textPrimary}`}
+              >
+                ₹{discountedPrice.toFixed(0)}
+              </Text>
+              {isDiscounted && (
+                <Text
+                  className={`ml-2 ${themeStyles.discountText} font-medium`}
+                >
+                  (10% off)
+                </Text>
+              )}
+            </View>
+          </View>
+
+          <View className="flex-row justify-between items-center mt-2 pt-2 border-t border-gray-300 dark:border-gray-700">
+            <Text className={`text-base ${themeStyles.textSecondary}`}>
+              Total Amount:
+            </Text>
+            <Text className={`text-lg font-bold ${themeStyles.textPrimary}`}>
+              ₹{totalAmount.toFixed(0)}
+            </Text>
           </View>
         </View>
 
-        <View className="mb-6 flex-row">
-          <Text className={`text-lg ${themeStyles.textPrimary}`}>
-            Cook:{' '}
-            <Text className={`font-medium ${themeStyles.textAccent}`}>
-              {cookName}
-            </Text>
-          </Text>
-        </View>
-        <View className="mb-6">
-          <Text
-            className={`text-lg font-medium mb-2 ${themeStyles.textPrimary}`}
-          >
-            Pricing Details:
-          </Text>
-          <Text className={`text-base ${themeStyles.textPrimary}`}>
-            Price per guest:{' '}
-            <Text className={`font-medium ${themeStyles.textSecondary}`}>
-              ₹{cookPrice.toFixed(2)}
-              {isDiscounted && (
-                <Text className={themeStyles.discountText}>
-                  {' '}
-                  (10% discount applied)
-                </Text>
-              )}
-            </Text>
-          </Text>
-          <Text className={`text-base ${themeStyles.textPrimary}`}>
-            Total Amount:{' '}
-            <Text className={`font-medium ${themeStyles.textSecondary}`}>
-              ₹{totalAmount.toFixed(2)}
-            </Text>
-          </Text>
-        </View>
         <Text className={`text-lg font-medium mb-2 ${themeStyles.textPrimary}`}>
           Choose Meal
         </Text>
@@ -432,6 +718,12 @@ export default function BookingPageScreen() {
           </Text>
         </TouchableOpacity>
       </ScrollView>
+      <SnackbarComponent
+        visible={snackbarVisible}
+        message={snackbarMessage}
+        type={snackbarType}
+        onDismiss={() => setSnackbarVisible(false)}
+      />
     </SafeAreaView>
   );
 }

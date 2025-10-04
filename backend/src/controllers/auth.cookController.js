@@ -188,6 +188,10 @@ export const getAllCooks = async (req, res) => {
       cuisine: cook.cuisineSpecialties.join(", "),
       image: cook.profileImage,
       experienceLevel: cook.experienceLevel,
+      pricing: cook.pricing,
+      specialties: cook.specialties,
+      bio:cook.bio,
+      servicesOffered:cook.servicesOffered,
     }));
     res.status(200).json(formattedCooks);
   } catch (error) {
@@ -248,6 +252,42 @@ export const getCooksByCuisine = async (req, res) => {
     res.status(200).json(formattedCooks);
   } catch (error) {
     console.log("Error in getCooksByCuisine controller", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const updateCookFcmToken = async (req, res) => {
+  try {
+    const { fcmToken } = req.body;
+    if (!fcmToken) {
+      return res.status(400).json({ message: "FCM token is required" });
+    }
+    const updatedCook = await Cook.findByIdAndUpdate(
+      req.user._id,
+      { fcmToken },
+      { new: true }
+    ).select("-password");
+    if (!updatedCook) {
+      return res.status(404).json({ message: "Cook not found" });
+    }
+    res.status(200).json({
+      cook: {
+        id: updatedCook._id,
+        username: updatedCook.username,
+        email: updatedCook.email,
+        profileImage: updatedCook.profileImage,
+        fcmToken: updatedCook.fcmToken,
+        location: updatedCook.location,
+        cuisineSpecialties: updatedCook.cuisineSpecialties,
+        specialties: updatedCook.specialties,
+        bio: updatedCook.bio,
+        experienceLevel: updatedCook.experienceLevel,
+        servicesOffered: updatedCook.servicesOffered,
+        pricing: updatedCook.pricing,
+      },
+    });
+  } catch (error) {
+    console.error("Error controller updating FCM token:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
