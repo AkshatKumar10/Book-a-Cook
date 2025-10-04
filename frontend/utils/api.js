@@ -2,8 +2,6 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {API_BASE_URL} from '@env';
 
-const API_BASE_URL = process.env.API_BASE_URL;
-
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: { 'Content-Type': 'application/json' },
@@ -169,5 +167,89 @@ export const getCooksByCuisine = async (cuisine) => {
     return response.data;
   } catch (error) {
     console.error('Error fetching cooks by cuisine:', error);
+  }
+};
+
+export const updateUserFcmToken = async (data) => {
+  try {
+    const token = await getUserToken();
+    const response = await api.post('/api/auth/update-fcm', data, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating user FCM token:', error);
+  }
+};
+
+export const updateCookFcmToken = async (data) => {
+  try {
+    const token = await getCookToken();
+    const response = await api.post('/api/cook/update-fcm', data, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating cook FCM token:', error);
+  }
+};
+
+export const createBooking = async (bookingData) => {
+  try {
+    const token = await getUserToken();
+    const response = await api.post('/api/bookings/create', bookingData, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating booking:', error);
+  }
+};
+
+export const getUserBookings = async () => {
+  try {
+    const token = await getUserToken();
+    const response = await api.get('/api/bookings/user', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data.bookings;
+  } catch (error) {
+    console.error('Error fetching user bookings:', error);
+  }
+};
+
+export const getCookBookings = async () => {
+  try {
+    const token = await getCookToken();
+    const response = await api.get('/api/bookings/cook', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data.bookings;
+  } catch (error) {
+    console.error('Error fetching cook bookings:', error);
+  }
+};
+
+export const acceptBooking = async (bookingId) => {
+  try {
+    const token = await getCookToken();
+    const response = await api.put(`/api/bookings/cook/${bookingId}/accept`, {}, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error accepting booking:', error);
+  }
+};
+
+export const declineBooking = async (bookingId, reason = '') => {
+  try {
+    const token = await getCookToken();
+    const response = await api.put(`/api/bookings/cook/${bookingId}/decline`, { reason }, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error declining booking:', error);
   }
 };

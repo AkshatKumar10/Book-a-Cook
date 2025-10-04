@@ -5,9 +5,7 @@ import WelcomeScreen from '../screens/WelcomeScreen';
 import CookProfileScreen from '../screens/CookProfileScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import MyBookingsScreen from '../screens/MyBookingsScreen';
-import HowItWorksScreen from '../screens/HowItWorksScreen';
 import EditProfileScreen from '../screens/EditProfileScreen';
-import FAQScreen from '../screens/FAQScreen';
 import BottomNavigation from './bottomNavigation';
 import CuisineDetails from '../screens/CuisineDetails';
 import CheckoutPageScreen from '../screens/CheckoutPageScreen';
@@ -19,9 +17,17 @@ import UserSignInScreen from '../screens/UserSignInScreen';
 import UserSignUpScreen from '../screens/UserSignUpScreen';
 import CookSignInScreen from '../screens/CookSignInScreen';
 import CookSignUpScreen from '../screens/CookSignUpScreen';
-import { getUserToken, getCookToken } from '../utils/api.js';
+import {
+  getUserToken,
+  getCookToken,
+  updateCookFcmToken,
+  updateUserFcmToken,
+} from '../utils/api.js';
 import CookDashboardScreen from '../screens/CookDashboardScreen.js';
 import CuisineChefsScreen from '../screens/CuisineChefsScreen.js';
+import { getFcmToken } from '../utils/fcmUtils.js';
+import CookBookingsScreen from '../screens/CookBookingsScreen.js';
+import CookListScreen from '../screens/CookListScreen.js';
 
 const Stack = createNativeStackNavigator();
 
@@ -41,8 +47,17 @@ export default function AppNavigation() {
       const cookToken = await getCookToken();
       if (userToken) {
         setInitialRoute('HomeTabs');
+        const token = await getFcmToken();
+        if (token) {
+          await updateUserFcmToken({ fcmToken: token });
+        }
       } else if (cookToken) {
         setInitialRoute('CookDashboard');
+        const token = await getFcmToken();
+        console.log("Token",token);
+        if (token) {
+          await updateCookFcmToken({ fcmToken: token });
+        }
       } else {
         setInitialRoute('Welcome');
       }
@@ -114,6 +129,13 @@ export default function AppNavigation() {
           }}
         />
         <Stack.Screen
+          name="CookList"
+          component={CookListScreen}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
           name="HomeTabs"
           component={BottomNavigation}
           options={{
@@ -135,23 +157,15 @@ export default function AppNavigation() {
           }}
         />
         <Stack.Screen
-          name="FAQScreen"
-          component={FAQScreen}
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="HowItWorks"
-          component={HowItWorksScreen}
-          options={{
-            headerShown: false,
-          }}
-        />
-
-        <Stack.Screen
           name="CookProfile"
           component={CookProfileScreen}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="CookBookings"
+          component={CookBookingsScreen}
           options={{
             headerShown: false,
           }}

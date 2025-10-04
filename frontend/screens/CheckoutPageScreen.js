@@ -1,23 +1,20 @@
 import { useState, useEffect, useContext } from 'react';
-import { View, Text, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Alert,
+  ScrollView,
+  Image,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Navbar from '../components/Navbar';
 import { ThemeContext } from '../context/ThemeContext';
 import { StatusBar } from 'expo-status-bar';
-import * as Notifications from 'expo-notifications';
-import * as Device from 'expo-device';
 import { RAZORPAY_KEY_ID } from '@env';
-
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowBanner: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
-});
+import { createBooking } from '../utils/api';
 
 export default function CheckoutPageScreen() {
   const [showWebView, setShowWebView] = useState(false);
@@ -26,6 +23,7 @@ export default function CheckoutPageScreen() {
   const { theme } = useContext(ThemeContext);
 
   const {
+    cookId,
     mealType,
     guestCount,
     selectedDate,
@@ -33,7 +31,6 @@ export default function CheckoutPageScreen() {
     selectedCuisine,
     cookName,
     totalAmount,
-    cookRating,
     cookImage,
     // address,
     isDiscounted = false,
@@ -53,110 +50,19 @@ export default function CheckoutPageScreen() {
     webViewText: theme === 'dark' ? '#D1D5DB' : '#333333',
   };
 
-  useEffect(() => {
-    const requestPermissions = async () => {
-      if (Device.isDevice) {
-        const { status } = await Notifications.requestPermissionsAsync();
-        if (status !== 'granted') {
-          console.warn('Notification permissions not granted!');
-        }
-      } else {
-        console.warn('Use physical device for notifications.');
-      }
-    };
-    requestPermissions();
-  }, []);
-
   const originalAmount = isDiscounted ? totalAmount / 0.9 : totalAmount;
   const discountAmount = isDiscounted ? originalAmount * 0.1 : 0;
   const finalAmount = isDiscounted ? totalAmount : originalAmount;
 
-  const formatDateTime = (dateStr, timeStr) => {
-    if (!dateStr || !timeStr) return '';
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '';
     const [day, month, year] = dateStr.split('/').map(Number);
-
-    const convertTo24Hour = (time12h) => {
-      const [time, modifier] = time12h.toLowerCase().split(/(am|pm)/);
-      let [hours, minutes] = time.split(':').map(Number);
-
-      if (modifier === 'pm' && hours !== 12) hours += 12;
-      if (modifier === 'am' && hours === 12) hours = 0;
-
-      return `${hours.toString().padStart(2, '0')}:${minutes
-        .toString()
-        .padStart(2, '0')}`;
-    };
-
-    const time24 = convertTo24Hour(timeStr);
-    const date = new Date(`${year}-${month}-${day}T${time24}`);
-
-    return date.toLocaleString('en-US', {
+    const date = new Date(year, month - 1, day);
+    return date.toLocaleDateString('en-US', {
       month: 'long',
       day: 'numeric',
       year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
     });
-  };
-
-  const formattedDateTime = formatDateTime(selectedDate, selectedTime);
-
-  const scheduleBookingNotification = async () => {
-    try {
-      const time = new Date(Date.now() + 10 * 1000);
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: 'Booking Confirmed!',
-          body: `Your ${mealType} booking with Chef ${cookName} for ${guestCount} guests on ${formattedDateTime} is confirmed.`,
-        },
-        trigger: {
-          type: 'date',
-          date: time,
-        },
-      });
-    } catch (e) {
-      console.error('Failed to schedule notification', e);
-    }
-  };
-
-  const saveBooking = async () => {
-    try {
-      const newBooking = {
-        id: Date.now(),
-        createdAt: new Date().toISOString(),
-        cook: {
-          name: cookName,
-          cuisine: selectedCuisine,
-          rating: cookRating,
-          image: cookImage,
-        },
-        status: 'upcoming',
-        date: selectedDate,
-        time: selectedTime,
-        pricing: `₹${finalAmount.toFixed(2)}`,
-        mealType,
-        guestCount,
-        discount: isDiscounted ? '10% off' : 'None',
-      };
-      const existingBookings = await AsyncStorage.getItem('bookings');
-      const bookings = existingBookings ? JSON.parse(existingBookings) : [];
-      bookings.push(newBooking);
-      await AsyncStorage.setItem('bookings', JSON.stringify(bookings));
-      await scheduleBookingNotification();
-      navigation.reset({
-        index: 1,
-        routes: [
-          { name: 'HomeTabs', params: { screen: 'Home' } },
-          {
-            name: 'HomeTabs',
-            params: { screen: 'Bookings', params: { refresh: true } },
-          },
-        ],
-      });
-    } catch (error) {
-      console.error('Error saving booking:', error);
-    }
   };
 
   const razorpayHTML = `
@@ -210,11 +116,35 @@ export default function CheckoutPageScreen() {
   const handleWebViewMessage = (event) => {
     const data = JSON.parse(event.nativeEvent.data);
     if (data.event === 'SUCCESS') {
-      Alert.alert(
-        'Payment Successful',
-        'Thank you for your payment!\nYour booking is confirmed.',
-      );
-      saveBooking();
+      const bookingData = {
+        cookId,
+        mealType,
+        guestCount,
+        selectedDate,
+        selectedTime,
+        selectedCuisine,
+        totalAmount: finalAmount,
+        paymentId: data.response.razorpay_payment_id,
+      };
+      createBooking(bookingData)
+        .then(() => {
+          Alert.alert(
+            'Booking Created!',
+            'Your booking is pending cook approval.',
+          );
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'HomeTabs', params: { screen: 'Home' } }],
+          });
+        })
+        
+        .catch((error) => {
+          console.error('Error on payment', error);
+          Alert.alert(
+            'Payment Error',
+            'Failed to create booking. Please contact support.',
+          );
+        });
       setShowWebView(false);
     } else if (data.event === 'DISMISS') {
       Alert.alert(
@@ -250,79 +180,71 @@ export default function CheckoutPageScreen() {
       <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
       <Navbar title="Checkout" onBackPress={() => navigation.goBack()} />
       <ScrollView className="px-4 py-6" showsVerticalScrollIndicator={false}>
-        <Text className={`text-2xl font-bold ${themeStyles.textPrimary}`}>
-          Order Summary
+        <Text className={`text-xl font-semibold ${themeStyles.textPrimary}`}>
+          Cook
+        </Text>
+        <View className="mt-2 flex-row items-center gap-12">
+          <Image
+            source={{ uri: cookImage }}
+            className="w-24 h-24 rounded-full"
+          />
+          <View>
+            <Text className={`text-xl mt-2 ${themeStyles.textPrimary}`}>
+              Chef {cookName}
+            </Text>
+            <Text className={`text-lg ${themeStyles.textAccent}`}>
+              ID: {`${cookName.slice(0, 3).toUpperCase()}-${cookId.slice(-4)}`}
+            </Text>
+          </View>
+        </View>
+
+        <Text
+          className={`mt-6 text-xl font-semibold ${themeStyles.textPrimary}`}
+        >
+          Booking Details
         </Text>
 
-        <View className="mt-6 flex-row justify-between items-center">
-          <View>
-            <Text className={`text-xl ${themeStyles.textPrimary}`}>
-              Meal Type
-            </Text>
-            <Text className={`text-lg ${themeStyles.textAccent}`}>
-              {mealType}
-            </Text>
-          </View>
-          <Text className={`text-xl ${themeStyles.textSecondary}`}>
-            {mealType}
-          </Text>
-        </View>
-
-        <View className="mt-6 flex-row justify-between items-center">
-          <View>
-            <Text className={`text-xl ${themeStyles.textPrimary}`}>
-              Number of Guests
-            </Text>
-            <Text className={`text-lg ${themeStyles.textAccent}`}>
-              {guestCount}
-            </Text>
-          </View>
-          <Text className={`text-xl ${themeStyles.textSecondary}`}>
-            {guestCount}
-          </Text>
-        </View>
-
-        <View className="mt-6 flex-row justify-between items-center">
-          <View>
-            <Text className={`text-xl ${themeStyles.textPrimary}`}>
-              Date & Time
-            </Text>
-            <Text className={`text-lg ${themeStyles.textAccent}`}>
-              {formattedDateTime}
-            </Text>
-          </View>
-          <Text className={`text-xl ${themeStyles.textSecondary}`}>
-            {formattedDateTime}
-          </Text>
-        </View>
-
-        <View className="mt-6 flex-row justify-between items-center">
-          <View>
-            <Text className={`text-xl ${themeStyles.textPrimary}`}>
-              Cuisine
-            </Text>
-            <Text className={`text-lg ${themeStyles.textAccent}`}>
-              {selectedCuisine}
-            </Text>
-          </View>
-          <Text className={`text-xl ${themeStyles.textSecondary}`}>
+        <View className="mt-4 flex-row justify-between items-center border-b border-red-100 pb-4">
+          <Text className={`text-lg text-red-300 w-1/5`}>Cuisine</Text>
+          <Text className={`text-lg ${themeStyles.textSecondary} flex-1 pl-12`}>
             {selectedCuisine}
           </Text>
         </View>
 
-        <View className="mt-6 flex-row justify-between items-center">
-          <View>
-            <Text className={`text-xl ${themeStyles.textPrimary}`}>
-              Assigned Cook
-            </Text>
-            <Text className={`text-lg ${themeStyles.textAccent}`}>
-              Chef {cookName}
-            </Text>
-          </View>
-          <Text className={`text-xl ${themeStyles.textSecondary}`}>
-            Chef {cookName}
+        <View className="flex-row justify-between items-center border-b border-red-100 py-4">
+          <Text className={`text-lg  text-red-300 w-1/5`}>Meal Type</Text>
+          <Text className={`text-lg ${themeStyles.textSecondary} flex-1 pl-12`}>
+            {mealType}
           </Text>
         </View>
+
+        <View className="flex-row justify-between items-start border-b border-red-100 py-4">
+          <Text className={`text-lg  text-red-300 w-1/5`}>
+            Number of Guests
+          </Text>
+          <Text className={`text-lg ${themeStyles.textSecondary} flex-1 pl-12`}>
+            {guestCount}
+          </Text>
+        </View>
+
+        <View className="flex-row justify-between items-center border-b border-red-100 py-4">
+          <Text className={`text-lg  text-red-300 w-1/5`}>Date</Text>
+          <Text className={`text-lg ${themeStyles.textSecondary} flex-1 pl-12`}>
+            {formatDate(selectedDate)}
+          </Text>
+        </View>
+
+        <View className="flex-row justify-between items-center py-4">
+          <Text className={`text-lg  text-red-300 w-1/5`}>Time</Text>
+          <Text className={`text-lg ${themeStyles.textSecondary} flex-1 pl-12`}>
+            {selectedTime}
+          </Text>
+        </View>
+        <Text
+          className={`text-xl mt-6 font-semibold ${themeStyles.textPrimary}`}
+        >
+          Payment Summary
+        </Text>
 
         {/* <View className="mt-6">
           <Text className={`text-xl ${themeStyles.textPrimary}`}>Address</Text>
@@ -333,15 +255,9 @@ export default function CheckoutPageScreen() {
           </View>
         </View> */}
 
-        <Text className={`text-2xl font-bold mt-12 ${themeStyles.textPrimary}`}>
-          Payment Details
-        </Text>
-
         <View className="mt-6">
           <View className="flex-row justify-between items-center">
-            <Text className={`text-xl ${themeStyles.textPrimary}`}>
-              Subtotal
-            </Text>
+            <Text className={`text-xl text-red-300 border-b`}>Subtotal</Text>
             <Text className={`text-xl ${themeStyles.textSecondary}`}>
               ₹{originalAmount.toFixed(2)}
             </Text>
@@ -373,12 +289,8 @@ export default function CheckoutPageScreen() {
             </>
           )}
           {!isDiscounted && (
-            <View
-              className={`border-t ${themeStyles.borderColor} mt-2 pt-2 flex-row justify-between items-center`}
-            >
-              <Text className={`text-xl font-bold ${themeStyles.textPrimary}`}>
-                Total
-              </Text>
+            <View className={`mt-2 pt-2 flex-row justify-between items-center`}>
+              <Text className={`text-xl font-bold text-red-300`}>Total</Text>
               <Text
                 className={`text-xl font-bold ${themeStyles.textSecondary}`}
               >
@@ -395,7 +307,7 @@ export default function CheckoutPageScreen() {
           className={`${themeStyles.buttonBg} py-4 rounded-lg items-center`}
         >
           <Text className={`text-lg font-medium ${themeStyles.buttonText}`}>
-            Confirm Order
+            Pay ₹{finalAmount.toFixed(2)}
           </Text>
         </TouchableOpacity>
       </View>

@@ -56,7 +56,11 @@ const cookSchema = new mongoose.Schema(
       of: Number,
       required: true,
       default: {},
-    }
+    },
+    fcmToken: { 
+      type: String,
+      default: "",
+    },
   },
   { timestamps: true }
 );

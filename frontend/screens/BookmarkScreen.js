@@ -23,7 +23,7 @@ const BookmarkScreen = () => {
     <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
       <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
       <Navbar title="Saved" />
-      <ScrollView className="px-4 mt-4">
+      <ScrollView className="px-4 mt-4" showsVerticalScrollIndicator={false}>
         {bookmarkedCooks.length === 0 ? (
           <View className="flex-1 justify-center items-center mt-10">
             <Text className={`text-xl ${themeStyles.textNoResults}`}>

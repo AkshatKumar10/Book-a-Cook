@@ -20,18 +20,6 @@ const useCooksData = () => {
     fetchCooks();
   }, []);
 
-  // const allCooksPricing = cooksData.reduce((acc, cook) => {
-  //   const cuisineType = cook.cuisine;
-  //   const pricing = cook.pricing || { perDish: 0, perHour: 0 };
-  //   acc[cuisineType] = {
-  //     cook: cook.name,
-  //     price: pricing.perDish || 0,
-  //     rating: cook.rating,
-  //     image: cook.profileImage || cook.image,
-  //   };
-  //   return acc;
-  // }, {});
-
   return { cooksData, cooksDataLoading };
 };
 

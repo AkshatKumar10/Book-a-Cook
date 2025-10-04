@@ -1,21 +1,18 @@
 import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
-import {
-  FontAwesome5,
-  MaterialIcons,
-  Ionicons,
-  AntDesign,
-} from '@expo/vector-icons';
+import { FontAwesome5, MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Navbar from '../components/Navbar';
-import { useContext, useState, useEffect } from 'react';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { useContext, useState } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 import { StatusBar } from 'expo-status-bar';
 import { removeUserToken } from '../utils/api';
 import { useUser } from '../hooks/useUser';
 import SnackbarComponent from '../components/SnackbarComponent';
+import { Skeleton } from 'moti/skeleton';
 
 const ProfileScreen = () => {
   const { user, userLoading } = useUser();
@@ -51,10 +48,42 @@ const ProfileScreen = () => {
       <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
         <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
         <Navbar title="Profile" />
-        <View className="flex-1 items-center justify-center">
-          <Text className={`text-lg ${themeStyles.textPrimary}`}>
-            Loading...
-          </Text>
+        <View className="flex-1 px-4">
+          <View className="flex items-center mt-10">
+            <Skeleton colorMode={theme} width={96} height={96} radius="round" />
+            <View style={{ height: 12 }} />
+            <Skeleton colorMode={theme} width={120} height={20} />
+            <View style={{ height: 8 }} />
+            <Skeleton colorMode={theme} width={160} height={16} />
+          </View>
+          <ScrollView
+            className="flex-1 mt-10"
+            contentContainerStyle={{ paddingBottom: 20 }}
+            showsVerticalScrollIndicator={false}
+          >
+            {[...Array(6)].map((_, index) => (
+              <View
+                key={index}
+                className={`flex-row items-center justify-between p-3 border-b ${themeStyles.borderColor}`}
+              >
+                <View className="flex-row items-center gap-4">
+                  <Skeleton
+                    colorMode={theme}
+                    width={36}
+                    height={36}
+                    radius="round"
+                  />
+                  <Skeleton colorMode={theme} width="60%" height={20} />
+                </View>
+                <Skeleton
+                  colorMode={theme}
+                  width={20}
+                  height={20}
+                  radius="round"
+                />
+              </View>
+            ))}
+          </ScrollView>
         </View>
       </SafeAreaView>
     );
@@ -77,7 +106,6 @@ const ProfileScreen = () => {
             color={themeStyles.iconColor}
           />
         )}
-
         <Text
           className={`font-bold text-center text-lg ${themeStyles.textPrimary}`}
         >
@@ -90,13 +118,14 @@ const ProfileScreen = () => {
       <ScrollView
         className="flex-1 mt-10"
         contentContainerStyle={{ paddingBottom: 20 }}
+        showsVerticalScrollIndicator={false}
       >
         <TouchableOpacity
           onPress={() => navigation.navigate('EditProfileScreen')}
-          className={`flex-row items-center p-4 border-b ${themeStyles.borderColor}`}
+          className={`flex-row items-center p-3 border-b ${themeStyles.borderColor}`}
         >
           <View
-            className={`w-8 h-8 items-center justify-center ${themeStyles.buttonBg} rounded-full mr-4`}
+            className={`w-9 h-9 items-center justify-center ${themeStyles.buttonBg} rounded-full mr-4`}
           >
             <Ionicons name="person" size={20} color={themeStyles.iconColor} />
           </View>
@@ -110,11 +139,33 @@ const ProfileScreen = () => {
           />
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => navigation.navigate('MyBookings')}
-          className={`flex-row items-center p-4 border-b ${themeStyles.borderColor}`}
+          onPress={() => navigation.navigate('CookList')}
+          className={`flex-row items-center p-3 border-b ${themeStyles.borderColor}`}
         >
           <View
-            className={`w-8 h-8 items-center justify-center ${themeStyles.buttonBg} rounded-full mr-4`}
+            className={`w-9 h-9 items-center justify-center ${themeStyles.buttonBg} rounded-full mr-4`}
+          >
+            <MaterialCommunityIcons
+              name="chef-hat"
+              size={20}
+              color={themeStyles.iconColor}
+            />
+          </View>
+          <Text className={`flex-1 text-lg ${themeStyles.textPrimary}`}>
+            Chefs
+          </Text>
+          <Ionicons
+            name="chevron-forward"
+            size={20}
+            color={themeStyles.iconColor}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('MyBookings')}
+          className={`flex-row items-center p-3 border-b ${themeStyles.borderColor}`}
+        >
+          <View
+            className={`w-9 h-9 items-center justify-center ${themeStyles.buttonBg} rounded-full mr-4`}
           >
             <FontAwesome5
               name="calendar-alt"
@@ -133,10 +184,10 @@ const ProfileScreen = () => {
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => Linking.openURL('mailto:bookachef@gmail.com')}
-          className={`flex-row items-center p-4 border-b ${themeStyles.borderColor}`}
+          className={`flex-row items-center p-3 border-b ${themeStyles.borderColor}`}
         >
           <View
-            className={`w-8 h-8 items-center justify-center ${themeStyles.buttonBg} rounded-full mr-4`}
+            className={`w-9 h-9 items-center justify-center ${themeStyles.buttonBg} rounded-full mr-4`}
           >
             <FontAwesome5
               name="phone"
@@ -154,55 +205,11 @@ const ProfileScreen = () => {
           />
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => navigation.navigate('HowItWorks')}
-          className={`flex-row items-center p-4 border-b ${themeStyles.borderColor}`}
-        >
-          <View
-            className={`w-8 h-8 items-center justify-center ${themeStyles.buttonBg} rounded-full mr-4`}
-          >
-            <AntDesign
-              name="info-circle"
-              size={20}
-              color={themeStyles.iconColor}
-            />
-          </View>
-          <Text className={`flex-1 text-lg ${themeStyles.textPrimary}`}>
-            How It Works
-          </Text>
-          <Ionicons
-            name="chevron-forward"
-            size={20}
-            color={themeStyles.iconColor}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => navigation.navigate('FAQScreen')}
-          className={`flex-row items-center p-4 border-b ${themeStyles.borderColor}`}
-        >
-          <View
-            className={`w-8 h-8 items-center justify-center ${themeStyles.buttonBg} rounded-full mr-4`}
-          >
-            <MaterialIcons
-              name="live-help"
-              size={20}
-              color={themeStyles.iconColor}
-            />
-          </View>
-          <Text className={`flex-1 text-lg ${themeStyles.textPrimary}`}>
-            FAQ
-          </Text>
-          <Ionicons
-            name="chevron-forward"
-            size={20}
-            color={themeStyles.iconColor}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
           onPress={toggleTheme}
-          className={`flex-row items-center p-4 border-b ${themeStyles.borderColor}`}
+          className={`flex-row items-center p-3 border-b ${themeStyles.borderColor}`}
         >
           <View
-            className={`w-8 h-8 items-center justify-center ${themeStyles.buttonBg} rounded-full mr-4`}
+            className={`w-9 h-9 items-center justify-center ${themeStyles.buttonBg} rounded-full mr-4`}
           >
             <MaterialIcons
               name={theme === 'dark' ? 'light-mode' : 'dark-mode'}
@@ -223,10 +230,10 @@ const ProfileScreen = () => {
         </TouchableOpacity>
         <TouchableOpacity
           onPress={handleSignOut}
-          className={`flex-row items-center p-4 border-b ${themeStyles.borderColor}`}
+          className={`flex-row items-center p-3 border-b ${themeStyles.borderColor}`}
         >
           <View
-            className={`w-8 h-8 items-center justify-center ${themeStyles.buttonBg} rounded-full mr-4`}
+            className={`w-9 h-9 items-center justify-center ${themeStyles.buttonBg} rounded-full mr-4`}
           >
             <MaterialIcons
               name="logout"

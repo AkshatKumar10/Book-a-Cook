@@ -68,19 +68,12 @@ export default function HomeScreen() {
   const filteredCooks = cooksData.filter((cook) => {
     const matchesSearch =
       cook.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      cook.cuisine.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      cook.specialties.some((specialty) =>
-        specialty.toLowerCase().includes(searchQuery.toLowerCase()),
-      );
+      cook.cuisine.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCuisine = selectedCuisine
       ? cook.cuisine.split(', ').includes(selectedCuisine)
       : true;
     return matchesSearch && matchesCuisine;
   });
-
-  // const filteredCuisines = Object.keys(cuisineImages).filter((cuisine) =>
-  //   filteredCooks.some((cook) => cook.cuisine.includes(cuisine)),
-  // );
 
   useFocusEffect(
     useCallback(() => {
@@ -137,6 +130,10 @@ export default function HomeScreen() {
       'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcToiQgEuXfoj_fJSwnsa_aUd-g6dIAsVbgx0g&s',
   };
 
+  const filteredCuisineList = Object.keys(cuisineImages).filter((cuisine) =>
+    cuisine.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+
   if (cooksDataLoading) {
     return (
       <SafeAreaView
@@ -145,12 +142,28 @@ export default function HomeScreen() {
       >
         <ScrollView showsVerticalScrollIndicator={false}>
           <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
-          <View className="flex-row items-center mb-4 gap-8">
+          <View className="flex-row items-center mb-4 gap-10">
             <Skeleton colorMode={theme} width={40} height={40} radius="round" />
             <Skeleton colorMode={theme} width={'60%'} height={30} />
+            <Skeleton colorMode={theme} width={40} height={40} />
           </View>
-          <View className="mb-6">
-            <Skeleton colorMode={theme} width="100%" height={40} radius={20} />
+          <View className="flex-row mb-6 items-center gap-2">
+            <View className="flex-1">
+              <Skeleton
+                colorMode={theme}
+                width="100%"
+                height={40}
+                radius={20}
+              />
+            </View>
+            <View style={{ width: 40 }}>
+              <Skeleton
+                colorMode={theme}
+                width={40}
+                height={40}
+                radius="round"
+              />
+            </View>
           </View>
           <View className="mb-4">
             <Skeleton colorMode={theme} width={'60%'} height={30} />
@@ -242,8 +255,6 @@ export default function HomeScreen() {
               />
             </View>
           </View>
-          <View style={{ height: 30 }} />
-          <Skeleton colorMode={theme} width={'100%'} height={60} />
         </ScrollView>
       </SafeAreaView>
     );
@@ -435,7 +446,7 @@ export default function HomeScreen() {
             </View>
           ) : (
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              {filteredCooks.map((cook) => (
+              {filteredCooks.slice(0, 5).map((cook) => (
                 <View
                   key={cook.id}
                   style={{ padding: width * 0.015, width: width * 0.4 }}
@@ -495,62 +506,73 @@ export default function HomeScreen() {
           >
             Popular Cuisines
           </Text>
-          <View className="flex-row flex-wrap justify-between px-2">
-            {Object.keys(cuisineImages).map((cuisine, index) => {
-              const imageUri = cuisineImages[cuisine];
-              const cooksForCuisine = cooksData.filter((cook) =>
-                cook.cuisine.includes(cuisine),
-              );
-              return (
-                <TouchableOpacity
-                  key={index}
-                  className="rounded-xl mb-10"
-                  style={{ width: width * 0.45 }}
-                  onPress={() =>
-                    navigation.navigate('CuisineChefs', {
-                      cuisine,
-                    })
-                  }
-                >
-                  <View
-                    style={{
-                      width: '100%',
-                      height: height * 0.2,
-                      borderRadius: width * 0.02,
-                      overflow: 'hidden',
-                    }}
+          {filteredCuisineList.length === 0 ? (
+            <View className="items-center justify-center mt-4">
+              <AntDesign name="frown" size={80} color={themeStyles.empty} />
+              <Text
+                className={`ml-2 text-center mt-2 ${themeStyles.textNoResults} text-xl`}
+              >
+                No cuisines found
+              </Text>
+            </View>
+          ) : (
+            <View className="flex-row flex-wrap justify-between px-2">
+              {filteredCuisineList.map((cuisine, index) => {
+                const imageUri = cuisineImages[cuisine];
+                const cooksForCuisine = cooksData.filter((cook) =>
+                  cook.cuisine.includes(cuisine),
+                );
+                return (
+                  <TouchableOpacity
+                    key={index}
+                    className="rounded-xl mb-10"
+                    style={{ width: width * 0.45 }}
+                    onPress={() =>
+                      navigation.navigate('CuisineChefs', {
+                        cuisine,
+                      })
+                    }
                   >
-                    {!imageLoadedState[cuisine] && (
-                      <Skeleton
-                        colorMode={theme}
-                        width="100%"
-                        height="100%"
-                        radius={10}
-                      />
-                    )}
-                    <Image
-                      source={{ uri: imageUri }}
+                    <View
                       style={{
                         width: '100%',
-                        height: '100%',
+                        height: height * 0.2,
                         borderRadius: width * 0.02,
+                        overflow: 'hidden',
                       }}
-                      resizeMode="cover"
-                      onLoad={() => handleImageLoad(cuisine)}
-                    />
-                  </View>
-                  <Text
-                    className={`font-semibold text-xl mt-2 ${themeStyles.textPrimary}`}
-                  >
-                    {cuisine}
-                  </Text>
-                  <Text className={`text-base ${themeStyles.textSecondary}`}>
-                    {cooksForCuisine.length} Chefs
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
+                    >
+                      {!imageLoadedState[cuisine] && (
+                        <Skeleton
+                          colorMode={theme}
+                          width="100%"
+                          height="100%"
+                          radius={10}
+                        />
+                      )}
+                      <Image
+                        source={{ uri: imageUri }}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          borderRadius: width * 0.02,
+                        }}
+                        resizeMode="cover"
+                        onLoad={() => handleImageLoad(cuisine)}
+                      />
+                    </View>
+                    <Text
+                      className={`font-semibold text-xl mt-2 ${themeStyles.textPrimary}`}
+                    >
+                      {cuisine}
+                    </Text>
+                    <Text className={`text-base ${themeStyles.textSecondary}`}>
+                      {cooksForCuisine.length} Chefs
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          )}
         </View>
         <View className="mt-4 mb-6">
           <Text
@@ -572,13 +594,11 @@ export default function HomeScreen() {
                 Book a chef today and enjoy a discount on your first meal.
               </Text>
               <TouchableOpacity
-                // onPress={() =>
-                //   navigation.navigate('BookingPageScreen', {
-                //     pricing: allCooksPricing || {},
-                //     cuisine: Object.keys(allCooksPricing)[0] || 'North Indian',
-                //     isDiscounted: true,
-                //   })
-                // }
+                onPress={() =>
+                  navigation.navigate('BookNow', {
+                    isDiscounted: true,
+                  })
+                }
                 className={`${themeStyles.buttonBg} py-2 px-4 rounded-full mt-2 self-start`}
               >
                 <Text
@@ -603,20 +623,6 @@ export default function HomeScreen() {
             </View>
           </View>
         </View>
-        <TouchableOpacity
-          onPress={() => navigation.navigate('HowItWorks')}
-          className="rounded-lg shadow-lg overflow-hidden mx-2"
-        >
-          <LinearGradient
-            colors={['#4c8bf5', '#3f51b5']}
-            className="p-4 flex-row items-center justify-center"
-          >
-            <MaterialIcons name="info" size={30} color="white" />
-            <Text className="font-bold text-white text-center text-xl">
-              How It Works
-            </Text>
-          </LinearGradient>
-        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );

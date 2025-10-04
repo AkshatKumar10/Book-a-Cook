@@ -167,3 +167,21 @@ export const updateUserProfile = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+export const updateUserFcmToken = async (req, res) => {
+  try {
+    const { fcmToken } = req.body;
+    if (!fcmToken) {
+      return res.status(400).json({ message: "FCM token is required" });
+    }
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      { fcmToken },
+      { new: true }
+    ).select("-password");
+    res.status(200).json({ user: updatedUser });
+  } catch (error) {
+    console.error("Error updating user controller FCM token:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
