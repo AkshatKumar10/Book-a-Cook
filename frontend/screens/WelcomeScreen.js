@@ -10,7 +10,7 @@ export default function WelcomeScreen() {
   const { theme } = useContext(ThemeContext);
 
   const themeStyles = {
-    container: theme === 'dark' ? 'bg-black' : 'bg-brown-100',
+    container: theme === 'dark' ? 'bg-black' : 'bg-gray-100',
     textPrimary: theme === 'dark' ? 'text-white' : 'text-yellow-950',
     textSecondary: theme === 'dark' ? 'text-gray-300' : 'text-slate-950',
     textAccent: theme === 'dark' ? 'text-amber-500' : 'text-yellow-600',

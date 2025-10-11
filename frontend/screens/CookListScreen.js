@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   Image,
   useWindowDimensions,
+  RefreshControl,
 } from 'react-native';
 import { useContext, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -19,11 +20,11 @@ export default function CookListScreen() {
   const { height } = useWindowDimensions();
   const navigation = useNavigation();
   const { theme } = useContext(ThemeContext);
-  const { cooksData, cooksDataLoading } = useCooksData();
+  const { cooksData, cooksDataLoading, refresh, refreshing } = useCooksData();
   const [imageLoadedState, setImageLoadedState] = useState({});
 
   const themeStyles = {
-    container: theme === 'dark' ? 'bg-black' : 'bg-white',
+    container: theme === 'dark' ? 'bg-black' : 'bg-gray-100',
     textPrimary: theme === 'dark' ? 'text-white' : 'text-gray-800',
     textSecondary: theme === 'dark' ? 'text-gray-300' : 'text-gray-600',
     textAccent: theme === 'dark' ? 'text-red-300' : 'text-red-500',
@@ -112,7 +113,6 @@ export default function CookListScreen() {
                       width={80}
                       height={24}
                       radius={12}
-                      
                     />
                   ))}
                 </View>
@@ -141,6 +141,13 @@ export default function CookListScreen() {
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={{ paddingHorizontal: 8, paddingVertical: 10 }}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={refresh}
+              tintColor={theme === 'dark' ? 'white' : 'black'}
+            />
+          }
         />
       )}
     </SafeAreaView>

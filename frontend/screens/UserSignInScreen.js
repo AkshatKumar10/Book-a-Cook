@@ -30,7 +30,7 @@ export default function UserSignInScreen() {
   const [snackbarType, setSnackbarType] = useState('success');
 
   const themeStyles = {
-    container: theme === 'dark' ? 'bg-black' : 'bg-white',
+    container: theme === 'dark' ? 'bg-black' : 'bg-gray-100',
     textPrimary: theme === 'dark' ? 'text-white' : 'text-gray-800',
     textSecondary: theme === 'dark' ? 'text-gray-300' : 'text-gray-600',
     textAccent: theme === 'dark' ? 'text-amber-500' : 'text-amber-700',
@@ -56,7 +56,7 @@ export default function UserSignInScreen() {
       console.error('Registration error:', error);
       const errorMessage = error.response?.data?.message;
       Keyboard.dismiss();
-      setSnackbarMessage(errorMessage);
+      setSnackbarMessage(errorMessage || "Error while logging in. Try again.");
       setSnackbarType('error');
       setSnackbarVisible(true);
     } finally {

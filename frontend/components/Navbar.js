@@ -27,7 +27,7 @@ const Navbar = ({ title, onBackPress, showBookmark = false, cook }) => {
   };
 
   const themeStyles = {
-    container: theme === 'dark' ? 'bg-black' : 'bg-white',
+    container: theme === 'dark' ? 'bg-black' : 'bg-gray-100',
     text: theme === 'dark' ? 'text-white' : 'text-gray-800',
     iconColor: theme === 'dark' ? 'white' : 'black',
     bookmarkColor:

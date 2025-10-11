@@ -15,7 +15,6 @@ import { ThemeContext } from '../context/ThemeContext';
 import { StatusBar } from 'expo-status-bar';
 import { useBookmark } from '../context/BookmarkContext';
 import { getTime } from '../utils/getTime';
-import { Calendar } from 'react-native-calendars';
 import { Skeleton } from 'moti/skeleton';
 
 const CookProfileScreen = () => {
@@ -28,7 +27,7 @@ const CookProfileScreen = () => {
   const { isBookmarked } = useBookmark();
 
   const themeStyles = {
-    container: theme === 'dark' ? 'bg-black' : 'bg-white',
+    container: theme === 'dark' ? 'bg-black' : 'bg-gray-100',
     textPrimary: theme === 'dark' ? 'text-white' : 'text-gray-800',
     textSecondary: theme === 'dark' ? 'text-gray-300' : 'text-gray-900',
     textAccent: theme === 'dark' ? 'text-red-300' : 'text-red-400',
@@ -65,7 +64,10 @@ const CookProfileScreen = () => {
       <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
         <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
         <Navbar title="Chef Profile" />
-        <ScrollView contentContainerStyle={{ paddingBottom: 10 }} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          contentContainerStyle={{ paddingBottom: 10 }}
+          showsVerticalScrollIndicator={false}
+        >
           <View className="items-center mt-4">
             <Skeleton
               colorMode={theme}
@@ -146,7 +148,10 @@ const CookProfileScreen = () => {
         cook={cook}
         isBookmarked={isBookmarked(cook.id)}
       />
-      <ScrollView contentContainerStyle={{ paddingBottom: 10 }} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 10 }}
+        showsVerticalScrollIndicator={false}
+      >
         <View className="items-center mt-4">
           <Image
             source={{ uri: cook.image }}

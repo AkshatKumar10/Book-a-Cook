@@ -25,7 +25,7 @@ const MyBookingsScreen = () => {
   const [activeTab, setActiveTab] = useState('upcoming');
 
   const themeStyles = {
-    container: theme === 'dark' ? 'bg-black' : 'bg-white',
+    container: theme === 'dark' ? 'bg-black' : 'bg-gray-100',
     textPrimary: theme === 'dark' ? 'text-white' : 'text-gray-800',
     textTertiary: theme === 'dark' ? 'text-gray-400' : 'text-gray-600',
     textNoBookings: theme === 'dark' ? 'text-gray-400' : 'text-gray-500',
@@ -203,7 +203,9 @@ const MyBookingsScreen = () => {
   };
 
   const upcomingBookings = bookings.filter(
-    (b) => b.status === 'pending' || b.status === 'accepted',
+    (b) =>
+      (b.status === 'pending' || b.status === 'accepted') &&
+      parseBookingDateTime(b) >= new Date(),
   );
   const pastBookings = bookings.filter(
     (b) => b.status === 'declined' || parseBookingDateTime(b) < new Date(),

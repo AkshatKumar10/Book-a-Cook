@@ -51,13 +51,13 @@ export default function BookingPageScreen() {
   const [selectedCook, setSelectedCook] = useState(null);
   const [matchingCooks, setMatchingCooks] = useState([]);
   const [showCookList, setShowCookList] = useState(false);
-  const [isLoading, setIsLoading] = useState(true); // Renamed to avoid confusion
+  const [isLoading, setIsLoading] = useState(true);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarType, setSnackbarType] = useState('success');
 
   const themeStyles = {
-    container: theme === 'dark' ? 'bg-black' : 'bg-white',
+    container: theme === 'dark' ? 'bg-black' : 'bg-gray-100',
     textPrimary: theme === 'dark' ? 'text-white' : 'text-gray-700',
     textSecondary: theme === 'dark' ? 'text-gray-300' : 'text-gray-800',
     textAccent: theme === 'dark' ? 'text-red-300' : 'text-red-400',

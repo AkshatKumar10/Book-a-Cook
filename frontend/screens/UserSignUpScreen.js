@@ -9,8 +9,12 @@ import {
   ScrollView,
   Keyboard,
 } from 'react-native';
-import { useState, useContext, useEffect } from 'react';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useState, useContext, useCallback } from 'react';
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemeContext } from '../context/ThemeContext';
 import { StatusBar } from 'expo-status-bar';
@@ -37,7 +41,7 @@ export default function UserSignUpScreen() {
   const [snackbarType, setSnackbarType] = useState('success');
 
   const themeStyles = {
-    container: theme === 'dark' ? 'bg-black' : 'bg-white',
+    container: theme === 'dark' ? 'bg-black' : 'bg-gray-100',
     formContainer: theme === 'dark' ? 'bg-gray-900' : 'bg-white',
     textPrimary: theme === 'dark' ? 'text-white' : 'text-gray-800',
     textSecondary: theme === 'dark' ? 'text-gray-300' : 'text-gray-600',
@@ -49,15 +53,17 @@ export default function UserSignUpScreen() {
     inputPlaceholder: theme === 'dark' ? '#9ca3af' : '#6b7280',
   };
 
-  useEffect(() => {
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      () => {
-        return true;
-      },
-    );
-    return () => backHandler.remove();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      const backHandler = BackHandler.addEventListener(
+        'hardwareBackPress',
+        () => {
+          return true;
+        },
+      );
+      return () => backHandler.remove();
+    }, []),
+  );
 
   const handleSubmit = async () => {
     setLoading(true);

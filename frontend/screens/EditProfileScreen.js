@@ -52,7 +52,7 @@ const EditProfileScreen = () => {
   };
 
   const themeStyles = {
-    container: theme === 'dark' ? 'bg-black' : 'bg-white',
+    container: theme === 'dark' ? 'bg-black' : 'bg-gray-100',
     textLabel: theme === 'dark' ? 'text-gray-300' : 'text-gray-700',
     textInput: theme === 'dark' ? 'text-white' : 'text-gray-800',
     border: theme === 'dark' ? 'border-gray-700' : 'border-gray-300',
@@ -72,11 +72,7 @@ const EditProfileScreen = () => {
           <View className={`rounded-xl mb-6 mt-2`}>
             <Skeleton colorMode={theme} width="100%" height={40} />
           </View>
-          <Skeleton
-            colorMode={theme}
-            width={80}
-            height={20}
-          />
+          <Skeleton colorMode={theme} width={80} height={20} />
           <View className={`rounded-xl mb-8 mt-2`}>
             <Skeleton colorMode={theme} width="100%" height={40} />
           </View>
