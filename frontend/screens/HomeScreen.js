@@ -9,11 +9,10 @@ import {
   BackHandler,
   TextInput,
   Modal,
+  RefreshControl,
 } from 'react-native';
-import { useCallback, useState, useContext, useEffect } from 'react';
+import { useCallback, useState, useContext } from 'react';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { MaterialIcons } from '@expo/vector-icons';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AntDesign from '@expo/vector-icons/AntDesign';
@@ -27,7 +26,7 @@ import { useUser } from '../hooks/useUser';
 export default function HomeScreen() {
   const { width, height } = useWindowDimensions();
   const navigation = useNavigation();
-  const { cooksData, cooksDataLoading } = useCooksData();
+  const { cooksData, cooksDataLoading, refresh, refreshing } = useCooksData();
   const { theme } = useContext(ThemeContext);
   const [searchQuery, setSearchQuery] = useState('');
   const [imageLoadedState, setImageLoadedState] = useState({});
@@ -41,7 +40,7 @@ export default function HomeScreen() {
   const { user } = useUser();
 
   const themeStyles = {
-    container: theme === 'dark' ? 'bg-black' : 'bg-white',
+    container: theme === 'dark' ? 'bg-black' : 'bg-gray-100',
     textPrimary: theme === 'dark' ? 'text-white' : 'text-gray-800',
     textSecondary: theme === 'dark' ? 'text-gray-300' : 'text-gray-600',
     textAccent: theme === 'dark' ? 'text-red-300' : 'text-red-400',
@@ -428,6 +427,13 @@ export default function HomeScreen() {
       <ScrollView
         className="flex-1 px-2"
         contentContainerStyle={{ paddingBottom: 10 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={refresh}
+            tintColor={theme === 'dark' ? 'white' : 'black'}
+          />
+        }
       >
         <View>
           <Text

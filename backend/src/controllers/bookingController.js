@@ -106,7 +106,7 @@ export const getCookBookings = async (req, res) => {
         .json({ message: "Only cooks can view their bookings" });
     }
     const bookings = await Booking.find({ cookId: req.user._id })
-      .populate("userId", "username")
+      .populate("userId", "username profileImage")
       .sort({ createdAt: -1 });
     res.status(200).json({ bookings });
   } catch (error) {

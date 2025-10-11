@@ -18,7 +18,7 @@ export const registerCook = async (req, res) => {
       bio,
       experienceLevel,
       servicesOffered,
-      pricing
+      pricing,
     } = req.body;
 
     let profileImage = `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`;
@@ -44,7 +44,7 @@ export const registerCook = async (req, res) => {
       !experienceLevel ||
       !servicesOffered ||
       !bio ||
-      !parsedPricing 
+      !parsedPricing
     ) {
       return res
         .status(400)
@@ -190,8 +190,8 @@ export const getAllCooks = async (req, res) => {
       experienceLevel: cook.experienceLevel,
       pricing: cook.pricing,
       specialties: cook.specialties,
-      bio:cook.bio,
-      servicesOffered:cook.servicesOffered,
+      bio: cook.bio,
+      servicesOffered: cook.servicesOffered,
     }));
     res.status(200).json(formattedCooks);
   } catch (error) {
@@ -211,7 +211,7 @@ export const getCookById = async (req, res) => {
       id: cook._id,
       name: cook.username,
       cuisine: cook.cuisineSpecialties.join(", "),
-      specialties: cook.specialties.join(', '),
+      specialties: cook.specialties.join(", "),
       image: cook.profileImage,
       location: cook.location,
       bio: cook.bio,
@@ -234,7 +234,9 @@ export const getCooksByCuisine = async (req, res) => {
       return res.status(400).json({ message: "Cuisine is required" });
     }
 
-    const cooks = await Cook.find({ cuisineSpecialties: cuisine }).select("-password");
+    const cooks = await Cook.find({ cuisineSpecialties: cuisine }).select(
+      "-password"
+    );
     const formattedCooks = cooks.map((cook) => ({
       id: cook._id,
       name: cook.username,
@@ -246,7 +248,7 @@ export const getCooksByCuisine = async (req, res) => {
       servicesOffered: cook.servicesOffered,
       specialties: cook.specialties,
       pricing: cook.pricing,
-      createdAt: cook.createdAt
+      createdAt: cook.createdAt,
     }));
 
     res.status(200).json(formattedCooks);
@@ -288,6 +290,132 @@ export const updateCookFcmToken = async (req, res) => {
     });
   } catch (error) {
     console.error("Error controller updating FCM token:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getCook = async (req, res) => {
+  try {
+    const cook = await Cook.findById(req.user._id).select("-password");
+    if (!cook) {
+      return res.status(404).json({ message: "Cook not found" });
+    }
+    const formattedCook = {
+      id: cook._id,
+      email: cook.email,
+      name: cook.username,
+      cuisine: cook.cuisineSpecialties.join(", "),
+      specialties: cook.specialties.join(", "),
+      image: cook.profileImage,
+      location: cook.location,
+      bio: cook.bio,
+      experienceLevel: cook.experienceLevel,
+      servicesOffered: cook.servicesOffered,
+      pricing: cook.pricing,
+      createdAt: cook.createdAt,
+    };
+    res.status(200).json(formattedCook);
+  } catch (error) {
+    console.log("Error in getCook controller", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const updateCookProfile = async (req, res) => {
+  try {
+    const {
+      username,
+      email,
+      location,
+      cuisineSpecialties,
+      specialties,
+      bio,
+      experienceLevel,
+      servicesOffered,
+      pricing,
+    } = req.body;
+
+    let profileImage = req.user.profileImage;
+
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "cooks",
+        resource_type: "image",
+      });
+      profileImage = result.secure_url;
+    }
+
+    if (!username || !email || !location || !bio) {
+      return res
+        .status(400)
+        .json({ message: "Username, email, location, and bio are required" });
+    }
+
+    const existingEmail = await Cook.findOne({ email });
+    if (
+      existingEmail &&
+      existingEmail._id.toString() !== req.user._id.toString()
+    ) {
+      return res.status(400).json({ message: "Email is already in use" });
+    }
+
+    if (!Array.isArray(cuisineSpecialties) || cuisineSpecialties.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "At least one cuisine specialty is required" });
+    }
+
+    if (!Array.isArray(servicesOffered) || servicesOffered.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "At least one service must be offered" });
+    }
+
+    const parsedPricing = {
+      perDish: parseFloat(pricing?.perDish) || 0,
+      perHour: parseFloat(pricing?.perHour) || 0,
+    };
+
+    const updatedCook = await Cook.findByIdAndUpdate(
+      req.user._id,
+      {
+        username,
+        email,
+        profileImage,
+        location,
+        cuisineSpecialties,
+        specialties,
+        bio,
+        experienceLevel: parseInt(experienceLevel),
+        servicesOffered,
+        pricing: parsedPricing,
+      },
+      { new: true, runValidators: true }
+    ).select("-password");
+
+    if (!updatedCook) {
+      return res.status(404).json({ message: "Cook not found" });
+    }
+
+    res.status(200).json({
+      message: "Profile updated successfully",
+      cook: {
+        id: updatedCook._id,
+        username: updatedCook.username,
+        email: updatedCook.email,
+        profileImage: updatedCook.profileImage,
+        location: updatedCook.location,
+        cuisineSpecialties: updatedCook.cuisineSpecialties,
+        specialties: updatedCook.specialties,
+        bio: updatedCook.bio,
+        experienceLevel: updatedCook.experienceLevel,
+        servicesOffered: updatedCook.servicesOffered,
+        pricing: updatedCook.pricing,
+        createdAt: updatedCook.createdAt,
+      },
+    });
+  } catch (error) {
+    console.log("Error in updateCookProfile controller", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };

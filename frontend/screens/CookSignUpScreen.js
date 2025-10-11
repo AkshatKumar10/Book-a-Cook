@@ -12,8 +12,8 @@ import {
   ScrollView,
   KeyboardAvoidingView,
 } from 'react-native';
-import { useState, useContext, useEffect } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import { useState, useContext, useCallback } from 'react';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemeContext } from '../context/ThemeContext';
 import { StatusBar } from 'expo-status-bar';
@@ -69,7 +69,7 @@ export default function CookSignUpScreen() {
   };
 
   const themeStyles = {
-    container: theme === 'dark' ? 'bg-black' : 'bg-white',
+    container: theme === 'dark' ? 'bg-black' : 'bg-gray-100',
     textPrimary: theme === 'dark' ? 'text-white' : 'text-gray-800',
     textSecondary: theme === 'dark' ? 'text-gray-300' : 'text-gray-600',
     textAccent: theme === 'dark' ? 'text-amber-500' : 'text-amber-700',
@@ -80,19 +80,21 @@ export default function CookSignUpScreen() {
     inputPlaceholder: theme === 'dark' ? '#9ca3af' : '#6b7280',
   };
 
-  useEffect(() => {
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      () => {
-        if (step > 1) {
-          setStep(step - 1);
-          return true;
-        }
-        return false;
-      },
-    );
-    return () => backHandler.remove();
-  }, [step]);
+  useFocusEffect(
+    useCallback(() => {
+      const backHandler = BackHandler.addEventListener(
+        'hardwareBackPress',
+        () => {
+          if (step > 1) {
+            setStep(step - 1);
+            return true;
+          }
+          return false;
+        },
+      );
+      return () => backHandler.remove();
+    }, [step]),
+  );
 
   const pickImage = async () => {
     const permissionResult =
@@ -129,18 +131,18 @@ export default function CookSignUpScreen() {
 
   const handleNext = async () => {
     if (step === 1) {
-      // if (
-      //   !formData.username ||
-      //   !formData.email ||
-      //   !formData.password ||
-      //   !formData.confirmPassword
-      // ) {
-      //   Keyboard.dismiss();
-      //   setSnackbarMessage('Please fill all fields');
-      //   setSnackbarType('error');
-      //   setSnackbarVisible(true);
-      //   return;
-      // }
+      if (
+        !formData.username ||
+        !formData.email ||
+        !formData.password ||
+        !formData.confirmPassword
+      ) {
+        Keyboard.dismiss();
+        setSnackbarMessage('Please fill all fields');
+        setSnackbarType('error');
+        setSnackbarVisible(true);
+        return;
+      }
       if (formData.password !== formData.confirmPassword) {
         Keyboard.dismiss();
         setSnackbarMessage('Passwords do not match');

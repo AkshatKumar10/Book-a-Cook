@@ -1,9 +1,9 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {API_BASE_URL} from '@env';
+import { API_BASE_URL } from '@env';
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: "http://192.168.1.8:3000",
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -107,7 +107,7 @@ export const getCooks = async () => {
         Authorization: `Bearer ${token}`,
       },
     });
-    
+
     return response.data;
   } catch (error) {
     console.error('Error fetching cooks data:', error);
@@ -150,7 +150,7 @@ export const updateUserProfile = async (data) => {
         Authorization: `Bearer ${token}`,
       },
     });
-    return response.data; 
+    return response.data;
   } catch (error) {
     console.error('Error updating user profile:', error);
   }
@@ -159,11 +159,14 @@ export const updateUserProfile = async (data) => {
 export const getCooksByCuisine = async (cuisine) => {
   try {
     const token = await getUserToken();
-    const response = await api.get(`/api/cook/cuisine/${encodeURIComponent(cuisine)}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
+    const response = await api.get(
+      `/api/cook/cuisine/${encodeURIComponent(cuisine)}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       },
-    });
+    );
     return response.data;
   } catch (error) {
     console.error('Error fetching cooks by cuisine:', error);
@@ -233,9 +236,13 @@ export const getCookBookings = async () => {
 export const acceptBooking = async (bookingId) => {
   try {
     const token = await getCookToken();
-    const response = await api.put(`/api/bookings/cook/${bookingId}/accept`, {}, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await api.put(
+      `/api/bookings/cook/${bookingId}/accept`,
+      {},
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
     return response.data;
   } catch (error) {
     console.error('Error accepting booking:', error);
@@ -245,11 +252,66 @@ export const acceptBooking = async (bookingId) => {
 export const declineBooking = async (bookingId, reason = '') => {
   try {
     const token = await getCookToken();
-    const response = await api.put(`/api/bookings/cook/${bookingId}/decline`, { reason }, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response = await api.put(
+      `/api/bookings/cook/${bookingId}/decline`,
+      { reason },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
     return response.data;
   } catch (error) {
     console.error('Error declining booking:', error);
+  }
+};
+
+export const getCookProfile = async () => {
+  try {
+    const token = await getCookToken();
+    const response = await api.get('/api/cook/me', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching profile:', error);
+  }
+};
+
+export const updateCookProfile = async (cookData) => {
+  try {
+    const token = await getCookToken();
+    const formData = new FormData();
+    
+    Object.keys(cookData).forEach((key) => {
+      if (key === 'profileImage' && cookData[key] && cookData[key].startsWith('file://')) {
+        formData.append('profileImage', {
+          uri: cookData[key],
+          type: 'image/jpeg',
+          name: 'profile.jpg',
+        });
+      } else if (key === 'pricing' && cookData[key]) {
+        formData.append('pricing[perDish]', cookData[key].perDish);
+        formData.append('pricing[perHour]', cookData[key].perHour);
+      } else if (Array.isArray(cookData[key])) {
+        cookData[key].forEach((item, index) => {
+          formData.append(`${key}[${index}]`, item);
+        });
+      } else {
+        formData.append(key, cookData[key]);
+      }
+    });
+
+    const response = await api.put('/api/cook/update-profile', formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating cook profile:', error);
+    throw error;
   }
 };

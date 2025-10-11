@@ -15,7 +15,7 @@ export default function BottomNavigation() {
   const { theme } = useContext(ThemeContext);
 
   const themeStyles = {
-    container: theme === 'dark' ? 'bg-black' : 'bg-white',
+    container: theme === 'dark' ? 'bg-black' : 'bg-gray-100',
     tabBarBg: theme === 'dark' ? 'bg-gray-800' : 'bg-white',
     activeTintColor: theme === 'dark' ? '#f06292' : '#e91e63',
     inactiveTintColor: theme === 'dark' ? 'gray-400' : 'gray',

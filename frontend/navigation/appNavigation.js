@@ -7,7 +7,6 @@ import ProfileScreen from '../screens/ProfileScreen';
 import MyBookingsScreen from '../screens/MyBookingsScreen';
 import EditProfileScreen from '../screens/EditProfileScreen';
 import BottomNavigation from './bottomNavigation';
-import CuisineDetails from '../screens/CuisineDetails';
 import CheckoutPageScreen from '../screens/CheckoutPageScreen';
 import { ActivityIndicator, View } from 'react-native';
 import { ThemeContext } from '../context/ThemeContext';
@@ -28,6 +27,9 @@ import CuisineChefsScreen from '../screens/CuisineChefsScreen.js';
 import { getFcmToken } from '../utils/fcmUtils.js';
 import CookBookingsScreen from '../screens/CookBookingsScreen.js';
 import CookListScreen from '../screens/CookListScreen.js';
+import EarningScreen from '../screens/EarningScreen.js';
+import EditCookProfileScreen from '../screens/EditCookProfileScreen.js';
+import PaymentPageScreen from '../screens/PaymentPageScreen.js';
 
 const Stack = createNativeStackNavigator();
 
@@ -37,7 +39,7 @@ export default function AppNavigation() {
   const { theme } = useContext(ThemeContext);
 
   const themeStyles = {
-    container: theme === 'dark' ? 'bg-black' : 'bg-white',
+    container: theme === 'dark' ? 'bg-black' : 'bg-gray-100',
     loadingColor: theme === 'dark' ? '#60a5fa' : '#38bdf8',
   };
 
@@ -54,7 +56,7 @@ export default function AppNavigation() {
       } else if (cookToken) {
         setInitialRoute('CookDashboard');
         const token = await getFcmToken();
-        console.log("Token",token);
+        console.log('Token', token);
         if (token) {
           await updateCookFcmToken({ fcmToken: token });
         }
@@ -129,6 +131,20 @@ export default function AppNavigation() {
           }}
         />
         <Stack.Screen
+          name="Earning"
+          component={EarningScreen}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="EditCookProfile"
+          component={EditCookProfileScreen}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
           name="CookList"
           component={CookListScreen}
           options={{
@@ -171,13 +187,6 @@ export default function AppNavigation() {
           }}
         />
         <Stack.Screen
-          name="CuisineDetails"
-          component={CuisineDetails}
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
           name="BookingPageScreen"
           component={BookingPageScreen}
           options={{
@@ -194,6 +203,13 @@ export default function AppNavigation() {
         <Stack.Screen
           name="CheckoutPageScreen"
           component={CheckoutPageScreen}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="PaymentScreen"
+          component={PaymentPageScreen}
           options={{
             headerShown: false,
           }}

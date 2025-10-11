@@ -2,11 +2,15 @@ import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { FontAwesome5, MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import {
+  CommonActions,
+  useFocusEffect,
+  useNavigation,
+} from '@react-navigation/native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Navbar from '../components/Navbar';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { useContext, useState } from 'react';
+import { useCallback, useContext, useState } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 import { StatusBar } from 'expo-status-bar';
 import { removeUserToken } from '../utils/api';
@@ -15,7 +19,7 @@ import SnackbarComponent from '../components/SnackbarComponent';
 import { Skeleton } from 'moti/skeleton';
 
 const ProfileScreen = () => {
-  const { user, userLoading } = useUser();
+  const { user, userLoading, refresh: refreshProfile } = useUser();
   const navigation = useNavigation();
   const { theme, toggleTheme } = useContext(ThemeContext);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
@@ -25,7 +29,12 @@ const ProfileScreen = () => {
   const handleSignOut = async () => {
     try {
       await removeUserToken();
-      navigation.navigate('UserSignIn');
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: 'UserSignIn' }],
+        }),
+      );
     } catch (error) {
       console.error('Sign out error:', error);
       setSnackbarMessage('Failed to sign out. Please try again.');
@@ -35,13 +44,19 @@ const ProfileScreen = () => {
   };
 
   const themeStyles = {
-    container: theme === 'dark' ? 'bg-black' : 'bg-white',
+    container: theme === 'dark' ? 'bg-black' : 'bg-gray-100',
     textPrimary: theme === 'dark' ? 'text-white' : 'text-gray-900',
     textSecondary: theme === 'dark' ? 'text-gray-300' : 'text-gray-600',
     iconColor: theme === 'dark' ? 'white' : 'black',
     borderColor: theme === 'dark' ? 'border-gray-700' : 'border-gray-200',
     buttonBg: theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200',
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      refreshProfile();
+    }, []),
+  );
 
   if (userLoading) {
     return (
