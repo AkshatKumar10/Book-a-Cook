@@ -116,9 +116,7 @@ export default function CookBookingsScreen() {
     const statusBadge = getStatusBadge(item.status);
 
     return (
-      <View
-        className={`mx-4 mb-4 rounded-2xl ${themeStyles.cardBg} p-5`}
-      >
+      <View className={`mx-4 mb-4 rounded-2xl ${themeStyles.cardBg} p-5`}>
         <View className="flex-row items-center justify-between mb-5">
           <View className="flex-row items-center flex-1">
             <Image
@@ -195,6 +193,17 @@ export default function CookBookingsScreen() {
               {item.selectedCuisine}
             </Text>
           </View>
+          <View className="py-2">
+            <Text className={`text-base ${themeStyles.textLabel}`}>
+              Location
+            </Text>
+            <Text
+              className={`text-base font-semibold ${themeStyles.textPrimary} mt-1`}
+            >
+              {item.address}
+            </Text>
+          </View>
+
           <View
             className={`flex-row justify-between py-3 border-t ${themeStyles.divider}`}
           >
@@ -258,9 +267,7 @@ export default function CookBookingsScreen() {
         <FlatList
           data={[1, 2, 3]}
           renderItem={() => (
-            <View
-              className={`mx-4 mb-4 rounded-2xl ${themeStyles.cardBg} p-5`}
-            >
+            <View className={`mx-4 mb-4 rounded-2xl ${themeStyles.cardBg} p-5`}>
               <View className="flex-row items-center justify-between mb-5">
                 <View className="flex-row items-center flex-1">
                   <Skeleton

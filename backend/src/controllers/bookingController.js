@@ -21,6 +21,7 @@ export const createBooking = async (req, res) => {
       selectedCuisine,
       totalAmount,
       paymentId,
+      address,
     } = req.body;
 
     if (
@@ -31,7 +32,8 @@ export const createBooking = async (req, res) => {
       !selectedTime ||
       !selectedCuisine ||
       !totalAmount ||
-      !paymentId
+      !paymentId ||
+      !address
     ) {
       return res
         .status(400)
@@ -54,10 +56,11 @@ export const createBooking = async (req, res) => {
       mealType,
       guestCount,
       selectedDate,
-      selectedTime, 
+      selectedTime,
       selectedCuisine,
       totalAmount,
       paymentId,
+      address,
     });
 
     await booking.save();
@@ -71,7 +74,7 @@ export const createBooking = async (req, res) => {
         { bookingId: booking._id.toString(), action: "view_booking" }
       );
     }
-    
+
     await booking.populate(["userId", "cookId"]);
 
     res.status(201).json({ booking: booking });
