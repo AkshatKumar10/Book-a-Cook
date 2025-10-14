@@ -38,15 +38,19 @@ const bookingSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    address: {
+      type: String,
+      required: true,
+    },
     totalAmount: {
       type: Number,
       required: true,
     },
-    paymentId: { 
+    paymentId: {
       type: String,
       required: true,
     },
-    declineReason: { 
+    declineReason: {
       type: String,
       default: "",
     },
