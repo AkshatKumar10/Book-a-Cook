@@ -170,7 +170,12 @@ const EditCookProfileScreen = () => {
   };
 
   const handleSave = async () => {
-    if (!formData.username || !formData.email || !formData.location || !formData.bio) {
+    if (
+      !formData.username ||
+      !formData.email ||
+      !formData.location ||
+      !formData.bio
+    ) {
       Keyboard.dismiss();
       setSnackbarMessage('Please fill all required fields');
       setSnackbarType('error');
@@ -261,28 +266,72 @@ const EditCookProfileScreen = () => {
             contentContainerStyle={{
               paddingHorizontal: 20,
               paddingTop: 20,
-              paddingBottom: 80,
             }}
             showsVerticalScrollIndicator={false}
           >
             <View className="items-center mb-6">
-              <Skeleton colorMode={theme} width={128} height={128} radius="round" />
+              <Skeleton
+                colorMode={theme}
+                width={128}
+                height={128}
+                radius="round"
+              />
               <View style={{ height: 16 }} />
-              <Skeleton colorMode={theme} width={width * 0.4} height={36} radius={10} />
+              <Skeleton
+                colorMode={theme}
+                width={width * 0.4}
+                height={36}
+                radius={10}
+              />
             </View>
-            <Skeleton colorMode={theme} width={width * 0.3} height={20} radius={10} />
+            <Skeleton
+              colorMode={theme}
+              width={width * 0.3}
+              height={20}
+              radius={10}
+            />
             <View style={{ height: 8 }} />
-            <Skeleton colorMode={theme} width={width - 40} height={48} radius={10} />
+            <Skeleton
+              colorMode={theme}
+              width={width - 40}
+              height={48}
+              radius={10}
+            />
             <View style={{ height: 16 }} />
-            <Skeleton colorMode={theme} width={width * 0.3} height={20} radius={10} />
+            <Skeleton
+              colorMode={theme}
+              width={width * 0.3}
+              height={20}
+              radius={10}
+            />
             <View style={{ height: 8 }} />
-            <Skeleton colorMode={theme} width={width - 40} height={48} radius={10} />
+            <Skeleton
+              colorMode={theme}
+              width={width - 40}
+              height={48}
+              radius={10}
+            />
             <View style={{ height: 16 }} />
-            <Skeleton colorMode={theme} width={width * 0.3} height={20} radius={10} />
+            <Skeleton
+              colorMode={theme}
+              width={width * 0.3}
+              height={20}
+              radius={10}
+            />
             <View style={{ height: 8 }} />
-            <Skeleton colorMode={theme} width={width - 40} height={48} radius={10} />
+            <Skeleton
+              colorMode={theme}
+              width={width - 40}
+              height={48}
+              radius={10}
+            />
             <View style={{ height: 16 }} />
-            <Skeleton colorMode={theme} width={width * 0.4} height={20} radius={10} />
+            <Skeleton
+              colorMode={theme}
+              width={width * 0.4}
+              height={20}
+              radius={10}
+            />
             <View style={{ height: 8 }} />
             <View className="flex-row flex-wrap gap-2">
               {[...Array(6)].map((_, index) => (
@@ -296,23 +345,63 @@ const EditCookProfileScreen = () => {
               ))}
             </View>
             <View style={{ height: 16 }} />
-            <Skeleton colorMode={theme} width={width * 0.4} height={20} radius={10} />
+            <Skeleton
+              colorMode={theme}
+              width={width * 0.4}
+              height={20}
+              radius={10}
+            />
             <View style={{ height: 8 }} />
             <View className="flex-row">
-              <Skeleton colorMode={theme} width={width * 0.7} height={48} radius={10} />
+              <Skeleton
+                colorMode={theme}
+                width={width * 0.7}
+                height={48}
+                radius={10}
+              />
               <View style={{ width: 8 }} />
-              <Skeleton colorMode={theme} width={width * 0.2} height={48} radius={10} />
+              <Skeleton
+                colorMode={theme}
+                width={width * 0.2}
+                height={48}
+                radius={10}
+              />
             </View>
             <View style={{ height: 16 }} />
-            <Skeleton colorMode={theme} width={width * 0.4} height={20} radius={10} />
+            <Skeleton
+              colorMode={theme}
+              width={width * 0.4}
+              height={20}
+              radius={10}
+            />
             <View style={{ height: 8 }} />
-            <Skeleton colorMode={theme} width={width - 40} height={120} radius={10} />
+            <Skeleton
+              colorMode={theme}
+              width={width - 40}
+              height={120}
+              radius={10}
+            />
             <View style={{ height: 16 }} />
-            <Skeleton colorMode={theme} width={width * 0.4} height={20} radius={10} />
+            <Skeleton
+              colorMode={theme}
+              width={width * 0.4}
+              height={20}
+              radius={10}
+            />
             <View style={{ height: 8 }} />
-            <Skeleton colorMode={theme} width={width - 40} height={48} radius={10} />
+            <Skeleton
+              colorMode={theme}
+              width={width - 40}
+              height={48}
+              radius={10}
+            />
             <View style={{ height: 16 }} />
-            <Skeleton colorMode={theme} width={width * 0.4} height={20} radius={10} />
+            <Skeleton
+              colorMode={theme}
+              width={width * 0.4}
+              height={20}
+              radius={10}
+            />
             <View style={{ height: 8 }} />
             <View className="flex-row flex-wrap gap-2">
               {[...Array(4)].map((_, index) => (
@@ -327,13 +416,40 @@ const EditCookProfileScreen = () => {
               ))}
             </View>
             <View style={{ height: 16 }} />
-            <Skeleton colorMode={theme} width={width * 0.4} height={20} radius={10} />
+            <Skeleton
+              colorMode={theme}
+              width={width * 0.4}
+              height={20}
+              radius={10}
+            />
             <View style={{ height: 8 }} />
-            <Skeleton colorMode={theme} width={width - 40} height={48} radius={10} />
+            <Skeleton
+              colorMode={theme}
+              width={width - 40}
+              height={48}
+              radius={10}
+            />
             <View style={{ height: 16 }} />
-            <Skeleton colorMode={theme} width={width * 0.4} height={20} radius={10} />
+            <Skeleton
+              colorMode={theme}
+              width={width * 0.4}
+              height={20}
+              radius={10}
+            />
             <View style={{ height: 8 }} />
-            <Skeleton colorMode={theme} width={width - 40} height={48} radius={10} />
+            <Skeleton
+              colorMode={theme}
+              width={width - 40}
+              height={48}
+              radius={10}
+            />
+            <View style={{ height: 32 }} />
+            <Skeleton
+              colorMode={theme}
+              width={width - 40}
+              height={48}
+              radius={10}
+            />
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
@@ -348,262 +464,258 @@ const EditCookProfileScreen = () => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
         className="flex-1"
       >
-        <View className="flex-1">
-          <ScrollView
-            contentContainerStyle={{
-              paddingHorizontal: 20,
-              paddingTop: 20,
-              paddingBottom: 80,
-            }}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
+        <ScrollView
+          contentContainerStyle={{
+            paddingHorizontal: 20,
+            paddingTop: 20,
+            paddingBottom: 80,
+          }}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View className="items-center mb-6">
+            <View className="w-32 h-32 rounded-full overflow-hidden">
+              {formData.profileImage && (
+                <Image
+                  source={{ uri: formData.profileImage }}
+                  className="w-full h-full"
+                />
+              )}
+            </View>
+            <TouchableOpacity
+              onPress={pickImage}
+              className={`mt-4 px-6 py-2 rounded-xl ${themeStyles.inputBg}`}
+            >
+              <Text className={`font-medium ${themeStyles.inputText}`}>
+                Change Photo
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <Text
+            className={`text-base font-semibold mb-2 ${themeStyles.textPrimary}`}
           >
-            <View className="items-center mb-6">
-              <View className="w-32 h-32 rounded-full overflow-hidden">
-                {formData.profileImage && (
-                  <Image
-                    source={{ uri: formData.profileImage }}
-                    className="w-full h-full"
-                  />
-                )}
-              </View>
+            Full Name
+          </Text>
+          <TextInput
+            className={`p-4 ${themeStyles.inputBg} ${themeStyles.inputText} rounded-xl mb-4`}
+            placeholder="Enter name"
+            value={formData.username}
+            onChangeText={(text) =>
+              setFormData({ ...formData, username: text })
+            }
+            autoCapitalize="words"
+            editable={!loading}
+            placeholderTextColor={themeStyles.inputPlaceholder}
+          />
+
+          <Text
+            className={`text-base font-semibold mb-2 ${themeStyles.textPrimary}`}
+          >
+            Email
+          </Text>
+          <TextInput
+            className={`p-4 ${themeStyles.inputBg} ${themeStyles.inputText} rounded-xl mb-4`}
+            placeholder="Enter email"
+            value={formData.email}
+            onChangeText={(text) => setFormData({ ...formData, email: text })}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            editable={!loading}
+            placeholderTextColor={themeStyles.inputPlaceholder}
+          />
+
+          <Text
+            className={`text-base font-semibold mb-2 ${themeStyles.textPrimary}`}
+          >
+            Location
+          </Text>
+          <TextInput
+            className={`p-4 ${themeStyles.inputBg} ${themeStyles.inputText} rounded-xl mb-4`}
+            placeholder="Enter city or area"
+            value={formData.location}
+            onChangeText={(text) =>
+              setFormData({ ...formData, location: text })
+            }
+            editable={!loading}
+            placeholderTextColor={themeStyles.inputPlaceholder}
+          />
+
+          <Text
+            className={`text-base font-semibold mb-2 ${themeStyles.textPrimary}`}
+          >
+            Cuisine Specialties
+          </Text>
+          <FlatList
+            data={cuisineOptions}
+            keyExtractor={(item) => item}
+            numColumns={2}
+            scrollEnabled={false}
+            renderItem={({ item }) => (
               <TouchableOpacity
-                onPress={pickImage}
-                className={`mt-4 px-6 py-2 rounded-xl ${themeStyles.inputBg}`}
+                className={`flex-1 m-1 p-3 rounded-xl ${
+                  formData.cuisineSpecialties.includes(item)
+                    ? themeStyles.buttonBg
+                    : themeStyles.inputBg
+                }`}
+                onPress={() => toggleCuisine(item)}
+                disabled={loading}
               >
-                <Text className={`font-medium ${themeStyles.inputText}`}>
-                  Change Photo
+                <Text
+                  className={`text-center ${
+                    formData.cuisineSpecialties.includes(item)
+                      ? themeStyles.buttonText
+                      : themeStyles.inputText
+                  }`}
+                >
+                  {item}
                 </Text>
               </TouchableOpacity>
-            </View>
+            )}
+          />
 
-            <Text
-              className={`text-base font-semibold mb-2 ${themeStyles.textPrimary}`}
-            >
-              Full Name
-            </Text>
+          <Text
+            className={`text-base font-semibold mb-2 mt-4 ${themeStyles.textPrimary}`}
+          >
+            Specialties
+          </Text>
+          <View className="flex-row mb-2">
             <TextInput
-              className={`p-4 ${themeStyles.inputBg} ${themeStyles.inputText} rounded-xl mb-4`}
-              placeholder="Enter name"
-              value={formData.username}
-              onChangeText={(text) =>
-                setFormData({ ...formData, username: text })
-              }
-              autoCapitalize="words"
-              editable={!loading}
+              className={`flex-1 p-4 ${themeStyles.inputBg} ${themeStyles.inputText} rounded-xl`}
+              placeholder="Add a specialty"
+              value={specialtyInput}
+              onChangeText={setSpecialtyInput}
               placeholderTextColor={themeStyles.inputPlaceholder}
             />
-
-            <Text
-              className={`text-base font-semibold mb-2 ${themeStyles.textPrimary}`}
+            <TouchableOpacity
+              onPress={addSpecialty}
+              className={`ml-2 px-4 justify-center ${themeStyles.buttonBg} rounded-xl`}
             >
-              Email
-            </Text>
-            <TextInput
-              className={`p-4 ${themeStyles.inputBg} ${themeStyles.inputText} rounded-xl mb-4`}
-              placeholder="Enter email"
-              value={formData.email}
-              onChangeText={(text) =>
-                setFormData({ ...formData, email: text })
-              }
-              autoCapitalize="none"
-              keyboardType="email-address"
-              editable={!loading}
-              placeholderTextColor={themeStyles.inputPlaceholder}
-            />
-
-            <Text
-              className={`text-base font-semibold mb-2 ${themeStyles.textPrimary}`}
-            >
-              Location
-            </Text>
-            <TextInput
-              className={`p-4 ${themeStyles.inputBg} ${themeStyles.inputText} rounded-xl mb-4`}
-              placeholder="Enter city or area"
-              value={formData.location}
-              onChangeText={(text) =>
-                setFormData({ ...formData, location: text })
-              }
-              editable={!loading}
-              placeholderTextColor={themeStyles.inputPlaceholder}
-            />
-
-            <Text
-              className={`text-base font-semibold mb-2 ${themeStyles.textPrimary}`}
-            >
-              Cuisine Specialties
-            </Text>
-            <FlatList
-              data={cuisineOptions}
-              keyExtractor={(item) => item}
-              numColumns={2}
-              scrollEnabled={false}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  className={`flex-1 m-1 p-3 rounded-xl ${
-                    formData.cuisineSpecialties.includes(item)
-                      ? themeStyles.buttonBg
-                      : themeStyles.inputBg
-                  }`}
-                  onPress={() => toggleCuisine(item)}
-                  disabled={loading}
-                >
-                  <Text
-                    className={`text-center ${
-                      formData.cuisineSpecialties.includes(item)
-                        ? themeStyles.buttonText
-                        : themeStyles.inputText
-                    }`}
-                  >
-                    {item}
-                  </Text>
-                </TouchableOpacity>
-              )}
-            />
-
-            <Text
-              className={`text-base font-semibold mb-2 mt-4 ${themeStyles.textPrimary}`}
-            >
-              Specialties
-            </Text>
-            <View className="flex-row mb-2">
-              <TextInput
-                className={`flex-1 p-4 ${themeStyles.inputBg} ${themeStyles.inputText} rounded-xl`}
-                placeholder="Add a specialty"
-                value={specialtyInput}
-                onChangeText={setSpecialtyInput}
-                placeholderTextColor={themeStyles.inputPlaceholder}
-              />
-              <TouchableOpacity
-                onPress={addSpecialty}
-                className={`ml-2 px-4 justify-center ${themeStyles.buttonBg} rounded-xl`}
+              <Text className="text-white font-bold">Add</Text>
+            </TouchableOpacity>
+          </View>
+          <View className="flex-row flex-wrap mb-4">
+            {formData.specialties.map((item) => (
+              <View
+                key={item}
+                className={`flex-row items-center ${themeStyles.chipBg} rounded-full px-3 py-2 m-1`}
               >
-                <Text className="text-white font-bold">Add</Text>
-              </TouchableOpacity>
-            </View>
-            <View className="flex-row flex-wrap mb-4">
-              {formData.specialties.map((item) => (
-                <View
-                  key={item}
-                  className={`flex-row items-center ${themeStyles.chipBg} rounded-full px-3 py-2 m-1`}
-                >
-                  <Text className={themeStyles.chipText}>{item}</Text>
-                  <TouchableOpacity
-                    onPress={() => removeSpecialty(item)}
-                    className="ml-2"
-                  >
-                    <Ionicons name="close-circle" size={18} color="#ef4444" />
-                  </TouchableOpacity>
-                </View>
-              ))}
-            </View>
-
-            <Text
-              className={`text-base font-semibold mb-2 ${themeStyles.textPrimary}`}
-            >
-              Bio
-            </Text>
-            <TextInput
-              className={`p-4 ${themeStyles.inputBg} ${themeStyles.inputText} rounded-xl mb-4`}
-              placeholder="Describe your cooking passion"
-              value={formData.bio}
-              onChangeText={(text) => setFormData({ ...formData, bio: text })}
-              multiline
-              numberOfLines={10}
-              editable={!loading}
-              placeholderTextColor={themeStyles.inputPlaceholder}
-              textAlignVertical="top"
-            />
-
-            <Text
-              className={`text-base font-semibold mb-2 ${themeStyles.textPrimary}`}
-            >
-              Experience (Years)
-            </Text>
-            <TextInput
-              className={`p-4 ${themeStyles.inputBg} ${themeStyles.inputText} rounded-xl mb-4`}
-              placeholder="Enter years of experience"
-              value={formData.experienceLevel}
-              onChangeText={(text) =>
-                setFormData({ ...formData, experienceLevel: text })
-              }
-              keyboardType="numeric"
-              editable={!loading}
-              placeholderTextColor={themeStyles.inputPlaceholder}
-            />
-
-            <Text
-              className={`text-base font-semibold mb-2 ${themeStyles.textPrimary}`}
-            >
-              Services Offered
-            </Text>
-            <FlatList
-              data={serviceOptions}
-              keyExtractor={(item) => item}
-              scrollEnabled={false}
-              renderItem={({ item }) => (
+                <Text className={themeStyles.chipText}>{item}</Text>
                 <TouchableOpacity
-                  className={`m-1 p-3 rounded-xl ${
-                    formData.servicesOffered.includes(item)
-                      ? themeStyles.buttonBg
-                      : themeStyles.inputBg
-                  }`}
-                  onPress={() => toggleService(item)}
-                  disabled={loading}
+                  onPress={() => removeSpecialty(item)}
+                  className="ml-2"
                 >
-                  <Text
-                    className={`text-center ${
-                      formData.servicesOffered.includes(item)
-                        ? themeStyles.buttonText
-                        : themeStyles.inputText
-                    }`}
-                  >
-                    {item}
-                  </Text>
+                  <Ionicons name="close-circle" size={18} color="#ef4444" />
                 </TouchableOpacity>
-              )}
-            />
+              </View>
+            ))}
+          </View>
 
-            <Text
-              className={`text-base font-semibold mb-2 mt-4 ${themeStyles.textPrimary}`}
-            >
-              Pricing (Per Dish)
-            </Text>
-            <TextInput
-              className={`p-4 ${themeStyles.inputBg} ${themeStyles.inputText} rounded-xl mb-4`}
-              placeholder="Enter price per dish"
-              value={formData.pricing.perDish}
-              onChangeText={(text) =>
-                setFormData({
-                  ...formData,
-                  pricing: { ...formData.pricing, perDish: text },
-                })
-              }
-              keyboardType="numeric"
-              editable={!loading}
-              placeholderTextColor={themeStyles.inputPlaceholder}
-            />
+          <Text
+            className={`text-base font-semibold mb-2 ${themeStyles.textPrimary}`}
+          >
+            Bio
+          </Text>
+          <TextInput
+            className={`p-4 ${themeStyles.inputBg} ${themeStyles.inputText} rounded-xl mb-4`}
+            placeholder="Describe your cooking passion"
+            value={formData.bio}
+            onChangeText={(text) => setFormData({ ...formData, bio: text })}
+            multiline
+            numberOfLines={10}
+            editable={!loading}
+            placeholderTextColor={themeStyles.inputPlaceholder}
+            textAlignVertical="top"
+          />
 
-            <Text
-              className={`text-base font-semibold mb-2 ${themeStyles.textPrimary}`}
-            >
-              Pricing (Per Hour)
-            </Text>
-            <TextInput
-              className={`p-4 ${themeStyles.inputBg} ${themeStyles.inputText} rounded-xl mb-4`}
-              placeholder="Enter price per hour"
-              value={formData.pricing.perHour}
-              onChangeText={(text) =>
-                setFormData({
-                  ...formData,
-                  pricing: { ...formData.pricing, perHour: text },
-                })
-              }
-              keyboardType="numeric"
-              editable={!loading}
-              placeholderTextColor={themeStyles.inputPlaceholder}
-            />
-          </ScrollView>
+          <Text
+            className={`text-base font-semibold mb-2 ${themeStyles.textPrimary}`}
+          >
+            Experience (Years)
+          </Text>
+          <TextInput
+            className={`p-4 ${themeStyles.inputBg} ${themeStyles.inputText} rounded-xl mb-4`}
+            placeholder="Enter years of experience"
+            value={formData.experienceLevel}
+            onChangeText={(text) =>
+              setFormData({ ...formData, experienceLevel: text })
+            }
+            keyboardType="numeric"
+            editable={!loading}
+            placeholderTextColor={themeStyles.inputPlaceholder}
+          />
+
+          <Text
+            className={`text-base font-semibold mb-2 ${themeStyles.textPrimary}`}
+          >
+            Services Offered
+          </Text>
+          <FlatList
+            data={serviceOptions}
+            keyExtractor={(item) => item}
+            scrollEnabled={false}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                className={`m-1 p-3 rounded-xl ${
+                  formData.servicesOffered.includes(item)
+                    ? themeStyles.buttonBg
+                    : themeStyles.inputBg
+                }`}
+                onPress={() => toggleService(item)}
+                disabled={loading}
+              >
+                <Text
+                  className={`text-center ${
+                    formData.servicesOffered.includes(item)
+                      ? themeStyles.buttonText
+                      : themeStyles.inputText
+                  }`}
+                >
+                  {item}
+                </Text>
+              </TouchableOpacity>
+            )}
+          />
+
+          <Text
+            className={`text-base font-semibold mb-2 mt-4 ${themeStyles.textPrimary}`}
+          >
+            Pricing (Per Dish)
+          </Text>
+          <TextInput
+            className={`p-4 ${themeStyles.inputBg} ${themeStyles.inputText} rounded-xl mb-4`}
+            placeholder="Enter price per dish"
+            value={formData.pricing.perDish}
+            onChangeText={(text) =>
+              setFormData({
+                ...formData,
+                pricing: { ...formData.pricing, perDish: text },
+              })
+            }
+            keyboardType="numeric"
+            editable={!loading}
+            placeholderTextColor={themeStyles.inputPlaceholder}
+          />
+
+          <Text
+            className={`text-base font-semibold mb-2 ${themeStyles.textPrimary}`}
+          >
+            Pricing (Per Hour)
+          </Text>
+          <TextInput
+            className={`p-4 ${themeStyles.inputBg} ${themeStyles.inputText} rounded-xl mb-4`}
+            placeholder="Enter price per hour"
+            value={formData.pricing.perHour}
+            onChangeText={(text) =>
+              setFormData({
+                ...formData,
+                pricing: { ...formData.pricing, perHour: text },
+              })
+            }
+            keyboardType="numeric"
+            editable={!loading}
+            placeholderTextColor={themeStyles.inputPlaceholder}
+          />
           <View
             className={`absolute bottom-0 left-0 right-0 px-4 py-1 bg-transparent ${
               theme === 'dark' ? 'bg-black/50' : 'bg-gray-50/50'
@@ -621,7 +733,7 @@ const EditCookProfileScreen = () => {
               </Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </ScrollView>
         <SnackbarComponent
           visible={snackbarVisible}
           message={snackbarMessage}
