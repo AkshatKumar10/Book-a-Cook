@@ -45,29 +45,15 @@ const CookProfileScreen = () => {
     });
   };
 
-  if (!cook) {
-    return (
-      <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
-        <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
-        <Navbar title="Chef Profile" />
-        <View className="flex-1 items-center justify-center">
-          <Text className={`text-lg ${themeStyles.textPrimary}`}>
-            Cook not found
-          </Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
   if (cookLoading) {
     return (
       <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
         <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
-        <Navbar title="Chef Profile" />
         <ScrollView
           contentContainerStyle={{ paddingBottom: 10 }}
           showsVerticalScrollIndicator={false}
         >
+          <Navbar title="Chef Profile"/>
           <View className="items-center mt-4">
             <Skeleton
               colorMode={theme}

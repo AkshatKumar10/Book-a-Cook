@@ -370,22 +370,36 @@ export default function CookBookingsScreen() {
                     radius={10}
                   />
                 </View>
-                <View
-                  className={`flex-row justify-between py-3 border-t ${themeStyles.divider}`}
-                >
+                <View className={`flex py-2`}>
                   <Skeleton
                     colorMode={theme}
                     width={width * 0.3}
                     height={24}
                     radius={10}
                   />
-                  <Skeleton
-                    colorMode={theme}
-                    width={width * 0.2}
-                    height={24}
-                    radius={10}
-                  />
                 </View>
+                <View className="mt-2" />
+                <Skeleton
+                  colorMode={theme}
+                  width={width * 0.85}
+                  height={80}
+                  radius={10}
+                />
+              </View>
+              <View className={`border-t my-4 ${themeStyles.divider}`} />
+              <View className="flex-row justify-between">
+                <Skeleton
+                  colorMode={theme}
+                  width={width * 0.3}
+                  height={20}
+                  radius={10}
+                />
+                <Skeleton
+                  colorMode={theme}
+                  width={width * 0.2}
+                  height={20}
+                  radius={10}
+                />
               </View>
               <View className="flex-row space-x-3 gap-4 mt-5">
                 <Skeleton

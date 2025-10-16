@@ -283,8 +283,8 @@ export default function HomeScreen() {
           BookAChef
         </Text>
         <TouchableOpacity onPress={() => navigation.navigate('Bookmark')}>
-          <Feather
-            name="bookmark"
+          <FontAwesome
+            name="bookmark-o"
             size={25}
             color={themeStyles.bookmarkColor}
           />
