@@ -2,6 +2,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from '@env';
 
+console.log(API_BASE_URL);
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: { 'Content-Type': 'application/json' },
@@ -312,6 +313,49 @@ export const updateCookProfile = async (cookData) => {
     return response.data;
   } catch (error) {
     console.error('Error updating cook profile:', error);
-    throw error;
+  }
+};
+
+export const bookmarkCook = async (cookId) => {
+  try {
+    const token = await getUserToken();
+    const response = await api.post(
+      '/api/auth/bookmark-cook',
+      { cookId },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error bookmarking cook:', error);
+  }
+};
+
+export const unbookmarkCook = async (cookId) => {
+  try {
+    const token = await getUserToken();
+    const response = await api.post(
+      '/api/auth/unbookmark-cook',
+      { cookId },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error unbookmarking cook:', error);
+  }
+};
+
+export const getBookmarkedCooks = async () => {
+  try {
+    const token = await getUserToken();
+    const response = await api.get('/api/auth/bookmarked-cooks', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data.bookmarkedCooks;
+  } catch (error) {
+    console.error('Error fetching bookmarked cooks:', error);
   }
 };

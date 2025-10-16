@@ -661,26 +661,19 @@ export default function BookingPageScreen() {
               }}
               placeholderTextColor={themeStyles.placeholderColor}
             />
-            <TouchableOpacity
-              onPress={() => {
-                if (!searchQuery.trim()) {
-                  setSnackbarMessage('Please enter a location to search.');
-                  setSnackbarType('Error');
-                  setSnackbarVisible(true);
-                }
-              }}
-              disabled={isSearching}
-            >
-              <Feather
-                name="search"
-                size={24}
-                color={
-                  isSearching
-                    ? themeStyles.placeholderColor
-                    : themeStyles.iconColor
-                }
-              />
-            </TouchableOpacity>
+            {searchQuery.trim() ? (
+              <TouchableOpacity
+                onPress={() => {
+                  setSearchQuery('');
+                  setSuggestions([]);
+                  setShowSuggestions(false);
+                }}
+              >
+                <Feather name="x" size={24} color={themeStyles.iconColor} />
+              </TouchableOpacity>
+            ) : (
+              <Feather name="search" size={24} color={themeStyles.iconColor} />
+            )}
           </View>
           {showSuggestions && (
             <View

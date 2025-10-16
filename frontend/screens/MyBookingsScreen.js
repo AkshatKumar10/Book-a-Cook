@@ -260,7 +260,7 @@ const MyBookingsScreen = () => {
               <View className="flex-row mt-3">
                 <View className="w-1/2 space-y-2">
                   {[...Array(3)].map((_, i) => (
-                    <View key={i} className="flex-row items-center mb-2">
+                    <View key={i} className="flex-row items-center mb-2 gap-2">
                       <Skeleton
                         colorMode={theme}
                         width={20}
@@ -278,7 +278,7 @@ const MyBookingsScreen = () => {
                 </View>
                 <View className="w-1/2 space-y-2">
                   {[...Array(2)].map((_, i) => (
-                    <View key={i} className="flex-row items-center mb-2">
+                    <View key={i} className="flex-row items-center mb-2 gap-2">
                       <Skeleton
                         colorMode={theme}
                         width={20}

@@ -1,3 +1,4 @@
+import Cook from "../models/Cook.js";
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 
@@ -71,11 +72,11 @@ export const loginUser = async (req, res) => {
       return res.status(400).json({ message: "All fields are required" });
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: "Invalid credentials" });
+    if (!user) return res.status(401).json({ message: "Invalid credentials" });
 
     const isPasswordCorrect = await user.comparePassword(password);
     if (!isPasswordCorrect)
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(401).json({ message: "Invalid credentials" });
 
     const token = generateToken(user._id);
 
@@ -182,6 +183,83 @@ export const updateUserFcmToken = async (req, res) => {
     res.status(200).json({ user: updatedUser });
   } catch (error) {
     console.error("Error updating user controller FCM token:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const bookmarkCook = async (req, res) => {
+  try {
+    const { cookId } = req.body;
+    if (!cookId) {
+      return res.status(400).json({ message: "Cook ID is required" });
+    }
+
+    const cook = await Cook.findById(cookId);
+    if (!cook) {
+      return res.status(404).json({ message: "Cook not found" });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (user.bookmarkedCooks.includes(cookId)) {
+      return res.status(400).json({ message: "Cook already bookmarked" });
+    }
+
+    user.bookmarkedCooks.push(cookId);
+    await user.save();
+
+    res.status(200).json({ message: "Cook bookmarked successfully" });
+  } catch (error) {
+    console.error("Error bookmarking cook:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const unbookmarkCook = async (req, res) => {
+  try {
+    const { cookId } = req.body;
+    if (!cookId) {
+      return res.status(400).json({ message: "Cook ID is required" });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user.bookmarkedCooks.includes(cookId)) {
+      return res.status(400).json({ message: "Cook not bookmarked" });
+    }
+
+    user.bookmarkedCooks = user.bookmarkedCooks.filter(
+      (id) => id.toString() !== cookId
+    );
+    await user.save();
+
+    res.status(200).json({ message: "Cook unbookmarked successfully" });
+  } catch (error) {
+    console.error("Error unbookmarking cook:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getBookmarkedCooks = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id)
+      .populate("bookmarkedCooks", "-password")
+      .select("-password");
+    const formattedCooks = user.bookmarkedCooks.map((cook) => ({
+      id: cook._id,
+      name: cook.username,
+      cuisine: cook.cuisineSpecialties.join(", "),
+      image: cook.profileImage,
+      experienceLevel: cook.experienceLevel,
+      pricing: cook.pricing,
+      specialties: cook.specialties,
+      bio: cook.bio,
+      servicesOffered: cook.servicesOffered,
+      location: cook.location,
+      createdAt: cook.createdAt,
+    }));
+
+    res.status(200).json({ bookmarkedCooks: formattedCooks });
+  } catch (error) {
+    console.error("Error fetching bookmarked cooks:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };

@@ -147,12 +147,12 @@ export const loginCook = async (req, res) => {
 
     const cook = await Cook.findOne({ email });
     if (!cook) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
     const isPasswordCorrect = await cook.comparePassword(password);
     if (!isPasswordCorrect) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
     const token = generateToken(cook._id);
