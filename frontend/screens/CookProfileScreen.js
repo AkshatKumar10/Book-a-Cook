@@ -8,14 +8,16 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { useContext } from 'react';
+import { useContext,useState,useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import useCook from '../hooks/useCook';
 import { ThemeContext } from '../context/ThemeContext';
 import { StatusBar } from 'expo-status-bar';
-import { useBookmark } from '../context/BookmarkContext';
 import { getTime } from '../utils/getTime';
 import { Skeleton } from 'moti/skeleton';
+import SnackbarComponent from '../components/SnackbarComponent';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { bookmarkCook, unbookmarkCook } from '../utils/api';
 
 const CookProfileScreen = () => {
   const route = useRoute();
@@ -24,7 +26,10 @@ const CookProfileScreen = () => {
   const { width } = useWindowDimensions();
   const { cook, cookLoading } = useCook(cookId);
   const { theme } = useContext(ThemeContext);
-  const { isBookmarked } = useBookmark();
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarType, setSnackbarType] = useState('success');
 
   const themeStyles = {
     container: theme === 'dark' ? 'bg-black' : 'bg-gray-100',
@@ -45,29 +50,64 @@ const CookProfileScreen = () => {
     });
   };
 
-  if (!cook) {
-    return (
-      <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
-        <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
-        <Navbar title="Chef Profile" />
-        <View className="flex-1 items-center justify-center">
-          <Text className={`text-lg ${themeStyles.textPrimary}`}>
-            Cook not found
-          </Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
+  useEffect(() => {
+    if (cook?.id) {
+      const fetchBookmarks = async () => {
+        const storedBookmarks = JSON.parse(
+          (await AsyncStorage.getItem('bookmarkedCooks')) || '[]',
+        );
+        setIsBookmarked(storedBookmarks.includes(cook.id));
+      };
+      fetchBookmarks();
+    }
+  }, [cook]);
+
+  const handleBookmarkToggle = async () => {
+    try {
+      const storedBookmarks = JSON.parse(
+        (await AsyncStorage.getItem('bookmarkedCooks')) || '[]',
+      );
+
+      if (isBookmarked) {
+        const res = await unbookmarkCook(cook.id);
+        const updatedBookmarks = storedBookmarks.filter((id) => id !== cook.id);
+        await AsyncStorage.setItem(
+          'bookmarkedCooks',
+          JSON.stringify(updatedBookmarks),
+        );
+        setIsBookmarked(false);
+        setSnackbarMessage(res?.message);
+        setSnackbarType('success');
+        setSnackbarVisible(true);
+      } else {
+        const res = await bookmarkCook(cook.id);
+        storedBookmarks.push(cook.id);
+        await AsyncStorage.setItem(
+          'bookmarkedCooks',
+          JSON.stringify(storedBookmarks),
+        );
+        setIsBookmarked(true);
+        setSnackbarMessage(res?.message);
+        setSnackbarType('success');
+        setSnackbarVisible(true);
+      }
+    } catch (error) {
+      console.error('Error toggling bookmark:', error);
+      setSnackbarMessage(error.message);
+      setSnackbarType('error');
+      setSnackbarVisible(true);
+    }
+  };
 
   if (cookLoading) {
     return (
       <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
         <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
-        <Navbar title="Chef Profile" />
         <ScrollView
           contentContainerStyle={{ paddingBottom: 10 }}
           showsVerticalScrollIndicator={false}
         >
+          <Navbar title="Chef Profile" />
           <View className="items-center mt-4">
             <Skeleton
               colorMode={theme}
@@ -144,9 +184,8 @@ const CookProfileScreen = () => {
       <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
       <Navbar
         title="Chef Profile"
-        showBookmark={true}
-        cook={cook}
-        isBookmarked={isBookmarked(cook.id)}
+        cook={{ ...cook, isBookmarked }}
+        onBookmarkToggle={handleBookmarkToggle}
       />
       <ScrollView
         contentContainerStyle={{ paddingBottom: 10 }}
@@ -182,10 +221,6 @@ const CookProfileScreen = () => {
               {getTime(cook.createdAt)}
             </Text>
           </View>
-
-          {/* <Text className={`text-center mt-2 ${themeStyles.textAccent}`}>
-            {cook.rating || 5}
-          </Text> */}
         </View>
         <View className="mt-6">
           {cook.specialties && cook.specialties.length > 0 && (
@@ -274,6 +309,12 @@ const CookProfileScreen = () => {
           </TouchableOpacity>
         </View>
       </ScrollView>
+      <SnackbarComponent
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        message={snackbarMessage}
+        type={snackbarType}
+      />
     </SafeAreaView>
   );
 };
