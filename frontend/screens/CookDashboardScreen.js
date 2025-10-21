@@ -11,7 +11,11 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import { CommonActions, useFocusEffect, useNavigation } from '@react-navigation/native';
+import {
+  CommonActions,
+  useFocusEffect,
+  useNavigation,
+} from '@react-navigation/native';
 import { ThemeContext } from '../context/ThemeContext';
 import useCookProfile from '../hooks/useCookProfile';
 import useCookBookings from '../hooks/useCookBookings';
@@ -65,7 +69,15 @@ const CookDashboardScreen = () => {
     summaryValue: theme === 'dark' ? 'text-white' : 'text-gray-900',
   };
 
-  const pendingBookings = bookings.filter((b) => b.status === 'pending').length;
+  const pendingBookings = bookings.filter((b) => {
+    if (b.status !== 'pending') return false;
+    const [day, month, year] = b.selectedDate.split('/').map(Number);
+    const bookingDate = new Date(year, month - 1, day);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return bookingDate >= today;
+  }).length;
+
   const completedBookings = bookings.filter((b) => b.status === 'completed');
   const totalEarnings = completedBookings.reduce(
     (sum, booking) => sum + booking.totalAmount,
