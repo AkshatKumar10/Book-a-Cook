@@ -8,6 +8,8 @@ import {
   Switch,
   RefreshControl,
   useWindowDimensions,
+  BackHandler,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -82,6 +84,29 @@ const CookDashboardScreen = () => {
   const totalEarnings = completedBookings.reduce(
     (sum, booking) => sum + booking.totalAmount,
     0,
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        Alert.alert('Exit App', 'Are you sure you want to exit?', [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Exit',
+            style: 'destructive',
+            onPress: () => BackHandler.exitApp(),
+          },
+        ]);
+        return true;
+      };
+
+      const backHandler = BackHandler.addEventListener(
+        'hardwareBackPress',
+        onBackPress,
+      );
+
+      return () => backHandler.remove();
+    }, []),
   );
 
   if (dataLoading || bookingsLoading) {
