@@ -13,6 +13,7 @@ import useCookBookings from '../hooks/useCookBookings';
 import { Skeleton } from 'moti/skeleton';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Navbar from '../components/Navbar';
+import { formatDate } from '../utils/formatDate';
 
 const EarningScreen = () => {
   const { theme } = useContext(ThemeContext);
@@ -38,15 +39,6 @@ const EarningScreen = () => {
     (sum, booking) => sum + booking.totalAmount,
     0,
   );
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
 
   if (cookBookingLoading) {
     return (
@@ -192,7 +184,7 @@ const EarningScreen = () => {
                   Booking with {booking.userId.username}
                 </Text>
                 <Text className={`text-sm mt-1 ${themeStyles.textSecondary}`}>
-                  {formatDate(booking.createdAt)}
+                  {formatDate(booking.selectedDate)}
                 </Text>
               </View>
               <View className="items-end">

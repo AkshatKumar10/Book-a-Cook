@@ -37,10 +37,12 @@ const MyBookingsScreen = () => {
     cardBorder: theme === 'dark' ? 'border-gray-700' : 'border-gray-200',
     statusPending: theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600',
     statusConfirmed: theme === 'dark' ? 'text-green-400' : 'text-green-600',
-    statusCompleted: theme === 'dark' ? 'text-gray-400' : 'text-gray-500',
+    statusCompleted: theme === 'dark' ? 'text-blue-400' : 'text-blue-600',
+    statusDeclined: theme === 'dark' ? 'text-red-400' : 'text-red-600', 
     statusPendingBg: theme === 'dark' ? 'bg-yellow-900/30' : 'bg-yellow-100',
     statusConfirmedBg: theme === 'dark' ? 'bg-green-900/30' : 'bg-green-100',
-    statusCompletedBg: theme === 'dark' ? 'bg-gray-700/30' : 'bg-gray-200',
+    statusCompletedBg: theme === 'dark' ? 'bg-blue-900/30' : 'bg-blue-100',
+    statusDeclinedBg: theme === 'dark' ? 'bg-red-900/30' : 'bg-red-100',
   };
 
   useFocusEffect(
@@ -57,58 +59,55 @@ const MyBookingsScreen = () => {
     }, [navigation]),
   );
 
-  const convertTo24Hour = (time12h) => {
-    const [time, modifier] = time12h.split(' ');
-    let [hours, minutes] = time.split(':');
-    if (hours === '12') hours = '00';
-    if (modifier.toLowerCase() === 'pm')
-      hours = String(parseInt(hours, 10) + 12);
-    return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
-  };
-
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
+    const [day, month, year] = dateString.split('/');
+    return new Date(`${year}-${month}-${day}`).toLocaleDateString('en-US', {
       month: 'long',
       day: 'numeric',
       year: 'numeric',
     });
   };
 
-  const parseBookingDateTime = (booking) => {
-    const [day, month, year] = booking.selectedDate.split('/');
-    const time24 = convertTo24Hour(booking.selectedTime);
-    return new Date(`${year}-${month}-${day}T${time24}:00`);
-  };
-
   const getStatusText = (booking) => {
-    if (booking.status === 'pending') return 'Pending';
-    if (booking.status === 'accepted') return 'Confirmed';
-    if (booking.status === 'declined') return 'Declined';
-    if (parseBookingDateTime(booking) < new Date()) return 'Completed';
-    return booking.status;
+    switch (booking.status) {
+      case 'pending':
+        return 'Pending';
+      case 'accepted':
+        return 'Confirmed';
+      case 'declined':
+        return 'Declined';
+      case 'completed':
+        return 'Completed';
+      default:
+        return booking.status;
+    }
   };
 
   const getStatusStyles = (booking) => {
-    if (booking.status === 'pending')
-      return {
-        text: themeStyles.statusPending,
-        bg: themeStyles.statusPendingBg,
-      };
-    if (booking.status === 'accepted')
-      return {
-        text: themeStyles.statusConfirmed,
-        bg: themeStyles.statusConfirmedBg,
-      };
-    if (
-      booking.status === 'declined' ||
-      parseBookingDateTime(booking) < new Date()
-    )
-      return {
-        text: themeStyles.statusCompleted,
-        bg: themeStyles.statusCompletedBg,
-      };
-    return { text: themeStyles.textTertiary, bg: 'transparent' };
+    switch (booking.status) {
+      case 'pending':
+        return {
+          text: themeStyles.statusPending,
+          bg: themeStyles.statusPendingBg,
+        };
+      case 'accepted':
+        return {
+          text: themeStyles.statusConfirmed,
+          bg: themeStyles.statusConfirmedBg,
+        };
+      case 'declined':
+        return {
+          text: themeStyles.statusDeclined,
+          bg: themeStyles.statusDeclinedBg,
+        };
+      case 'completed':
+        return {
+          text: themeStyles.statusCompleted,
+          bg: themeStyles.statusCompletedBg,
+        };
+      default:
+        return { text: themeStyles.textTertiary, bg: 'transparent' };
+    }
   };
 
   const renderBooking = ({ item: booking }) => {
@@ -145,10 +144,7 @@ const MyBookingsScreen = () => {
           <View className="w-1/2 space-y-2">
             {[
               { icon: 'utensils', text: booking.mealType },
-              {
-                icon: 'calendar',
-                text: formatDate(parseBookingDateTime(booking)),
-              },
+              { icon: 'calendar', text: formatDate(booking.selectedDate) },
             ].map((item, index) => (
               <View key={index} className="flex-row items-center mb-2">
                 <View style={{ width: 20, alignItems: 'center' }}>
@@ -202,13 +198,17 @@ const MyBookingsScreen = () => {
     );
   };
 
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
   const upcomingBookings = bookings.filter(
     (b) =>
-      (b.status === 'pending' || b.status === 'accepted') &&
-      parseBookingDateTime(b) >= new Date(),
+      ['pending', 'accepted'].includes(b.status) &&
+      new Date(b.selectedDate.split('/').reverse().join('-')) >= today,
   );
-  const pastBookings = bookings.filter(
-    (b) => b.status === 'declined' || parseBookingDateTime(b) < new Date(),
+
+  const pastBookings = bookings.filter((b) =>
+    ['declined', 'completed'].includes(b.status),
   );
 
   const renderEmptyComponent = (emptyMessage) => (
