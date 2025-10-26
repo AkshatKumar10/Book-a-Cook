@@ -38,7 +38,7 @@ const MyBookingsScreen = () => {
     statusPending: theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600',
     statusConfirmed: theme === 'dark' ? 'text-green-400' : 'text-green-600',
     statusCompleted: theme === 'dark' ? 'text-blue-400' : 'text-blue-600',
-    statusDeclined: theme === 'dark' ? 'text-red-400' : 'text-red-600', 
+    statusDeclined: theme === 'dark' ? 'text-red-400' : 'text-red-600',
     statusPendingBg: theme === 'dark' ? 'bg-yellow-900/30' : 'bg-yellow-100',
     statusConfirmedBg: theme === 'dark' ? 'bg-green-900/30' : 'bg-green-100',
     statusCompletedBg: theme === 'dark' ? 'bg-blue-900/30' : 'bg-blue-100',
@@ -211,18 +211,6 @@ const MyBookingsScreen = () => {
     ['declined', 'completed'].includes(b.status),
   );
 
-  const renderEmptyComponent = (emptyMessage) => (
-    <View className="flex-1 justify-center items-center py-10">
-      <FontAwesome5 name="sad-tear" size={64} color={themeStyles.iconColor} />
-      <Text className={`text-lg ${themeStyles.textTertiary} mt-4`}>
-        {emptyMessage.title}
-      </Text>
-      <Text className={`text-base ${themeStyles.textNoBookings} mt-1`}>
-        {emptyMessage.subtitle}
-      </Text>
-    </View>
-  );
-
   if (bookingLoading) {
     return (
       <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
@@ -331,32 +319,34 @@ const MyBookingsScreen = () => {
         </TouchableOpacity>
       </View>
       <FlatList
-        data={upcomingBookings}
+        data={activeTab === 'upcoming' ? upcomingBookings : pastBookings}
         keyExtractor={(item) => item._id}
         renderItem={renderBooking}
-        contentContainerStyle={{
-          paddingBottom: 24,
-          display: activeTab === 'upcoming' ? 'flex' : 'none',
-        }}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 24 }}
         showsVerticalScrollIndicator={false}
-        ListEmptyComponent={renderEmptyComponent({
-          title: 'No upcoming bookings found',
-          subtitle: 'Start by booking your favorite chef!',
-        })}
-      />
-      <FlatList
-        data={pastBookings}
-        keyExtractor={(item) => item._id}
-        renderItem={renderBooking}
-        contentContainerStyle={{
-          paddingBottom: 24,
-          display: activeTab === 'past' ? 'flex' : 'none',
-        }}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={renderEmptyComponent({
-          title: 'No past bookings found',
-          subtitle: 'No past bookings available.',
-        })}
+        ListEmptyComponent={
+          <View className="flex-1 justify-center items-center px-8">
+            <Ionicons
+              name="calendar-outline"
+              size={80}
+              color={themeStyles.iconColor}
+            />
+            <Text
+              className={`text-2xl font-bold mt-4 ${themeStyles.textPrimary}`}
+            >
+              {activeTab === 'upcoming'
+                ? 'No Upcoming Bookings'
+                : 'No Past Bookings'}
+            </Text>
+            <Text
+              className={`text-base mt-2 text-center ${themeStyles.textTertiary}`}
+            >
+              {activeTab === 'upcoming'
+                ? 'Your upcoming bookings will appear here.'
+                : 'Your past bookings will appear here.'}
+            </Text>
+          </View>
+        }
       />
     </SafeAreaView>
   );
