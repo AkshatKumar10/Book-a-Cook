@@ -21,7 +21,7 @@ export const registerCook = async (req, res) => {
       pricing,
     } = req.body;
 
-    let profileImage = `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`;
+    let profileImage = `https://api.dicebear.com/7.x/avataaars/png?seed=${username}`;
 
     if (req.file) {
       const result = await cloudinary.uploader.upload(req.file.path, {
