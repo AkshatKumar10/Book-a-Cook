@@ -20,7 +20,6 @@ import { StatusBar } from 'expo-status-bar';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { registerCook, storeCookToken, updateCookFcmToken } from '../utils/api';
 import * as ImagePicker from 'expo-image-picker';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import SnackbarComponent from '../components/SnackbarComponent';
 import { getFcmToken } from '../utils/fcmUtils';
 
@@ -386,7 +385,7 @@ export default function CookSignUpScreen() {
           </Text>
           <View className="flex-row mb-4">
             <TextInput
-              className={`flex-1 py-4 px-4 ${themeStyles.inputBg} ${themeStyles.inputText} rounded-xl`}
+              className={`flex-1 py-4 pl-4 ${themeStyles.inputBg} ${themeStyles.inputText} rounded-xl`}
               placeholder="Enter a specialty"
               value={specialtyInput}
               onChangeText={setSpecialtyInput}
