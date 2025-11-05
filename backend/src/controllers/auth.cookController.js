@@ -21,6 +21,15 @@ export const registerCook = async (req, res) => {
       pricing,
     } = req.body;
 
+    if (!req.files?.document) {
+      return res.status(400).json({ message: "Document (Aadhaar/PAN/Certificate) is required" });
+    }
+
+    const documentResult = await cloudinary.uploader.upload(req.files.document[0].path, {
+      folder: "cooks/documents",
+      resource_type: "auto",
+    });
+
     let profileImage = `https://api.dicebear.com/7.x/avataaars/png?seed=${username}`;
 
     if (req.file) {
@@ -102,6 +111,7 @@ export const registerCook = async (req, res) => {
       email,
       password,
       profileImage,
+      document: documentResult.secure_url,
       location,
       cuisineSpecialties,
       specialties,
@@ -121,6 +131,7 @@ export const registerCook = async (req, res) => {
         username: cook.username,
         email: cook.email,
         profileImage: cook.profileImage,
+        document: cook.document,
         location: cook.location,
         cuisineSpecialties: cook.cuisineSpecialties,
         specialties: cook.specialties,
