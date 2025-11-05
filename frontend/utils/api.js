@@ -76,6 +76,12 @@ export const registerCook = async (cookData) => {
         type: 'image/jpeg',
         name: 'profile.jpg',
       });
+    } else if (key === 'document' && cookData[key]) {
+      formData.append('document', {
+        uri: cookData[key],
+        type: 'image/jpeg',
+        name: 'doc.jpg',
+      });
     } else if (key === 'pricing' && cookData[key]) {
       formData.append('pricing[perDish]', cookData[key].perDish);
       formData.append('pricing[perHour]', cookData[key].perHour);
@@ -285,7 +291,11 @@ export const updateCookProfile = async (cookData) => {
     const formData = new FormData();
     
     Object.keys(cookData).forEach((key) => {
-      if (key === 'profileImage' && cookData[key] && cookData[key].startsWith('file://')) {
+      if (
+        key === 'profileImage' &&
+        cookData[key] &&
+        cookData[key].startsWith('file://')
+      ) {
         formData.append('profileImage', {
           uri: cookData[key],
           type: 'image/jpeg',
@@ -323,7 +333,7 @@ export const bookmarkCook = async (cookId) => {
       { cookId },
       {
         headers: { Authorization: `Bearer ${token}` },
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -339,7 +349,7 @@ export const unbookmarkCook = async (cookId) => {
       { cookId },
       {
         headers: { Authorization: `Bearer ${token}` },
-      }
+      },
     );
     return response.data;
   } catch (error) {

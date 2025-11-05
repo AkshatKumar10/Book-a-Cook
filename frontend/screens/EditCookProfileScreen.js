@@ -48,8 +48,15 @@ const EditCookProfileScreen = () => {
     pricing: { perDish: '', perHour: '' },
   });
 
-  const [cuisineOptions, setCuisineOptions] = useState([]);
-  const [serviceOptions, setServiceOptions] = useState([]);
+  const cuisineOptions = [
+    'Italian',
+    'Indian',
+    'Vegan',
+    'Mexican',
+    'Chinese',
+    'French',
+  ];
+  const serviceOptions = ['Meal Prep', 'Catering', 'Private Chef'];
 
   useEffect(() => {
     if (data) {
@@ -86,8 +93,6 @@ const EditCookProfileScreen = () => {
 
       setFormData(newFormData);
       setInitialData(newFormData);
-      setCuisineOptions(cuisinesArray);
-      setServiceOptions(data.servicesOffered);
     }
   }, [data]);
 
