@@ -78,6 +78,8 @@ export default function CookSignUpScreen() {
     inputBg: theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200',
     inputText: theme === 'dark' ? 'text-white' : 'text-gray-900',
     inputPlaceholder: theme === 'dark' ? '#9ca3af' : '#6b7280',
+    chipBg: theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200',
+    chipText: theme === 'dark' ? 'text-gray-200' : 'text-gray-700',
   };
 
   useFocusEffect(
@@ -435,9 +437,9 @@ export default function CookSignUpScreen() {
             {formData.specialties.map((item) => (
               <View
                 key={item}
-                className="flex-row items-center bg-gray-300 dark:bg-gray-700 rounded-full px-3 py-1 m-1"
+                className={`flex-row items-center ${themeStyles.chipBg} rounded-full px-3 py-1 m-1`}
               >
-                <Text className="mr-2">{item}</Text>
+                <Text className={`mr-2 ${themeStyles.chipText}`}>{item}</Text>
                 <TouchableOpacity onPress={() => removeSpecialty(item)}>
                   <Ionicons name="close-circle" size={20} color="#ef4444" />
                 </TouchableOpacity>
