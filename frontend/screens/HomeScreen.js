@@ -58,6 +58,7 @@ export default function HomeScreen() {
     modalBg: theme === 'dark' ? 'bg-gray-900' : 'bg-white',
     selected: theme === 'dark' ? 'bg-gray-700' : 'bg-gray-400',
     experienceLevel: theme === 'dark' ? 'text-yellow-300' : 'text-yellow-500',
+    borderColor: theme === 'dark' ? '#374151' : '#d1d5db',
   };
 
   const uniqueCuisines = [
@@ -452,57 +453,65 @@ export default function HomeScreen() {
             </View>
           ) : (
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              {filteredCooks.slice(0, 5).map((cook) => (
-                <View
-                  key={cook.id}
-                  style={{ padding: width * 0.015, width: width * 0.4 }}
-                >
+              {[...filteredCooks]
+                .reverse()
+                .slice(0, 5)
+                .map((cook) => (
                   <View
-                    className="rounded-xl overflow-hidden"
-                    style={{
-                      width: '100%',
-                      height: height * 0.2,
-                    }}
+                    key={cook.id}
+                    style={{ padding: width * 0.015, width: width * 0.4 }}
                   >
-                    {!imageLoadedState[cook.id] && (
-                      <Skeleton
-                        colorMode={theme}
-                        width="100%"
-                        height={'100%'}
-                        radius={10}
-                      />
-                    )}
-                    <TouchableOpacity
-                      onPress={() =>
-                        navigation.navigate('CookProfile', { cookId: cook.id })
-                      }
+                    <View
+                      className="rounded-xl overflow-hidden border-1"
+                      style={{
+                        width: '100%',
+                        height: height * 0.2,
+                        borderWidth: 1,
+                        borderColor: themeStyles.borderColor,
+                        borderRadius: 12,
+                      }}
                     >
-                      <Image
-                        source={{ uri: cook.image }}
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                        }}
-                        resizeMode="cover"
-                        onLoad={() => handleImageLoad(cook.id)}
-                      />
-                    </TouchableOpacity>
+                      {!imageLoadedState[cook.id] && (
+                        <Skeleton
+                          colorMode={theme}
+                          width="100%"
+                          height={'100%'}
+                          radius={10}
+                        />
+                      )}
+                      <TouchableOpacity
+                        onPress={() =>
+                          navigation.navigate('CookProfile', {
+                            cookId: cook.id,
+                          })
+                        }
+                      >
+                        <Image
+                          source={{ uri: cook.image }}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                          }}
+                          resizeMode="cover"
+                          onLoad={() => handleImageLoad(cook.id)}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                    <Text
+                      className={`font-semibold mt-2 text-lg ${themeStyles.textPrimary}`}
+                    >
+                      Chef {cook.name}
+                    </Text>
+                    <Text className={`text-base ${themeStyles.textAccent}`}>
+                      {cook.cuisine} cuisine
+                    </Text>
+                    <Text
+                      className={`text-base font-semibold ${themeStyles.experienceLevel}`}
+                    >
+                      {cook.experienceLevel} yrs experience
+                    </Text>
                   </View>
-                  <Text
-                    className={`font-semibold mt-2 text-lg ${themeStyles.textPrimary}`}
-                  >
-                    Chef {cook.name}
-                  </Text>
-                  <Text className={`text-base ${themeStyles.textAccent}`}>
-                    {cook.cuisine} cuisine
-                  </Text>
-                  <Text
-                    className={`text-base font-semibold ${themeStyles.experienceLevel}`}
-                  >
-                    {cook.experienceLevel} yrs experience
-                  </Text>
-                </View>
-              ))}
+                ))}
             </ScrollView>
           )}
         </View>

@@ -69,6 +69,7 @@ const CookDashboardScreen = () => {
     summaryCardBg: theme === 'dark' ? 'bg-gray-800' : 'bg-white',
     summaryText: theme === 'dark' ? 'text-gray-300' : 'text-gray-600',
     summaryValue: theme === 'dark' ? 'text-white' : 'text-gray-900',
+    borderColor: theme === 'dark' ? '#374151' : '#d1d5db',
   };
 
   const pendingBookings = bookings.filter((b) => {
@@ -272,6 +273,7 @@ const CookDashboardScreen = () => {
               uri: data?.image,
             }}
             className="h-24 w-24 rounded-full"
+            style={{ borderColor: themeStyles.borderColor,borderWidth: 1 }}
           />
           <View className="ml-4 flex-1">
             <Text className={`text-xl ${themeStyles.textWelcome}`}>
