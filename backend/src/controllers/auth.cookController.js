@@ -3,7 +3,7 @@ import Cook from "../models/Cook.js";
 import cloudinary from "../lib/cloudinary.js";
 
 const generateToken = (cookId) => {
-  return jwt.sign({ cookId }, process.env.JWT_SECRET, { expiresIn: "15d" });
+  return jwt.sign({ cookId }, process.env.JWT_SECRET);
 };
 
 export const registerCook = async (req, res) => {
@@ -32,8 +32,8 @@ export const registerCook = async (req, res) => {
 
     let profileImage = `https://api.dicebear.com/7.x/avataaars/png?seed=${username}`;
 
-    if (req.file) {
-      const result = await cloudinary.uploader.upload(req.file.path, {
+    if (req.files?.profileImage?.[0]) {
+      const result = await cloudinary.uploader.upload(req.files.profileImage[0].path, {
         folder: "cooks",
         resource_type: "image",
       });
