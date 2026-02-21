@@ -60,7 +60,8 @@
 - **Backend:** Node.js + Express + MongoDB  
 - **Notifications:** Firebase Cloud Messaging  
 - **Payments:** Razorpay React Native SDK  
-- **Cloud Storage:** Cloudinary  
+- **Cloud Storage:** Cloudinary
+- **Containerization:** Docker + Docker Compose
 
 ## 📦 Installation
 
