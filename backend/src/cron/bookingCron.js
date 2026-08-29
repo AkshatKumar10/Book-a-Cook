@@ -46,6 +46,24 @@ const bookingCron = () => {
       console.error("Cron job error:", error);
     }
   });
+
+  cron.schedule("*/14 * * * *", async () => {
+    try {
+      const baseUrl = process.env.API_BASE_URL;
+
+      const response = await fetch(`${baseUrl}/health`);
+
+      if (response.status === 200) {
+        console.log(
+          `Request sent successfully at ${new Date().toLocaleString()}`,
+        );
+      } else {
+        console.warn(`Request failed with status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error("Error while sending request  :", error.message);
+    }
+  });
 };
 
 export default bookingCron;
