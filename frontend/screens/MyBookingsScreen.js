@@ -59,9 +59,34 @@ const MyBookingsScreen = () => {
     }, [navigation]),
   );
 
+  const parseBookingDate = (dateString) => {
+    if (!dateString) return new Date(0);
+    const parts = dateString.split('/').map(Number);
+    if (parts.length === 3) {
+      let [p1, p2, year] = parts;
+      let day, month;
+      if (p1 > 12) {
+        day = p1;
+        month = p2;
+      } else if (p2 > 12) {
+        day = p2;
+        month = p1;
+      } else {
+        day = p1;
+        month = p2;
+      }
+      return new Date(year, month - 1, day);
+    }
+    const parsed = new Date(dateString);
+    return isNaN(parsed.getTime()) ? new Date(0) : parsed;
+  };
+
   const formatDate = (dateString) => {
-    const [day, month, year] = dateString.split('/');
-    return new Date(`${year}-${month}-${day}`).toLocaleDateString('en-US', {
+    const bookingDate = parseBookingDate(dateString);
+    if (isNaN(bookingDate.getTime()) || bookingDate.getTime() === 0) {
+      return dateString;
+    }
+    return bookingDate.toLocaleDateString('en-US', {
       month: 'long',
       day: 'numeric',
       year: 'numeric',
@@ -204,7 +229,7 @@ const MyBookingsScreen = () => {
   const upcomingBookings = bookings.filter(
     (b) =>
       ['pending', 'accepted'].includes(b.status) &&
-      new Date(b.selectedDate.split('/').reverse().join('-')) >= today,
+      parseBookingDate(b.selectedDate) >= today,
   );
 
   const pastBookings = bookings.filter((b) =>
