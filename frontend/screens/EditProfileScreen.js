@@ -97,7 +97,7 @@ const EditProfileScreen = () => {
           Full Name
         </Text>
         <View
-          className={`flex-row items-center border ${themeStyles.border} rounded-xl px-4 py-1 ${themeStyles.inputBg}`}
+          className={`flex-row items-center border ${themeStyles.border} rounded-2xl px-4 py-1 ${themeStyles.inputBg}`}
         >
           <Ionicons
             name="person-outline"
@@ -111,13 +111,19 @@ const EditProfileScreen = () => {
             placeholder="Your full name"
             className={`flex-1 ${themeStyles.textInput}`}
             placeholderTextColor={themeStyles.placeholder}
+            style={{
+              height: 48,
+              paddingVertical: 0,
+              fontSize: 16,
+              textAlignVertical: 'center',
+            }}
           />
         </View>
         <Text className={`mb-2 font-medium mt-8 ${themeStyles.textLabel}`}>
           Email
         </Text>
         <View
-          className={`flex-row items-center border ${themeStyles.border} rounded-xl px-4 py-1 ${themeStyles.inputBg}`}
+          className={`flex-row items-center border ${themeStyles.border} rounded-2xl px-4 py-1 ${themeStyles.inputBg}`}
         >
           <Ionicons
             name="mail-outline"
@@ -133,20 +139,34 @@ const EditProfileScreen = () => {
             className={`flex-1 ${themeStyles.textInput}`}
             placeholderTextColor={themeStyles.placeholder}
             autoCapitalize="none"
+            style={{
+              height: 48,
+              paddingVertical: 0,
+              fontSize: 16,
+              textAlignVertical: 'center',
+            }}
           />
         </View>
         <TouchableOpacity
           onPress={handleSave}
-          className="rounded-xl shadow-lg overflow-hidden mt-6"
+          activeOpacity={0.85}
+          className="rounded-xl shadow-lg overflow-hidden mt-8"
+          style={{ borderRadius: 14, elevation: 4 }}
         >
           <LinearGradient
             colors={['#4c8bf5', '#3f51b5']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            className="p-4 items-center"
+            style={{
+              height: 48,
+              width: '100%',
+              alignItems: 'center',
+              justifyContent: 'center',
+              paddingHorizontal: 20,
+            }}
           >
             <Text
-              className={`text-xl font-semibold tracking-wide ${themeStyles.buttonText}`}
+              className={`text-lg font-semibold tracking-wide ${themeStyles.buttonText}`}
             >
               Save Changes
             </Text>

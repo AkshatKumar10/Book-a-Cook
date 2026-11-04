@@ -17,6 +17,7 @@ import {
   Image,
   KeyboardAvoidingView,
   Platform,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Feather from '@expo/vector-icons/Feather';
@@ -61,6 +62,7 @@ export default function BookingPageScreen() {
   const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [selectedCuisine, setSelectedCuisine] = useState('');
+  const [isCuisinePickerModalVisible, setIsCuisinePickerModalVisible] = useState(false);
   const [selectedCook, setSelectedCook] = useState(null);
   const [matchingCooks, setMatchingCooks] = useState([]);
   const [showCookList, setShowCookList] = useState(false);
@@ -375,7 +377,10 @@ export default function BookingPageScreen() {
   const hideDatePicker = () => setDatePickerVisibility(false);
 
   const handleConfirmDate = (date) => {
-    const formattedDate = date.toLocaleDateString();
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    const formattedDate = `${day}/${month}/${year}`;
     setSelectedDate(formattedDate);
     hideDatePicker();
   };
@@ -756,20 +761,95 @@ export default function BookingPageScreen() {
             >
               Select Cuisine:
             </Text>
-            <View
-              className={`border ${themeStyles.borderColor} rounded-lg ${themeStyles.pickerBg}`}
-            >
-              <Picker
-                selectedValue={selectedCuisine}
-                onValueChange={handleCuisineChange}
-                style={{ color: theme === 'dark' ? '#D1D5DB' : '#000000' }}
+            {Platform.OS === 'ios' ? (
+              <>
+                <TouchableOpacity
+                  onPress={() => setIsCuisinePickerModalVisible(true)}
+                  className={`border ${themeStyles.borderColor} rounded-lg ${themeStyles.pickerBg} px-4 py-3 flex-row items-center justify-between`}
+                >
+                  <Text
+                    className={`text-base ${
+                      selectedCuisine
+                        ? themeStyles.textPrimary
+                        : themeStyles.placeholderColor
+                    }`}
+                  >
+                    {selectedCuisine || 'Select Cuisine'}
+                  </Text>
+                  <Feather
+                    name="chevron-down"
+                    size={20}
+                    color={themeStyles.iconColor}
+                  />
+                </TouchableOpacity>
+
+                <Modal
+                  visible={isCuisinePickerModalVisible}
+                  transparent={true}
+                  animationType="slide"
+                  onRequestClose={() => setIsCuisinePickerModalVisible(false)}
+                >
+                  <View
+                    className="flex-1 justify-end"
+                    style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+                  >
+                    <View
+                      className={`p-4 rounded-t-2xl ${
+                        theme === 'dark' ? 'bg-gray-900' : 'bg-white'
+                      }`}
+                    >
+                      <View className="flex-row justify-between items-center pb-2 border-b border-gray-200 dark:border-gray-700">
+                        <Text
+                          className={`text-lg font-semibold ${themeStyles.textPrimary}`}
+                        >
+                          Select Cuisine
+                        </Text>
+                        <TouchableOpacity
+                          onPress={() => setIsCuisinePickerModalVisible(false)}
+                          className="px-3 py-1 bg-orange-500 rounded-lg"
+                        >
+                          <Text className="text-white font-medium">Done</Text>
+                        </TouchableOpacity>
+                      </View>
+                      <Picker
+                        selectedValue={selectedCuisine}
+                        onValueChange={(val) => {
+                          handleCuisineChange(val);
+                        }}
+                        itemStyle={{
+                          color: theme === 'dark' ? '#FFFFFF' : '#000000',
+                          fontSize: 18,
+                        }}
+                      >
+                        <Picker.Item label="Select Cuisine" value="" />
+                        {uniqueCuisines.map((cuisine) => (
+                          <Picker.Item
+                            key={cuisine}
+                            label={cuisine}
+                            value={cuisine}
+                          />
+                        ))}
+                      </Picker>
+                    </View>
+                  </View>
+                </Modal>
+              </>
+            ) : (
+              <View
+                className={`border ${themeStyles.borderColor} rounded-lg ${themeStyles.pickerBg}`}
               >
-                <Picker.Item label="Select Cuisine" value="" />
-                {uniqueCuisines.map((cuisine) => (
-                  <Picker.Item key={cuisine} label={cuisine} value={cuisine} />
-                ))}
-              </Picker>
-            </View>
+                <Picker
+                  selectedValue={selectedCuisine}
+                  onValueChange={handleCuisineChange}
+                  style={{ color: theme === 'dark' ? '#D1D5DB' : '#000000' }}
+                >
+                  <Picker.Item label="Select Cuisine" value="" />
+                  {uniqueCuisines.map((cuisine) => (
+                    <Picker.Item key={cuisine} label={cuisine} value={cuisine} />
+                  ))}
+                </Picker>
+              </View>
+            )}
           </View>
         )}
 
