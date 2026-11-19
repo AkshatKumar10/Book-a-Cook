@@ -186,12 +186,14 @@ export const getAllCooks = async (req, res) => {
       id: cook._id,
       name: cook.username,
       cuisine: cook.cuisineSpecialties.join(", "),
+      location: cook.location,
       image: cook.profileImage,
       experienceLevel: cook.experienceLevel,
       pricing: cook.pricing,
       specialties: cook.specialties,
       bio: cook.bio,
       servicesOffered: cook.servicesOffered,
+      availability: cook.availability,
     }));
     res.status(200).json(formattedCooks);
   } catch (error) {
@@ -218,6 +220,7 @@ export const getCookById = async (req, res) => {
       experienceLevel: cook.experienceLevel,
       servicesOffered: cook.servicesOffered,
       pricing: cook.pricing,
+      availability: cook.availability,
       createdAt: cook.createdAt,
     };
     res.status(200).json(formattedCook);
@@ -248,6 +251,7 @@ export const getCooksByCuisine = async (req, res) => {
       servicesOffered: cook.servicesOffered,
       specialties: cook.specialties,
       pricing: cook.pricing,
+      availability: cook.availability,
       createdAt: cook.createdAt,
     }));
 
@@ -312,6 +316,7 @@ export const getCook = async (req, res) => {
       experienceLevel: cook.experienceLevel,
       servicesOffered: cook.servicesOffered,
       pricing: cook.pricing,
+      availability: cook.availability,
       createdAt: cook.createdAt,
     };
     res.status(200).json(formattedCook);
@@ -411,11 +416,40 @@ export const updateCookProfile = async (req, res) => {
         experienceLevel: updatedCook.experienceLevel,
         servicesOffered: updatedCook.servicesOffered,
         pricing: updatedCook.pricing,
+        availability: updatedCook.availability,
         createdAt: updatedCook.createdAt,
       },
     });
   } catch (error) {
     console.log("Error in updateCookProfile controller", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const updateCookAvailability = async (req, res) => {
+  try {
+    const { availability } = req.body;
+
+    if (!Array.isArray(availability)) {
+      return res.status(400).json({ message: "Availability array is required" });
+    }
+
+    const updatedCook = await Cook.findByIdAndUpdate(
+      req.user._id,
+      { availability },
+      { new: true, runValidators: true }
+    ).select("-password");
+
+    if (!updatedCook) {
+      return res.status(404).json({ message: "Cook not found" });
+    }
+
+    res.status(200).json({
+      message: "Availability updated successfully",
+      availability: updatedCook.availability,
+    });
+  } catch (error) {
+    console.error("Error updating cook availability:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };

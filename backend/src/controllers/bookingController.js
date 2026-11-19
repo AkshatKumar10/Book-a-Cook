@@ -14,6 +14,8 @@ export const createBooking = async (req, res) => {
 
     const {
       cookId,
+      bookingType = "dish",
+      hours = 1,
       mealType,
       guestCount,
       selectedDate,
@@ -38,6 +40,29 @@ export const createBooking = async (req, res) => {
         .json({ message: "All booking fields are required" });
     }
 
+    const cook = await Cook.findById(cookId);
+    if (!cook) {
+      return res.status(404).json({ message: "Cook not found" });
+    }
+
+    const dateParts = selectedDate.split("/");
+    if (dateParts.length === 3) {
+      const dayIndex = new Date(parseInt(dateParts[2]), parseInt(dateParts[1]) - 1, parseInt(dateParts[0])).getDay();
+      const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      const dayName = daysOfWeek[dayIndex];
+
+      if (cook.availability && cook.availability.length > 0) {
+        const daySchedule = cook.availability.find(
+          (item) => item.day.toLowerCase() === dayName.toLowerCase()
+        );
+        if (daySchedule && !daySchedule.isAvailable) {
+          return res.status(400).json({
+            message: `Chef ${cook.username} is not available on ${dayName}s.`,
+          });
+        }
+      }
+    }
+
     const paymentVerification = await verifyPayment(paymentId);
     if (
       !paymentVerification.valid ||
@@ -51,6 +76,8 @@ export const createBooking = async (req, res) => {
     const booking = new Booking({
       userId: req.user._id,
       cookId,
+      bookingType,
+      hours: bookingType === "hourly" ? Number(hours) || 1 : 1,
       mealType,
       guestCount,
       selectedDate,
@@ -62,12 +89,11 @@ export const createBooking = async (req, res) => {
 
     await booking.save();
 
-    const cook = await Cook.findById(cookId).select("username fcmToken");
     if (cook && cook.fcmToken) {
       await sendNotification(
         cook.fcmToken,
         "New Booking Request!",
-        `Hi Chef ${cook.username}, you have a new booking from ${req.user.username} for ${mealType} (${guestCount} guests) on ${selectedDate} at ${selectedTime}. Please accept or decline in your app.`,
+        `Hi Chef ${cook.username}, you have a new ${bookingType === "hourly" ? "hourly" : "dish-based"} booking from ${req.user.username} for ${mealType} (${bookingType === "hourly" ? `${hours} hrs` : `${guestCount} guests`}) on ${selectedDate} at ${selectedTime}. Please accept or decline in your app.`,
         { bookingId: booking._id.toString(), action: "view_booking" }
       );
     }

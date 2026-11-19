@@ -57,6 +57,37 @@ const cookSchema = new mongoose.Schema(
       required: true,
       default: {},
     },
+    availability: {
+      type: [
+        {
+          day: {
+            type: String, // "Monday", "Tuesday", etc.
+            required: true,
+          },
+          isAvailable: {
+            type: Boolean,
+            default: true,
+          },
+          startTime: {
+            type: String, // "09:00 AM" or "09:00"
+            default: "09:00 AM",
+          },
+          endTime: {
+            type: String, // "09:00 PM" or "21:00"
+            default: "09:00 PM",
+          },
+        },
+      ],
+      default: [
+        { day: "Monday", isAvailable: true, startTime: "09:00 AM", endTime: "09:00 PM" },
+        { day: "Tuesday", isAvailable: true, startTime: "09:00 AM", endTime: "09:00 PM" },
+        { day: "Wednesday", isAvailable: true, startTime: "09:00 AM", endTime: "09:00 PM" },
+        { day: "Thursday", isAvailable: true, startTime: "09:00 AM", endTime: "09:00 PM" },
+        { day: "Friday", isAvailable: true, startTime: "09:00 AM", endTime: "09:00 PM" },
+        { day: "Saturday", isAvailable: true, startTime: "09:00 AM", endTime: "09:00 PM" },
+        { day: "Sunday", isAvailable: true, startTime: "09:00 AM", endTime: "09:00 PM" },
+      ],
+    },
     fcmToken: { 
       type: String,
       default: "",

@@ -20,6 +20,8 @@ export default function CheckoutPageScreen() {
 
   const {
     cookId,
+    bookingType = 'dish',
+    hours = 1,
     mealType,
     guestCount,
     selectedDate,
@@ -49,6 +51,8 @@ export default function CheckoutPageScreen() {
   const handleProceedToPayment = () => {
     navigation.navigate('PaymentScreen', {
       cookId,
+      bookingType,
+      hours,
       mealType,
       guestCount,
       selectedDate,
@@ -57,6 +61,7 @@ export default function CheckoutPageScreen() {
       totalAmount: finalAmount,
       cookName,
       cookImage,
+      address,
     });
   };
 
@@ -95,18 +100,27 @@ export default function CheckoutPageScreen() {
         </View>
 
         <View className="flex-row justify-between items-center border-b border-red-100 py-4">
+          <Text className={`text-lg text-red-300 w-1/5`}>Service Type</Text>
+          <Text className={`text-lg ${themeStyles.textSecondary} flex-1 pl-12`}>
+            {bookingType === 'hourly' ? `Hourly (${hours} hrs)` : `Dish / Guest (${guestCount} guests)`}
+          </Text>
+        </View>
+
+        <View className="flex-row justify-between items-center border-b border-red-100 py-4">
           <Text className={`text-lg text-red-300 w-1/5`}>Meal Type</Text>
           <Text className={`text-lg ${themeStyles.textSecondary} flex-1 pl-12`}>
             {mealType}
           </Text>
         </View>
 
-        <View className="flex-row justify-between items-start border-b border-red-100 py-4">
-          <Text className={`text-lg text-red-300 w-1/5`}>Number of Guests</Text>
-          <Text className={`text-lg ${themeStyles.textSecondary} flex-1 pl-12`}>
-            {guestCount}
-          </Text>
-        </View>
+        {bookingType !== 'hourly' && (
+          <View className="flex-row justify-between items-start border-b border-red-100 py-4">
+            <Text className={`text-lg text-red-300 w-1/5`}>Number of Guests</Text>
+            <Text className={`text-lg ${themeStyles.textSecondary} flex-1 pl-12`}>
+              {guestCount}
+            </Text>
+          </View>
+        )}
 
         <View className="flex-row justify-between items-center border-b border-red-100 py-4">
           <Text className={`text-lg text-red-300 w-1/5`}>Date</Text>

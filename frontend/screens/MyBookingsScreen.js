@@ -179,7 +179,13 @@ const MyBookingsScreen = () => {
           </View>
           <View className="w-1/2 space-y-2">
             {[
-              { icon: 'users', text: `${booking.guestCount} Guests` },
+              {
+                icon: booking.bookingType === 'hourly' ? 'hourglass-half' : 'users',
+                text:
+                  booking.bookingType === 'hourly'
+                    ? `${booking.hours || 1} Hours`
+                    : `${booking.guestCount} Guests`,
+              },
               { icon: 'clock', text: booking.selectedTime },
             ].map((item, index) => (
               <View key={index} className="flex-row items-center mb-2">

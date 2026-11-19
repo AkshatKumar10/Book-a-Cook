@@ -315,3 +315,64 @@ export const updateCookProfile = async (cookData) => {
     throw error;
   }
 };
+
+export const updateCookAvailability = async (availability) => {
+  try {
+    const token = await getCookToken();
+    const response = await api.put(
+      '/api/cook/availability',
+      { availability },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error updating cook availability:', error);
+    throw error;
+  }
+};
+
+export const bookmarkCook = async (cookId) => {
+  try {
+    const token = await getUserToken();
+    const response = await api.post(
+      '/api/auth/bookmark-cook',
+      { cookId },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error bookmarking cook:', error);
+  }
+};
+
+export const unbookmarkCook = async (cookId) => {
+  try {
+    const token = await getUserToken();
+    const response = await api.post(
+      '/api/auth/unbookmark-cook',
+      { cookId },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error unbookmarking cook:', error);
+  }
+};
+
+export const getBookmarkedCooks = async () => {
+  try {
+    const token = await getUserToken();
+    const response = await api.get('/api/auth/bookmarked-cooks', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data.bookmarkedCooks;
+  } catch (error) {
+    console.error('Error fetching bookmarked cooks:', error);
+  }
+};
