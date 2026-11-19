@@ -219,6 +219,35 @@ const MyBookingsScreen = () => {
             ))}
           </View>
         </View>
+
+        {booking.status === 'declined' && (
+          <View className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+            {booking.declineReason ? (
+              <Text className={`text-xs ${themeStyles.textTertiary} mb-1`}>
+                <Text className="font-semibold">Reason: </Text>
+                {booking.declineReason}
+              </Text>
+            ) : null}
+            <View className="flex-row items-center mt-1">
+              <Ionicons
+                name={booking.refundStatus === 'processed' ? 'checkmark-circle' : 'information-circle'}
+                size={16}
+                color={booking.refundStatus === 'processed' ? '#10B981' : '#F59E0B'}
+              />
+              <Text
+                className={`ml-1 text-xs font-medium ${
+                  booking.refundStatus === 'processed'
+                    ? 'text-green-600 dark:text-green-400'
+                    : 'text-amber-600 dark:text-amber-400'
+                }`}
+              >
+                {booking.refundStatus === 'processed'
+                  ? `Refund Processed`
+                  : 'Refund Initiated / Under Process'}
+              </Text>
+            </View>
+          </View>
+        )}
       </View>
     );
   };
