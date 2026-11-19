@@ -325,6 +325,23 @@ export const updateCookProfile = async (cookData) => {
   }
 };
 
+export const updateCookAvailability = async (availability) => {
+  try {
+    const token = await getCookToken();
+    const response = await api.put(
+      '/api/cook/availability',
+      { availability },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error updating cook availability:', error);
+    throw error;
+  }
+};
+
 export const bookmarkCook = async (cookId) => {
   try {
     const token = await getUserToken();

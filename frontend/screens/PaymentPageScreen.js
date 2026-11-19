@@ -17,6 +17,8 @@ export default function PaymentPageScreen() {
 
   const {
     cookId,
+    bookingType = 'dish',
+    hours = 1,
     mealType,
     guestCount,
     selectedDate,
@@ -90,6 +92,8 @@ export default function PaymentPageScreen() {
     if (data.event === 'SUCCESS') {
       const bookingData = {
         cookId,
+        bookingType,
+        hours,
         mealType,
         guestCount,
         selectedDate,

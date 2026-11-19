@@ -56,6 +56,8 @@ export default function BookingPageScreen() {
   const { cook: specificCook, cookLoading } = useCook(cookId);
 
   const [mealType, setMealType] = useState(null);
+  const [bookingType, setBookingType] = useState('dish'); 
+  const [hours, setHours] = useState(2);
   const [guestCount, setGuestCount] = useState(2);
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
@@ -283,6 +285,9 @@ export default function BookingPageScreen() {
   const decrementGuests = () =>
     setGuestCount((prev) => (prev > 1 ? prev - 1 : prev));
 
+  const incrementHours = () => setHours((prev) => prev + 1);
+  const decrementHours = () => setHours((prev) => (prev > 1 ? prev - 1 : prev));
+
   const handleContactSupport = () => {
     const email = 'bookachef@gmail.com';
     const subject = 'Support Request';
@@ -293,9 +298,14 @@ export default function BookingPageScreen() {
     );
   };
 
-  const cookPrice = selectedCook?.pricing?.perDish || 0;
-  const discountedPrice = isDiscounted ? cookPrice * 0.9 : cookPrice;
-  const totalAmount = guestCount * discountedPrice;
+  const perDishPrice = selectedCook?.pricing?.perDish || 0;
+  const perHourPrice = selectedCook?.pricing?.perHour || 0;
+  const baseUnitPrice = bookingType === 'hourly' ? perHourPrice : perDishPrice;
+  const discountedUnitPrice = isDiscounted ? baseUnitPrice * 0.9 : baseUnitPrice;
+  const totalAmount =
+    bookingType === 'hourly'
+      ? hours * discountedUnitPrice
+      : guestCount * discountedUnitPrice;
 
   const handleNext = () => {
     if (
@@ -312,16 +322,49 @@ export default function BookingPageScreen() {
       setSnackbarVisible(true);
       return;
     }
+
+    const dateParts = selectedDate.split('/');
+    if (dateParts.length === 3 && selectedCook?.availability) {
+      const dayIndex = new Date(
+        parseInt(dateParts[2]),
+        parseInt(dateParts[1]) - 1,
+        parseInt(dateParts[0])
+      ).getDay();
+      const daysOfWeek = [
+        'Sunday',
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+      ];
+      const dayName = daysOfWeek[dayIndex];
+      const scheduleForDay = selectedCook.availability.find(
+        (s) => s.day?.toLowerCase() === dayName.toLowerCase()
+      );
+      if (scheduleForDay && !scheduleForDay.isAvailable) {
+        setSnackbarMessage(
+          `Chef ${selectedCook.name} is not available on ${dayName}s. Please choose another date.`,
+        );
+        setSnackbarType('Error');
+        setSnackbarVisible(true);
+        return;
+      }
+    }
+
     navigation.navigate('CheckoutPageScreen', {
       cookId: selectedCook.id,
       cookName: selectedCook.name,
       cookImage: selectedCook.image,
       selectedCuisine,
+      bookingType,
+      hours: bookingType === 'hourly' ? hours : 1,
       mealType,
       guestCount,
       selectedDate,
       selectedTime,
-      cookPrice,
+      cookPrice: baseUnitPrice,
       totalAmount,
       isDiscounted,
       address,
@@ -381,6 +424,34 @@ export default function BookingPageScreen() {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
     const formattedDate = `${day}/${month}/${year}`;
+
+    if (selectedCook?.availability) {
+      const dayIndex = date.getDay();
+      const daysOfWeek = [
+        'Sunday',
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+      ];
+      const dayName = daysOfWeek[dayIndex];
+      const scheduleForDay = selectedCook.availability.find(
+        (s) => s.day?.toLowerCase() === dayName.toLowerCase()
+      );
+      if (scheduleForDay && !scheduleForDay.isAvailable) {
+        setSnackbarMessage(
+          `Chef ${selectedCook.name} is not available on ${dayName}s. Please pick another date.`,
+        );
+        setSnackbarType('Error');
+        setSnackbarVisible(true);
+        setSelectedDate('');
+        hideDatePicker();
+        return;
+      }
+    }
+
     setSelectedDate(formattedDate);
     hideDatePicker();
   };
@@ -574,32 +645,122 @@ export default function BookingPageScreen() {
           <Text
             className={`text-lg font-medium mb-2 ${themeStyles.textPrimary}`}
           >
-            For how many people?
+            Booking Pricing Model:
           </Text>
-          <View
-            className={`flex-row items-center border ${themeStyles.borderColor} rounded-lg px-4 py-2 justify-between`}
-          >
+          <View className="flex-row space-x-2 gap-3">
             <TouchableOpacity
-              onPress={decrementGuests}
-              className={`border ${themeStyles.borderColor} rounded-full p-2`}
+              onPress={() => setBookingType('dish')}
+              className={`flex-1 py-3 px-3 rounded-xl border ${
+                bookingType === 'dish'
+                  ? `${themeStyles.mealSelectedBorder} ${themeStyles.mealSelectedBg}`
+                  : themeStyles.borderColor
+              }`}
             >
-              <Text className={`text-lg font-bold ${themeStyles.textPrimary}`}>
-                −
+              <Text
+                className={`text-center font-bold text-base ${
+                  bookingType === 'dish'
+                    ? themeStyles.mealSelectedText
+                    : themeStyles.textPrimary
+                }`}
+              >
+                Per Dish / Guest
+              </Text>
+              <Text
+                className={`text-center text-xs mt-1 ${themeStyles.textHint}`}
+              >
+                ₹{perDishPrice} / guest
               </Text>
             </TouchableOpacity>
-            <Text className={`text-lg font-medium ${themeStyles.textPrimary}`}>
-              {guestCount}
-            </Text>
+
             <TouchableOpacity
-              onPress={incrementGuests}
-              className={`border ${themeStyles.borderColor} rounded-full p-2`}
+              onPress={() => setBookingType('hourly')}
+              className={`flex-1 py-3 px-3 rounded-xl border ${
+                bookingType === 'hourly'
+                  ? `${themeStyles.mealSelectedBorder} ${themeStyles.mealSelectedBg}`
+                  : themeStyles.borderColor
+              }`}
             >
-              <Text className={`text-lg font-bold ${themeStyles.textPrimary}`}>
-                +
+              <Text
+                className={`text-center font-bold text-base ${
+                  bookingType === 'hourly'
+                    ? themeStyles.mealSelectedText
+                    : themeStyles.textPrimary
+                }`}
+              >
+                Hourly Service
+              </Text>
+              <Text
+                className={`text-center text-xs mt-1 ${themeStyles.textHint}`}
+              >
+                ₹{perHourPrice} / hour
               </Text>
             </TouchableOpacity>
           </View>
         </View>
+
+        {bookingType === 'hourly' ? (
+          <View className="mb-6">
+            <Text
+              className={`text-lg font-medium mb-2 ${themeStyles.textPrimary}`}
+            >
+              For how many hours?
+            </Text>
+            <View
+              className={`flex-row items-center border ${themeStyles.borderColor} rounded-lg px-4 py-2 justify-between`}
+            >
+              <TouchableOpacity
+                onPress={decrementHours}
+                className={`border ${themeStyles.borderColor} rounded-full p-2`}
+              >
+                <Text className={`text-lg font-bold ${themeStyles.textPrimary}`}>
+                  −
+                </Text>
+              </TouchableOpacity>
+              <Text className={`text-lg font-medium ${themeStyles.textPrimary}`}>
+                {hours} {hours === 1 ? 'Hour' : 'Hours'}
+              </Text>
+              <TouchableOpacity
+                onPress={incrementHours}
+                className={`border ${themeStyles.borderColor} rounded-full p-2`}
+              >
+                <Text className={`text-lg font-bold ${themeStyles.textPrimary}`}>
+                  +
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ) : (
+          <View className="mb-6">
+            <Text
+              className={`text-lg font-medium mb-2 ${themeStyles.textPrimary}`}
+            >
+              For how many people?
+            </Text>
+            <View
+              className={`flex-row items-center border ${themeStyles.borderColor} rounded-lg px-4 py-2 justify-between`}
+            >
+              <TouchableOpacity
+                onPress={decrementGuests}
+                className={`border ${themeStyles.borderColor} rounded-full p-2`}
+              >
+                <Text className={`text-lg font-bold ${themeStyles.textPrimary}`}>
+                  −
+                </Text>
+              </TouchableOpacity>
+              <Text className={`text-lg font-medium ${themeStyles.textPrimary}`}>
+                {guestCount} {guestCount === 1 ? 'Guest' : 'Guests'}
+              </Text>
+              <TouchableOpacity
+                onPress={incrementGuests}
+                className={`border ${themeStyles.borderColor} rounded-full p-2`}
+              >
+                <Text className={`text-lg font-bold ${themeStyles.textPrimary}`}>
+                  +
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
 
         <View className="mb-6">
           <Text
@@ -931,18 +1092,18 @@ export default function BookingPageScreen() {
           <Text
             className={`text-lg font-semibold mb-2 ${themeStyles.textPrimary}`}
           >
-            Pricing Details
+            Pricing Details ({bookingType === 'hourly' ? 'Hourly' : 'Per Dish'})
           </Text>
 
           <View className="flex-row justify-between items-center mb-1">
             <Text className={`text-base ${themeStyles.textSecondary}`}>
-              Price per guest:
+              {bookingType === 'hourly' ? 'Rate per hour:' : 'Price per guest:'}
             </Text>
             <View className="flex-row items-center">
               <Text
                 className={`text-base font-bold ${themeStyles.textPrimary}`}
               >
-                ₹{discountedPrice.toFixed(0)}
+                ₹{discountedUnitPrice.toFixed(0)}
               </Text>
               {isDiscounted && (
                 <Text
@@ -954,11 +1115,20 @@ export default function BookingPageScreen() {
             </View>
           </View>
 
+          <View className="flex-row justify-between items-center mb-1">
+            <Text className={`text-base ${themeStyles.textSecondary}`}>
+              {bookingType === 'hourly' ? 'Duration:' : 'Guest count:'}
+            </Text>
+            <Text className={`text-base font-bold ${themeStyles.textPrimary}`}>
+              {bookingType === 'hourly' ? `${hours} hrs` : `${guestCount} guests`}
+            </Text>
+          </View>
+
           <View className="flex-row justify-between items-center mt-2 pt-2 border-t border-gray-300 dark:border-gray-700">
             <Text className={`text-base ${themeStyles.textSecondary}`}>
               Total Amount:
             </Text>
-            <Text className={`text-lg font-bold ${themeStyles.textPrimary}`}>
+            <Text className={`text-lg font-bold text-orange-600`}>
               ₹{totalAmount.toFixed(0)}
             </Text>
           </View>

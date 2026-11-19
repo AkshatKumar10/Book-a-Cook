@@ -175,6 +175,18 @@ export default function CookBookingsScreen() {
         <View className={`space-y-3 border-t ${themeStyles.divider}`}>
           <View className="flex-row justify-between py-2">
             <Text className={`text-base ${themeStyles.textLabel}`}>
+              Booking Type
+            </Text>
+            <Text
+              className={`text-base font-semibold ${themeStyles.textPrimary}`}
+            >
+              {item.bookingType === 'hourly'
+                ? `Hourly (${item.hours || 1} hrs)`
+                : `Per Dish (${item.guestCount} guests)`}
+            </Text>
+          </View>
+          <View className="flex-row justify-between py-2">
+            <Text className={`text-base ${themeStyles.textLabel}`}>
               Meal Type
             </Text>
             <Text

@@ -8,20 +8,14 @@ import {
   updateCookFcmToken,
   getCook,
   updateCookProfile,
+  updateCookAvailability,
 } from "../controllers/auth.cookController.js";
 import upload from "../multer.js";
 import protectRoute from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.post(
-  "/register",
-  upload.fields([
-    { name: "profileImage", maxCount: 1 },
-    { name: "document", maxCount: 1 },
-  ]),
-  registerCook
-);
+router.post("/register", upload.single("profileImage"), registerCook);
 router.post("/login", loginCook);
 router.get("/getcooks", protectRoute, getAllCooks);
 router.get("/me", protectRoute, getCook);
@@ -31,6 +25,7 @@ router.put(
   upload.single("profileImage"),
   updateCookProfile
 );
+router.put("/availability", protectRoute, updateCookAvailability);
 router.get("/:id", protectRoute, getCookById);
 router.get("/cuisine/:cuisine", protectRoute, getCooksByCuisine);
 router.post("/update-fcm", protectRoute, updateCookFcmToken);

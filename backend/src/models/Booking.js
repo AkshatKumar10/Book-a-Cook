@@ -17,6 +17,15 @@ const bookingSchema = new mongoose.Schema(
       enum: ["pending", "accepted", "declined", "completed"],
       default: "pending",
     },
+    bookingType: {
+      type: String,
+      enum: ["dish", "hourly"],
+      default: "dish",
+    },
+    hours: {
+      type: Number,
+      default: 1,
+    },
     mealType: {
       type: String,
       required: true,

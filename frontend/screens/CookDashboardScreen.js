@@ -331,6 +331,23 @@ const CookDashboardScreen = () => {
           </View>
         </TouchableOpacity>
         <TouchableOpacity
+          onPress={() => navigation.navigate('CookAvailability')}
+          className="bg-blue-600 rounded-2xl px-4 py-6 mb-4 flex-row items-center justify-between"
+        >
+          <View className="p-2">
+            <MaterialIcons name="event-available" size={32} color="white" />
+          </View>
+          <View className="flex-1 px-4">
+            <Text className="text-white text-xl font-bold">Manage Availability</Text>
+            <Text className="text-white/80 text-lg">
+              Set your working days & schedule
+            </Text>
+          </View>
+          <View>
+            <Feather name="chevron-right" size={24} color="white" />
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity
           onPress={() => navigation.navigate('Earning')}
           className="bg-green-500 rounded-2xl px-4 py-6 mb-4 flex-row items-center justify-between"
         >

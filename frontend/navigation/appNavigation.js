@@ -29,6 +29,7 @@ import CookBookingsScreen from '../screens/CookBookingsScreen.js';
 import CookListScreen from '../screens/CookListScreen.js';
 import EarningScreen from '../screens/EarningScreen.js';
 import EditCookProfileScreen from '../screens/EditCookProfileScreen.js';
+import CookAvailabilityScreen from '../screens/CookAvailabilityScreen.js';
 import PaymentPageScreen from '../screens/PaymentPageScreen.js';
 
 const Stack = createNativeStackNavigator();
@@ -182,6 +183,13 @@ export default function AppNavigation() {
         <Stack.Screen
           name="CookBookings"
           component={CookBookingsScreen}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="CookAvailability"
+          component={CookAvailabilityScreen}
           options={{
             headerShown: false,
           }}
