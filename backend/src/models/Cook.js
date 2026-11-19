@@ -22,6 +22,10 @@ const cookSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    document: {
+      type: String,
+      required: true,
+    },
     location: {
       type: String,
       required: true,

@@ -25,6 +25,7 @@ export default function PaymentPageScreen() {
     selectedTime,
     selectedCuisine,
     totalAmount,
+    address
   } = params || {};
 
   const themeStyles = {
@@ -99,6 +100,7 @@ export default function PaymentPageScreen() {
         selectedTime,
         selectedCuisine,
         totalAmount,
+        address,
         paymentId: data.response.razorpay_payment_id,
       };
       createBooking(bookingData)

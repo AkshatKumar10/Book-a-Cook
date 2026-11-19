@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from '@env';
 
 const api = axios.create({
-  baseURL: "http://192.168.1.8:3000",
+  baseURL: API_BASE_URL,
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -75,6 +75,12 @@ export const registerCook = async (cookData) => {
         uri: cookData[key],
         type: 'image/jpeg',
         name: 'profile.jpg',
+      });
+    } else if (key === 'document' && cookData[key]) {
+      formData.append('document', {
+        uri: cookData[key],
+        type: 'image/jpeg',
+        name: 'doc.jpg',
       });
     } else if (key === 'pricing' && cookData[key]) {
       formData.append('pricing[perDish]', cookData[key].perDish);
@@ -285,7 +291,11 @@ export const updateCookProfile = async (cookData) => {
     const formData = new FormData();
     
     Object.keys(cookData).forEach((key) => {
-      if (key === 'profileImage' && cookData[key] && cookData[key].startsWith('file://')) {
+      if (
+        key === 'profileImage' &&
+        cookData[key] &&
+        cookData[key].startsWith('file://')
+      ) {
         formData.append('profileImage', {
           uri: cookData[key],
           type: 'image/jpeg',
@@ -312,7 +322,6 @@ export const updateCookProfile = async (cookData) => {
     return response.data;
   } catch (error) {
     console.error('Error updating cook profile:', error);
-    throw error;
   }
 };
 

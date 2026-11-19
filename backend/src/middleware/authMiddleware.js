@@ -26,7 +26,7 @@ const protectRoute = async (req, res, next) => {
 
     next();
   } catch (error) {
-    console.error("Authentication error hjbdsib:", error.message);
+    console.error("Authentication error:", error.message);
     res.status(401).json({ message: "Token is not valid" });
   }
 };

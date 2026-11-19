@@ -37,10 +37,12 @@ const MyBookingsScreen = () => {
     cardBorder: theme === 'dark' ? 'border-gray-700' : 'border-gray-200',
     statusPending: theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600',
     statusConfirmed: theme === 'dark' ? 'text-green-400' : 'text-green-600',
-    statusCompleted: theme === 'dark' ? 'text-gray-400' : 'text-gray-500',
+    statusCompleted: theme === 'dark' ? 'text-blue-400' : 'text-blue-600',
+    statusDeclined: theme === 'dark' ? 'text-red-400' : 'text-red-600',
     statusPendingBg: theme === 'dark' ? 'bg-yellow-900/30' : 'bg-yellow-100',
     statusConfirmedBg: theme === 'dark' ? 'bg-green-900/30' : 'bg-green-100',
-    statusCompletedBg: theme === 'dark' ? 'bg-gray-700/30' : 'bg-gray-200',
+    statusCompletedBg: theme === 'dark' ? 'bg-blue-900/30' : 'bg-blue-100',
+    statusDeclinedBg: theme === 'dark' ? 'bg-red-900/30' : 'bg-red-100',
   };
 
   useFocusEffect(
@@ -57,58 +59,80 @@ const MyBookingsScreen = () => {
     }, [navigation]),
   );
 
-  const convertTo24Hour = (time12h) => {
-    const [time, modifier] = time12h.split(' ');
-    let [hours, minutes] = time.split(':');
-    if (hours === '12') hours = '00';
-    if (modifier.toLowerCase() === 'pm')
-      hours = String(parseInt(hours, 10) + 12);
-    return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+  const parseBookingDate = (dateString) => {
+    if (!dateString) return new Date(0);
+    const parts = dateString.split('/').map(Number);
+    if (parts.length === 3) {
+      let [p1, p2, year] = parts;
+      let day, month;
+      if (p1 > 12) {
+        day = p1;
+        month = p2;
+      } else if (p2 > 12) {
+        day = p2;
+        month = p1;
+      } else {
+        day = p1;
+        month = p2;
+      }
+      return new Date(year, month - 1, day);
+    }
+    const parsed = new Date(dateString);
+    return isNaN(parsed.getTime()) ? new Date(0) : parsed;
   };
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
+    const bookingDate = parseBookingDate(dateString);
+    if (isNaN(bookingDate.getTime()) || bookingDate.getTime() === 0) {
+      return dateString;
+    }
+    return bookingDate.toLocaleDateString('en-US', {
       month: 'long',
       day: 'numeric',
       year: 'numeric',
     });
   };
 
-  const parseBookingDateTime = (booking) => {
-    const [day, month, year] = booking.selectedDate.split('/');
-    const time24 = convertTo24Hour(booking.selectedTime);
-    return new Date(`${year}-${month}-${day}T${time24}:00`);
-  };
-
   const getStatusText = (booking) => {
-    if (booking.status === 'pending') return 'Pending';
-    if (booking.status === 'accepted') return 'Confirmed';
-    if (booking.status === 'declined') return 'Declined';
-    if (parseBookingDateTime(booking) < new Date()) return 'Completed';
-    return booking.status;
+    switch (booking.status) {
+      case 'pending':
+        return 'Pending';
+      case 'accepted':
+        return 'Confirmed';
+      case 'declined':
+        return 'Declined';
+      case 'completed':
+        return 'Completed';
+      default:
+        return booking.status;
+    }
   };
 
   const getStatusStyles = (booking) => {
-    if (booking.status === 'pending')
-      return {
-        text: themeStyles.statusPending,
-        bg: themeStyles.statusPendingBg,
-      };
-    if (booking.status === 'accepted')
-      return {
-        text: themeStyles.statusConfirmed,
-        bg: themeStyles.statusConfirmedBg,
-      };
-    if (
-      booking.status === 'declined' ||
-      parseBookingDateTime(booking) < new Date()
-    )
-      return {
-        text: themeStyles.statusCompleted,
-        bg: themeStyles.statusCompletedBg,
-      };
-    return { text: themeStyles.textTertiary, bg: 'transparent' };
+    switch (booking.status) {
+      case 'pending':
+        return {
+          text: themeStyles.statusPending,
+          bg: themeStyles.statusPendingBg,
+        };
+      case 'accepted':
+        return {
+          text: themeStyles.statusConfirmed,
+          bg: themeStyles.statusConfirmedBg,
+        };
+      case 'declined':
+        return {
+          text: themeStyles.statusDeclined,
+          bg: themeStyles.statusDeclinedBg,
+        };
+      case 'completed':
+        return {
+          text: themeStyles.statusCompleted,
+          bg: themeStyles.statusCompletedBg,
+        };
+      default:
+        return { text: themeStyles.textTertiary, bg: 'transparent' };
+    }
   };
 
   const renderBooking = ({ item: booking }) => {
@@ -145,10 +169,7 @@ const MyBookingsScreen = () => {
           <View className="w-1/2 space-y-2">
             {[
               { icon: 'utensils', text: booking.mealType },
-              {
-                icon: 'calendar',
-                text: formatDate(parseBookingDateTime(booking)),
-              },
+              { icon: 'calendar', text: formatDate(booking.selectedDate) },
             ].map((item, index) => (
               <View key={index} className="flex-row items-center mb-2">
                 <View style={{ width: 20, alignItems: 'center' }}>
@@ -204,29 +225,50 @@ const MyBookingsScreen = () => {
             ))}
           </View>
         </View>
+
+        {booking.status === 'declined' && (
+          <View className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+            {booking.declineReason ? (
+              <Text className={`text-xs ${themeStyles.textTertiary} mb-1`}>
+                <Text className="font-semibold">Reason: </Text>
+                {booking.declineReason}
+              </Text>
+            ) : null}
+            <View className="flex-row items-center mt-1">
+              <Ionicons
+                name={booking.refundStatus === 'processed' ? 'checkmark-circle' : 'information-circle'}
+                size={16}
+                color={booking.refundStatus === 'processed' ? '#10B981' : '#F59E0B'}
+              />
+              <Text
+                className={`ml-1 text-xs font-medium ${
+                  booking.refundStatus === 'processed'
+                    ? 'text-green-600 dark:text-green-400'
+                    : 'text-amber-600 dark:text-amber-400'
+                }`}
+              >
+                {booking.refundStatus === 'processed'
+                  ? `Refund Processed`
+                  : 'Refund Initiated / Under Process'}
+              </Text>
+            </View>
+          </View>
+        )}
       </View>
     );
   };
 
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
   const upcomingBookings = bookings.filter(
     (b) =>
-      (b.status === 'pending' || b.status === 'accepted') &&
-      parseBookingDateTime(b) >= new Date(),
-  );
-  const pastBookings = bookings.filter(
-    (b) => b.status === 'declined' || parseBookingDateTime(b) < new Date(),
+      ['pending', 'accepted'].includes(b.status) &&
+      parseBookingDate(b.selectedDate) >= today,
   );
 
-  const renderEmptyComponent = (emptyMessage) => (
-    <View className="flex-1 justify-center items-center py-10">
-      <FontAwesome5 name="sad-tear" size={64} color={themeStyles.iconColor} />
-      <Text className={`text-lg ${themeStyles.textTertiary} mt-4`}>
-        {emptyMessage.title}
-      </Text>
-      <Text className={`text-base ${themeStyles.textNoBookings} mt-1`}>
-        {emptyMessage.subtitle}
-      </Text>
-    </View>
+  const pastBookings = bookings.filter((b) =>
+    ['declined', 'completed'].includes(b.status),
   );
 
   if (bookingLoading) {
@@ -266,7 +308,7 @@ const MyBookingsScreen = () => {
               <View className="flex-row mt-3">
                 <View className="w-1/2 space-y-2">
                   {[...Array(3)].map((_, i) => (
-                    <View key={i} className="flex-row items-center mb-2">
+                    <View key={i} className="flex-row items-center mb-2 gap-2">
                       <Skeleton
                         colorMode={theme}
                         width={20}
@@ -284,7 +326,7 @@ const MyBookingsScreen = () => {
                 </View>
                 <View className="w-1/2 space-y-2">
                   {[...Array(2)].map((_, i) => (
-                    <View key={i} className="flex-row items-center mb-2">
+                    <View key={i} className="flex-row items-center mb-2 gap-2">
                       <Skeleton
                         colorMode={theme}
                         width={20}
@@ -337,32 +379,34 @@ const MyBookingsScreen = () => {
         </TouchableOpacity>
       </View>
       <FlatList
-        data={upcomingBookings}
+        data={activeTab === 'upcoming' ? upcomingBookings : pastBookings}
         keyExtractor={(item) => item._id}
         renderItem={renderBooking}
-        contentContainerStyle={{
-          paddingBottom: 24,
-          display: activeTab === 'upcoming' ? 'flex' : 'none',
-        }}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 24 }}
         showsVerticalScrollIndicator={false}
-        ListEmptyComponent={renderEmptyComponent({
-          title: 'No upcoming bookings found',
-          subtitle: 'Start by booking your favorite chef!',
-        })}
-      />
-      <FlatList
-        data={pastBookings}
-        keyExtractor={(item) => item._id}
-        renderItem={renderBooking}
-        contentContainerStyle={{
-          paddingBottom: 24,
-          display: activeTab === 'past' ? 'flex' : 'none',
-        }}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={renderEmptyComponent({
-          title: 'No past bookings found',
-          subtitle: 'No past bookings available.',
-        })}
+        ListEmptyComponent={
+          <View className="flex-1 justify-center items-center px-8">
+            <Ionicons
+              name="calendar-outline"
+              size={80}
+              color={themeStyles.iconColor}
+            />
+            <Text
+              className={`text-2xl font-bold mt-4 ${themeStyles.textPrimary}`}
+            >
+              {activeTab === 'upcoming'
+                ? 'No Upcoming Bookings'
+                : 'No Past Bookings'}
+            </Text>
+            <Text
+              className={`text-base mt-2 text-center ${themeStyles.textTertiary}`}
+            >
+              {activeTab === 'upcoming'
+                ? 'Your upcoming bookings will appear here.'
+                : 'Your past bookings will appear here.'}
+            </Text>
+          </View>
+        }
       />
     </SafeAreaView>
   );

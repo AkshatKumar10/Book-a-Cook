@@ -14,7 +14,7 @@ const bookingSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "accepted", "declined"],
+      enum: ["pending", "accepted", "declined", "completed"],
       default: "pending",
     },
     bookingType: {
@@ -47,15 +47,32 @@ const bookingSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    address: {
+      type: String,
+      required: true,
+    },
     totalAmount: {
       type: Number,
       required: true,
     },
-    paymentId: { 
+    paymentId: {
       type: String,
       required: true,
     },
-    declineReason: { 
+    refundStatus: {
+      type: String,
+      enum: ["none", "pending", "processed", "failed"],
+      default: "none",
+    },
+    refundId: {
+      type: String,
+      default: "",
+    },
+    refundAmount: {
+      type: Number,
+      default: 0,
+    },
+    declineReason: {
       type: String,
       default: "",
     },

@@ -3,7 +3,7 @@ import Cook from "../models/Cook.js";
 import cloudinary from "../lib/cloudinary.js";
 
 const generateToken = (cookId) => {
-  return jwt.sign({ cookId }, process.env.JWT_SECRET, { expiresIn: "15d" });
+  return jwt.sign({ cookId }, process.env.JWT_SECRET);
 };
 
 export const registerCook = async (req, res) => {
@@ -21,10 +21,19 @@ export const registerCook = async (req, res) => {
       pricing,
     } = req.body;
 
-    let profileImage = `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`;
+    if (!req.files?.document) {
+      return res.status(400).json({ message: "Document (Aadhaar/PAN/Certificate) is required" });
+    }
 
-    if (req.file) {
-      const result = await cloudinary.uploader.upload(req.file.path, {
+    const documentResult = await cloudinary.uploader.upload(req.files.document[0].path, {
+      folder: "cooks/documents",
+      resource_type: "auto",
+    });
+
+    let profileImage = `https://api.dicebear.com/7.x/avataaars/png?seed=${username}`;
+
+    if (req.files?.profileImage?.[0]) {
+      const result = await cloudinary.uploader.upload(req.files.profileImage[0].path, {
         folder: "cooks",
         resource_type: "image",
       });
@@ -102,6 +111,7 @@ export const registerCook = async (req, res) => {
       email,
       password,
       profileImage,
+      document: documentResult.secure_url,
       location,
       cuisineSpecialties,
       specialties,
@@ -121,6 +131,7 @@ export const registerCook = async (req, res) => {
         username: cook.username,
         email: cook.email,
         profileImage: cook.profileImage,
+        document: cook.document,
         location: cook.location,
         cuisineSpecialties: cook.cuisineSpecialties,
         specialties: cook.specialties,
@@ -147,12 +158,12 @@ export const loginCook = async (req, res) => {
 
     const cook = await Cook.findOne({ email });
     if (!cook) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
     const isPasswordCorrect = await cook.comparePassword(password);
     if (!isPasswordCorrect) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
     const token = generateToken(cook._id);

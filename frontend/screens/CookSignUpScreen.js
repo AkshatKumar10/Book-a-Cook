@@ -20,7 +20,6 @@ import { StatusBar } from 'expo-status-bar';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { registerCook, storeCookToken, updateCookFcmToken } from '../utils/api';
 import * as ImagePicker from 'expo-image-picker';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import SnackbarComponent from '../components/SnackbarComponent';
 import { getFcmToken } from '../utils/fcmUtils';
 
@@ -38,6 +37,7 @@ export default function CookSignUpScreen() {
     password: '',
     confirmPassword: '',
     profileImage: null,
+    document: null,
     location: '',
     cuisineSpecialties: [],
     specialties: [],
@@ -78,6 +78,8 @@ export default function CookSignUpScreen() {
     inputBg: theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200',
     inputText: theme === 'dark' ? 'text-white' : 'text-gray-900',
     inputPlaceholder: theme === 'dark' ? '#9ca3af' : '#6b7280',
+    chipBg: theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200',
+    chipText: theme === 'dark' ? 'text-gray-200' : 'text-gray-700',
   };
 
   useFocusEffect(
@@ -116,6 +118,28 @@ export default function CookSignUpScreen() {
 
     if (!result.canceled) {
       setFormData({ ...formData, profileImage: result.assets[0].uri });
+    }
+  };
+
+  const pickDocument = async () => {
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissionResult.granted) {
+      Alert.alert(
+        'Permission required',
+        'Please allow access to your photo library',
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: false,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setFormData({ ...formData, document: result.assets[0].uri });
     }
   };
 
@@ -176,6 +200,14 @@ export default function CookSignUpScreen() {
       }
       setStep(4);
     } else if (step === 4) {
+      if (!formData.document) {
+        setSnackbarMessage('Please upload Aadhaar, PAN or Certificate');
+        setSnackbarType('error');
+        setSnackbarVisible(true);
+        return;
+      }
+      setStep(5);
+    } else if (step === 5) {
       setLoading(true);
       try {
         const cookData = {
@@ -183,6 +215,7 @@ export default function CookSignUpScreen() {
           email: formData.email,
           password: formData.password,
           profileImage: formData.profileImage,
+          document: formData.document,
           location: formData.location,
           cuisineSpecialties: formData.cuisineSpecialties,
           specialties: formData.specialties,
@@ -386,7 +419,7 @@ export default function CookSignUpScreen() {
           </Text>
           <View className="flex-row mb-4">
             <TextInput
-              className={`flex-1 py-4 px-4 ${themeStyles.inputBg} ${themeStyles.inputText} rounded-xl`}
+              className={`flex-1 py-4 pl-4 ${themeStyles.inputBg} ${themeStyles.inputText} rounded-xl`}
               placeholder="Enter a specialty"
               value={specialtyInput}
               onChangeText={setSpecialtyInput}
@@ -404,9 +437,9 @@ export default function CookSignUpScreen() {
             {formData.specialties.map((item) => (
               <View
                 key={item}
-                className="flex-row items-center bg-gray-300 dark:bg-gray-700 rounded-full px-3 py-1 m-1"
+                className={`flex-row items-center ${themeStyles.chipBg} rounded-full px-3 py-1 m-1`}
               >
-                <Text className="mr-2">{item}</Text>
+                <Text className={`mr-2 ${themeStyles.chipText}`}>{item}</Text>
                 <TouchableOpacity onPress={() => removeSpecialty(item)}>
                   <Ionicons name="close-circle" size={20} color="#ef4444" />
                 </TouchableOpacity>
@@ -522,6 +555,64 @@ export default function CookSignUpScreen() {
     } else if (step === 4) {
       return (
         <>
+          <Text
+            className={`text-3xl font-extrabold ${themeStyles.textAccent} text-center tracking-wide`}
+          >
+            Upload Document
+          </Text>
+          <Text
+            className={`text-lg ${themeStyles.textSecondary} text-center mb-8`}
+          >
+            Upload any one: Aadhaar, PAN or Certificate
+          </Text>
+          <View className="items-center mb-4">
+            <TouchableOpacity
+              onPress={pickDocument}
+              className={`w-full p-6 rounded-xl border-2 border-dashed ${
+                formData.document ? 'border-green-500' : 'border-gray-400'
+              } ${themeStyles.inputBg} items-center justify-center`}
+              disabled={loading}
+            >
+              {formData.document ? (
+                <View className="items-center">
+                  <Ionicons name="document" size={48} color="#10b981" />
+                  <Text className={`mt-2 ${themeStyles.textPrimary}`}>
+                    {formData.document.name || 'Document Selected'}
+                  </Text>
+                </View>
+              ) : (
+                <>
+                  <Ionicons
+                    name="cloud-upload-outline"
+                    size={48}
+                    color="#9ca3af"
+                  />
+                  <Text className={`mt-2 ${themeStyles.textSecondary}`}>
+                    Tap to upload Aadhaar, PAN, or Certificate
+                  </Text>
+                </>
+              )}
+            </TouchableOpacity>
+            {formData.document && (
+              <TouchableOpacity
+                onPress={() => setFormData({ ...formData, document: null })}
+                className="mt-3"
+              >
+                <Text className="text-red-500 font-medium">Remove</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          <Text
+            className={`text-sm ${themeStyles.textSecondary} text-center mb-2`}
+          >
+            Only one document is required.
+          </Text>
+        </>
+      );
+    } else if (step === 5) {
+      return (
+        <>
           <View className="px-4">
             <Text
               className={`text-3xl font-extrabold ${themeStyles.textAccent} text-center tracking-wide`}
@@ -585,7 +676,7 @@ export default function CookSignUpScreen() {
         <Text
           className={`text-lg ${themeStyles.textSecondary} text-center mt-2`}
         >
-          Step {step} of 4
+          Step {step} of 5
         </Text>
       </View>
       <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
@@ -603,7 +694,7 @@ export default function CookSignUpScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <View className="mb-4">{renderStep()}</View>
-          {step <= 4 && (
+          {step <= 5 && (
             <>
               <TouchableOpacity
                 onPress={handleNext}
@@ -615,7 +706,7 @@ export default function CookSignUpScreen() {
                 >
                   {loading
                     ? 'Processing...'
-                    : step === 4
+                    : step === 5
                       ? 'Complete Sign Up'
                       : 'Next'}
                 </Text>

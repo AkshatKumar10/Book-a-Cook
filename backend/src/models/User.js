@@ -26,6 +26,12 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    bookmarkedCooks: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Cook",
+      },
+    ],
   },
   { timestamps: true }
 );

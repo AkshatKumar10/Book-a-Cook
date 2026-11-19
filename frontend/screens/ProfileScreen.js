@@ -198,6 +198,28 @@ const ProfileScreen = () => {
           />
         </TouchableOpacity>
         <TouchableOpacity
+          onPress={() => navigation.navigate('Bookmark')}
+          className={`flex-row items-center p-3 border-b ${themeStyles.borderColor}`}
+        >
+          <View
+            className={`w-9 h-9 items-center justify-center ${themeStyles.buttonBg} rounded-full mr-4`}
+          >
+            <FontAwesome
+              name="bookmark-o"
+              size={20}
+              color={themeStyles.iconColor}
+            />
+          </View>
+          <Text className={`flex-1 text-lg ${themeStyles.textPrimary}`}>
+            Bookmarks
+          </Text>
+          <Ionicons
+            name="chevron-forward"
+            size={20}
+            color={themeStyles.iconColor}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
           onPress={() => Linking.openURL('mailto:bookachef@gmail.com')}
           className={`flex-row items-center p-3 border-b ${themeStyles.borderColor}`}
         >

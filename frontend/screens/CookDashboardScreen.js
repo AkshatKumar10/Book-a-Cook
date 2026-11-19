@@ -8,10 +8,16 @@ import {
   Switch,
   RefreshControl,
   useWindowDimensions,
+  BackHandler,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import { CommonActions, useFocusEffect, useNavigation } from '@react-navigation/native';
+import {
+  CommonActions,
+  useFocusEffect,
+  useNavigation,
+} from '@react-navigation/native';
 import { ThemeContext } from '../context/ThemeContext';
 import useCookProfile from '../hooks/useCookProfile';
 import useCookBookings from '../hooks/useCookBookings';
@@ -63,13 +69,45 @@ const CookDashboardScreen = () => {
     summaryCardBg: theme === 'dark' ? 'bg-gray-800' : 'bg-white',
     summaryText: theme === 'dark' ? 'text-gray-300' : 'text-gray-600',
     summaryValue: theme === 'dark' ? 'text-white' : 'text-gray-900',
+    borderColor: theme === 'dark' ? '#374151' : '#d1d5db',
   };
 
-  const pendingBookings = bookings.filter((b) => b.status === 'pending').length;
+  const pendingBookings = bookings.filter((b) => {
+    if (b.status !== 'pending') return false;
+    const [day, month, year] = b.selectedDate.split('/').map(Number);
+    const bookingDate = new Date(year, month - 1, day);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return bookingDate >= today;
+  }).length;
+
   const completedBookings = bookings.filter((b) => b.status === 'completed');
   const totalEarnings = completedBookings.reduce(
     (sum, booking) => sum + booking.totalAmount,
     0,
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        Alert.alert('Exit App', 'Are you sure you want to exit?', [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Exit',
+            style: 'destructive',
+            onPress: () => BackHandler.exitApp(),
+          },
+        ]);
+        return true;
+      };
+
+      const backHandler = BackHandler.addEventListener(
+        'hardwareBackPress',
+        onBackPress,
+      );
+
+      return () => backHandler.remove();
+    }, []),
   );
 
   if (dataLoading || bookingsLoading) {
@@ -235,6 +273,7 @@ const CookDashboardScreen = () => {
               uri: data?.image,
             }}
             className="h-24 w-24 rounded-full"
+            style={{ borderColor: themeStyles.borderColor,borderWidth: 1 }}
           />
           <View className="ml-4 flex-1">
             <Text className={`text-xl ${themeStyles.textWelcome}`}>

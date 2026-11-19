@@ -6,20 +6,19 @@
     "orientation": "portrait",
     "icon": "./assets/bookacook.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/bookacook.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.bookacook.bookacook",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/bookacook.png",
         "backgroundColor": "#ffffff"
       },
+      "versionCode":1,
       "package": "com.bookacook.bookacook"
     },
     "web": {
@@ -30,6 +29,21 @@
         "projectId": "bc11a537-c97b-493d-a972-acd60a54a5f5"
       }
     },
-    "owner": "akshatk_07"
+    "owner": "akshatk_07",
+    "plugins": [
+      "@react-native-community/datetimepicker",
+      "expo-build-properties",
+      "expo-status-bar",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/bookacook.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        }
+      ],
+      "expo-font"
+    ]
   }
 }

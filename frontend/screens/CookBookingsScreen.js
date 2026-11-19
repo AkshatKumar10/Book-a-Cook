@@ -35,6 +35,25 @@ export default function CookBookingsScreen() {
   const [declineModalVisible, setDeclineModalVisible] = useState(false);
   const [selectedBookingId, setSelectedBookingId] = useState(null);
   const [declineReason, setDeclineReason] = useState('');
+  const [activeTab, setActiveTab] = useState('upcoming');
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const upcomingBookings = bookings.filter((item) => {
+    const [day, month, year] = item.selectedDate.split('/');
+    const bookingDate = new Date(`${year}-${month}-${day}`);
+    return bookingDate >= today;
+  });
+  const pastBookings = bookings.filter((item) => {
+    const [day, month, year] = item.selectedDate.split('/');
+    const bookingDate = new Date(`${year}-${month}-${day}`);
+    return (
+      bookingDate < today &&
+      (item.status === 'accepted' ||
+        item.status === 'declined' ||
+        item.status === 'completed')
+    );
+  });
 
   const themeStyles = {
     container: theme === 'dark' ? 'bg-black' : 'bg-gray-100',
@@ -47,6 +66,9 @@ export default function CookBookingsScreen() {
     inputBorder: theme === 'dark' ? 'border-gray-700' : 'border-gray-300',
     inputText: theme === 'dark' ? 'text-white' : 'text-gray-900',
     divider: theme === 'dark' ? 'border-gray-800' : 'border-gray-200',
+    tabActive: 'bg-orange-500',
+    tabInactive: theme === 'dark' ? 'bg-gray-800' : 'bg-orange-100',
+    textAccent: theme === 'dark' ? 'text-amber-500' : 'text-amber-600',
   };
 
   const handleAccept = async (bookingId) => {
@@ -93,6 +115,12 @@ export default function CookBookingsScreen() {
 
   const getStatusBadge = (status) => {
     switch (status) {
+      case 'completed':
+        return {
+          bg: 'bg-blue-100',
+          text: 'text-blue-600',
+          label: 'Completed',
+        };
       case 'pending':
         return {
           bg: 'bg-yellow-100',
@@ -117,7 +145,7 @@ export default function CookBookingsScreen() {
 
     return (
       <View
-        className={`mx-4 mb-4 rounded-2xl ${themeStyles.cardBg} p-5`}
+        className={`mx-4 mb-4 rounded-2xl ${themeStyles.cardBg} p-5 shadow-sm`}
       >
         <View className="flex-row items-center justify-between mb-5">
           <View className="flex-row items-center flex-1">
@@ -207,6 +235,16 @@ export default function CookBookingsScreen() {
               {item.selectedCuisine}
             </Text>
           </View>
+          <View className="py-2">
+            <Text className={`text-base ${themeStyles.textLabel}`}>
+              Location
+            </Text>
+            <Text
+              className={`text-base font-semibold ${themeStyles.textPrimary} mt-1`}
+            >
+              {item.address}
+            </Text>
+          </View>
           <View
             className={`flex-row justify-between py-3 border-t ${themeStyles.divider}`}
           >
@@ -220,7 +258,7 @@ export default function CookBookingsScreen() {
             </Text>
           </View>
         </View>
-        {item.status === 'pending' && (
+        {item.status === 'pending' && activeTab === 'upcoming' && (
           <View className="flex-row space-x-3 gap-4 mt-5">
             <TouchableOpacity
               onPress={() => handleDeclinePress(item._id)}
@@ -271,7 +309,7 @@ export default function CookBookingsScreen() {
           data={[1, 2, 3]}
           renderItem={() => (
             <View
-              className={`mx-4 mb-4 rounded-2xl ${themeStyles.cardBg} p-5`}
+              className={`mx-4 mb-4 rounded-2xl ${themeStyles.cardBg} p-5 shadow-sm`}
             >
               <View className="flex-row items-center justify-between mb-5">
                 <View className="flex-row items-center flex-1">
@@ -375,22 +413,36 @@ export default function CookBookingsScreen() {
                     radius={10}
                   />
                 </View>
-                <View
-                  className={`flex-row justify-between py-3 border-t ${themeStyles.divider}`}
-                >
+                <View className={`flex py-2`}>
                   <Skeleton
                     colorMode={theme}
                     width={width * 0.3}
                     height={24}
                     radius={10}
                   />
+                  <View className="mt-2" />
                   <Skeleton
                     colorMode={theme}
-                    width={width * 0.2}
-                    height={24}
+                    width={width * 0.85}
+                    height={80}
                     radius={10}
                   />
                 </View>
+              </View>
+              <View className={`border-t my-4 ${themeStyles.divider}`} />
+              <View className="flex-row justify-between">
+                <Skeleton
+                  colorMode={theme}
+                  width={width * 0.3}
+                  height={20}
+                  radius={10}
+                />
+                <Skeleton
+                  colorMode={theme}
+                  width={width * 0.2}
+                  height={20}
+                  radius={10}
+                />
               </View>
               <View className="flex-row space-x-3 gap-4 mt-5">
                 <Skeleton
@@ -420,8 +472,32 @@ export default function CookBookingsScreen() {
     <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
       <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
       <Navbar title="Booking Request" />
+      <View
+        className={`flex-row mx-4 mb-4 mt-2 p-1 rounded-full ${themeStyles.tabInactive}`}
+      >
+        <TouchableOpacity
+          className={`flex-1 py-3 ${activeTab === 'upcoming' ? `${themeStyles.tabActive} rounded-full` : ''}`}
+          onPress={() => setActiveTab('upcoming')}
+        >
+          <Text
+            className={`text-center text-base font-semibold ${activeTab === 'upcoming' ? 'text-white' : themeStyles.textAccent}`}
+          >
+            Upcoming
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          className={`flex-1 py-3 ${activeTab === 'past' ? `${themeStyles.tabActive} rounded-full` : ''}`}
+          onPress={() => setActiveTab('past')}
+        >
+          <Text
+            className={`text-center text-base font-semibold ${activeTab === 'past' ? 'text-white' : themeStyles.textAccent}`}
+          >
+            Past
+          </Text>
+        </TouchableOpacity>
+      </View>
       <FlatList
-        data={bookings}
+        data={activeTab === 'upcoming' ? upcomingBookings : pastBookings}
         renderItem={renderBookingItem}
         keyExtractor={(item) => item._id}
         onRefresh={refresh}
@@ -438,12 +514,16 @@ export default function CookBookingsScreen() {
             <Text
               className={`text-2xl font-bold mt-4 ${themeStyles.textPrimary}`}
             >
-              No Bookings Yet
+              {activeTab === 'upcoming'
+                ? 'No Upcoming Bookings'
+                : 'No Past Bookings'}
             </Text>
             <Text
               className={`text-base ${themeStyles.textSecondary} text-center mt-2`}
             >
-              Your bookings will appear here once users schedule with you.
+              {activeTab === 'upcoming'
+                ? 'Your upcoming bookings will appear here once users schedule with you.'
+                : 'Your past accepted bookings will appear here after they are completed.'}
             </Text>
           </View>
         }
@@ -462,7 +542,7 @@ export default function CookBookingsScreen() {
             <View className="flex-1 bg-black/90 justify-center items-center px-5">
               <TouchableWithoutFeedback>
                 <View
-                  className={`${themeStyles.modalBg} rounded-3xl p-6 w-full`}
+                  className={`${themeStyles.modalBg} rounded-3xl p-6 w-full shadow-lg`}
                 >
                   <View className="flex-row justify-between items-center mb-4">
                     <Text
@@ -484,7 +564,7 @@ export default function CookBookingsScreen() {
                     Decline Reason
                   </Text>
                   <TextInput
-                    className={`p-4 rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} border ${themeStyles.inputBorder} text-base mb-6`}
+                    className={`p-4 rounded-xl ${themeStyles.inputBg} ${themeStyles.inputText} border ${themeStyles.inputBorder} text-base mb-6 shadow-sm`}
                     placeholder="Enter reason for declining..."
                     placeholderTextColor={
                       theme === 'dark' ? '#6b7280' : '#9ca3af'
@@ -498,7 +578,7 @@ export default function CookBookingsScreen() {
                   <View className="flex-row space-x-3 gap-4">
                     <TouchableOpacity
                       onPress={() => setDeclineModalVisible(false)}
-                      className={`flex-1 py-4 rounded-xl ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'}`}
+                      className={`flex-1 py-4 rounded-xl ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'} shadow-sm`}
                       activeOpacity={0.7}
                     >
                       <Text
@@ -509,7 +589,7 @@ export default function CookBookingsScreen() {
                     </TouchableOpacity>
                     <TouchableOpacity
                       onPress={handleDecline}
-                      className="flex-1 bg-orange-500 py-4 rounded-xl"
+                      className="flex-1 bg-orange-500 py-4 rounded-xl shadow-sm"
                       activeOpacity={0.7}
                     >
                       <Text className="text-center font-semibold text-white text-base">

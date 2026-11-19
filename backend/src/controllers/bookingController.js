@@ -2,7 +2,7 @@ import Booking from "../models/Booking.js";
 import User from "../models/User.js";
 import Cook from "../models/Cook.js";
 import { sendNotification } from "../utils/notifications.js";
-import { verifyPayment } from "../utils/razorpay.js";
+import { verifyPayment, refundPayment } from "../utils/razorpay.js";
 
 export const createBooking = async (req, res) => {
   try {
@@ -23,6 +23,7 @@ export const createBooking = async (req, res) => {
       selectedCuisine,
       totalAmount,
       paymentId,
+      address,
     } = req.body;
 
     if (
@@ -33,7 +34,8 @@ export const createBooking = async (req, res) => {
       !selectedTime ||
       !selectedCuisine ||
       !totalAmount ||
-      !paymentId
+      !paymentId ||
+      !address
     ) {
       return res
         .status(400)
@@ -81,10 +83,11 @@ export const createBooking = async (req, res) => {
       mealType,
       guestCount,
       selectedDate,
-      selectedTime, 
+      selectedTime,
       selectedCuisine,
       totalAmount,
       paymentId,
+      address,
     });
 
     await booking.save();
@@ -97,7 +100,7 @@ export const createBooking = async (req, res) => {
         { bookingId: booking._id.toString(), action: "view_booking" }
       );
     }
-    
+
     await booking.populate(["userId", "cookId"]);
 
     res.status(201).json({ booking: booking });
@@ -187,24 +190,47 @@ export const declineBooking = async (req, res) => {
     const { id } = req.params;
     const { reason } = req.body;
 
-    const booking = await Booking.findOneAndUpdate(
-      { _id: id, cookId: req.user._id, status: "pending" },
-      { status: "declined", declineReason: reason || "" },
-      { new: true }
-    ).populate("userId", "username fcmToken");
+    const existingBooking = await Booking.findOne({
+      _id: id,
+      cookId: req.user._id,
+      status: "pending",
+    });
 
-    if (!booking) {
+    if (!existingBooking) {
       return res
         .status(404)
         .json({ message: "Booking not found or already handled" });
     }
 
+    let refundResult = null;
+    if (existingBooking.paymentId) {
+      refundResult = await refundPayment(
+        existingBooking.paymentId,
+        existingBooking.totalAmount
+      );
+    }
+
+    const booking = await Booking.findByIdAndUpdate(
+      id,
+      {
+        status: "declined",
+        declineReason: reason || "",
+        refundStatus: refundResult?.success ? "processed" : "failed",
+        refundId: refundResult?.refundId || "",
+        refundAmount: refundResult?.amount || 0,
+      },
+      { new: true }
+    ).populate("userId", "username fcmToken");
+
     if (booking.userId && booking.userId.fcmToken) {
-      const reasonText = reason ? ` Reason: ${reason}` : "";
+      const reasonText = reason ? ` Reason: ${reason}.` : "";
+      const refundText = refundResult?.success
+        ? ` A full refund of ₹${booking.totalAmount} has been initiated to your original payment method.`
+        : "";
       await sendNotification(
         booking.userId.fcmToken,
-        "Booking Declined",
-        `Sorry, your ${booking.mealType} booking has been declined by Chef ${req.user.username}.${reasonText}`,
+        "Booking Declined & Refund Initiated",
+        `Sorry, your ${booking.mealType} booking has been declined by Chef ${req.user.username}.${reasonText}${refundText}`,
         { bookingId: id, action: "booking_declined" }
       );
     }

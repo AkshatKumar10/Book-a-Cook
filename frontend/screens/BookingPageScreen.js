@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useContext, useCallback } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useContext,
+  useCallback,
+  useRef,
+} from 'react';
 import {
   View,
   Text,
@@ -9,6 +15,9 @@ import {
   Linking,
   FlatList,
   Image,
+  KeyboardAvoidingView,
+  Platform,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Feather from '@expo/vector-icons/Feather';
@@ -20,6 +29,8 @@ import {
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
+import { WebView } from 'react-native-webview';
+import axios from 'axios';
 import Navbar from '../components/Navbar';
 import { ThemeContext } from '../context/ThemeContext';
 import { StatusBar } from 'expo-status-bar';
@@ -29,6 +40,8 @@ import { getUserToken } from '../utils/api';
 import { useWindowDimensions } from 'react-native';
 import SnackbarComponent from '../components/SnackbarComponent';
 import { Skeleton } from 'moti/skeleton';
+import useDebounce from '../hooks/useDebounce';
+import mapHtml from '../components/MapComponent';
 
 export default function BookingPageScreen() {
   const { params } = useRoute();
@@ -36,6 +49,7 @@ export default function BookingPageScreen() {
   const navigation = useNavigation();
   const { theme } = useContext(ThemeContext);
   const { width } = useWindowDimensions();
+  const webViewRef = useRef(null);
 
   const isSpecificCook = !!cookId;
   const { cooksData, cooksDataLoading } = useCooksData();
@@ -50,6 +64,7 @@ export default function BookingPageScreen() {
   const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [selectedCuisine, setSelectedCuisine] = useState('');
+  const [isCuisinePickerModalVisible, setIsCuisinePickerModalVisible] = useState(false);
   const [selectedCook, setSelectedCook] = useState(null);
   const [matchingCooks, setMatchingCooks] = useState([]);
   const [showCookList, setShowCookList] = useState(false);
@@ -57,6 +72,15 @@ export default function BookingPageScreen() {
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarType, setSnackbarType] = useState('success');
+  const [marker, setMarker] = useState(null);
+  const [address, setAddress] = useState('');
+  const [isTouchingMap, setIsTouchingMap] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   const themeStyles = {
     container: theme === 'dark' ? 'bg-black' : 'bg-gray-100',
@@ -166,6 +190,15 @@ export default function BookingPageScreen() {
     initCook();
   }, [isSpecificCook, specificCook, cookLoading, cooksData, cooksDataLoading]);
 
+  useEffect(() => {
+    if (debouncedSearchQuery.trim()) {
+      fetchSuggestions();
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  }, [debouncedSearchQuery]);
+
   useFocusEffect(
     useCallback(() => {
       if (!selectedDate && !selectedTime && !mealType) {
@@ -173,11 +206,63 @@ export default function BookingPageScreen() {
         setSelectedDate('');
         setSelectedTime('');
         setMealType(null);
+        setMarker(null);
+        setAddress('');
+        setSearchQuery('');
+        setSuggestions([]);
+        setShowSuggestions(false);
       }
       setTimePickerVisibility(false);
       setDatePickerVisibility(false);
     }, []),
   );
+
+  const bangalore = {
+    minLat: 12.8345,
+    minLon: 77.502,
+    maxLat: 13.1395,
+    maxLon: 77.709,
+  };
+
+  const fetchSuggestions = async () => {
+    setIsSearching(true);
+    try {
+      const { minLat, minLon, maxLat, maxLon } = bangalore;
+      const response = await axios.get(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(debouncedSearchQuery)}&bounded=1&viewbox=${minLon},${maxLat},${maxLon},${minLat}&limit=5`,
+        {
+          headers: {
+            'User-Agent': 'BookAChefApp/1.0 (contact: bookachef@gmail.com)',
+          },
+        },
+      );
+      setSuggestions(response.data || []);
+      setShowSuggestions(response.data.length > 0);
+    } catch (error) {
+      console.error('Error fetching suggestions:', error);
+      setSnackbarMessage(
+        'Failed to fetch location suggestions. Please try again.',
+      );
+      setSnackbarType('Error');
+      setSnackbarVisible(true);
+      setSuggestions([]);
+      setShowSuggestions(false);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleSelectSuggestion = (suggestion) => {
+    const latitude = parseFloat(suggestion.lat);
+    const longitude = parseFloat(suggestion.lon);
+    setSearchQuery(suggestion.display_name);
+    setShowSuggestions(false);
+    const jsCode = `
+      map.setView([${latitude}, ${longitude}], 20);
+      true;
+    `;
+    webViewRef.current.injectJavaScript(jsCode);
+  };
 
   const handleCuisineChange = (itemValue) => {
     if (isSpecificCook) return;
@@ -228,9 +313,11 @@ export default function BookingPageScreen() {
       !mealType ||
       !selectedDate ||
       !selectedTime ||
-      !selectedCuisine
+      !selectedCuisine ||
+      !marker ||
+      !address
     ) {
-      setSnackbarMessage('Please fill in all fields before proceeding.');
+      setSnackbarMessage('Please fill in all fields and select a location.');
       setSnackbarType('Error');
       setSnackbarVisible(true);
       return;
@@ -280,6 +367,7 @@ export default function BookingPageScreen() {
       cookPrice: baseUnitPrice,
       totalAmount,
       isDiscounted,
+      address,
     });
   };
 
@@ -368,6 +456,35 @@ export default function BookingPageScreen() {
     hideDatePicker();
   };
 
+  const fetchAddress = async (lat, lng) => {
+    try {
+      const response = await axios.get(
+        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`,
+        {
+          headers: {
+            'User-Agent': 'BookAChefApp/1.0 (contact: bookachef@gmail.com)',
+          },
+        },
+      );
+      const address = response.data.display_name || 'Unknown address';
+      setAddress(address);
+    } catch (error) {
+      console.error('Error fetching address:', error);
+      setAddress('Unable to fetch address');
+      setSnackbarMessage('Failed to fetch address. Please try again.');
+      setSnackbarType('Error');
+      setSnackbarVisible(true);
+    }
+  };
+
+  const handleWebViewMessage = (event) => {
+    const data = JSON.parse(event.nativeEvent.data);
+    if (data.type === 'marker') {
+      setMarker({ latitude: data.lat, longitude: data.lng });
+      fetchAddress(data.lat, data.lng);
+    }
+  };
+
   if (isLoading || cooksDataLoading || (isSpecificCook && cookLoading)) {
     return (
       <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
@@ -420,6 +537,26 @@ export default function BookingPageScreen() {
                 style={{ marginLeft: 8 }}
               />
             </View>
+          </View>
+          <View className="mb-6">
+            <Skeleton colorMode={theme} width={120} height={20} />
+            <View style={{ height: 8 }} />
+            <View
+              className={`flex-row items-center justify-between border ${themeStyles.borderColor} rounded-lg px-4 py-2`}
+            >
+              <Skeleton colorMode={theme} width="85%" height={40} />
+              <Skeleton
+                colorMode={theme}
+                width={24}
+                height={24}
+                radius={12}
+                style={{ marginLeft: 8 }}
+              />
+            </View>
+            <View style={{ height: 8 }} />
+            <Skeleton colorMode={theme} width="100%" height={300} radius={8} />
+            <View style={{ height: 8 }} />
+            <Skeleton colorMode={theme} width="100%" height={20} />
           </View>
           <View className="mb-6">
             <Skeleton colorMode={theme} width={120} height={20} />
@@ -502,6 +639,7 @@ export default function BookingPageScreen() {
       <ScrollView
         className="px-4 pb-6 pt-4"
         showsVerticalScrollIndicator={false}
+        scrollEnabled={!isTouchingMap}
       >
         <View className="mb-6">
           <Text
@@ -670,6 +808,97 @@ export default function BookingPageScreen() {
           </TouchableOpacity>
         </View>
 
+        <View className="mb-6">
+          <Text
+            className={`text-lg font-medium mb-2 ${themeStyles.textPrimary}`}
+          >
+            Select Location:
+          </Text>
+          <View
+            className={`flex-row items-center border ${themeStyles.borderColor} rounded-lg px-4 py-2 mb-3`}
+          >
+            <TextInput
+              placeholder="Enter location (e.g., Bangalore, India)"
+              className={`flex-1 ${themeStyles.textPrimary}`}
+              value={searchQuery}
+              onChangeText={(text) => {
+                setSearchQuery(text);
+                setShowSuggestions(true);
+              }}
+              placeholderTextColor={themeStyles.placeholderColor}
+            />
+            {searchQuery.trim() ? (
+              <TouchableOpacity
+                onPress={() => {
+                  setSearchQuery('');
+                  setSuggestions([]);
+                  setShowSuggestions(false);
+                }}
+              >
+                <Feather name="x" size={24} color={themeStyles.iconColor} />
+              </TouchableOpacity>
+            ) : (
+              <Feather name="search" size={24} color={themeStyles.iconColor} />
+            )}
+          </View>
+          {showSuggestions && (
+            <View
+              className={`border ${themeStyles.borderColor} rounded-lg ${themeStyles.cardBg} mb-3`}
+              style={{
+                maxHeight: 160,
+              }}
+            >
+              {suggestions.length > 0 ? (
+                <FlatList
+                  data={suggestions}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity
+                      onPress={() => handleSelectSuggestion(item)}
+                      className="p-3 border-b border-gray-200 dark:border-gray-700"
+                    >
+                      <Text className={themeStyles.textSecondary}>
+                        {item.display_name}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                  keyExtractor={(item) => item.place_id.toString()}
+                  nestedScrollEnabled={true}
+                  showsVerticalScrollIndicator={false}
+                />
+              ) : (
+                <Text className={`p-3 ${themeStyles.textHint}`}>
+                  No results in Bangalore
+                </Text>
+              )}
+            </View>
+          )}
+
+          <View
+            onTouchStart={() => setIsTouchingMap(true)}
+            onTouchEnd={() => setIsTouchingMap(false)}
+            className={`border ${themeStyles.borderColor} rounded-lg overflow-hidden`}
+          >
+            <WebView
+              ref={webViewRef}
+              source={{ html: mapHtml }}
+              style={{ height: 300, width: '100%' }}
+              onMessage={handleWebViewMessage}
+              javaScriptEnabled={true}
+              domStorageEnabled={true}
+            />
+          </View>
+          <Text className="text-sm mt-2">
+            {address ? (
+              <Text className="text-orange-600 font-medium">{address}</Text>
+            ) : (
+              <Text className={themeStyles.textHint}>
+                Search for a location and tap on the map to select your exact
+                location
+              </Text>
+            )}
+          </Text>
+        </View>
+
         <DateTimePickerModal
           isVisible={isDatePickerVisible}
           mode="date"
@@ -693,20 +922,95 @@ export default function BookingPageScreen() {
             >
               Select Cuisine:
             </Text>
-            <View
-              className={`border ${themeStyles.borderColor} rounded-lg ${themeStyles.pickerBg}`}
-            >
-              <Picker
-                selectedValue={selectedCuisine}
-                onValueChange={handleCuisineChange}
-                style={{ color: theme === 'dark' ? '#D1D5DB' : '#000000' }}
+            {Platform.OS === 'ios' ? (
+              <>
+                <TouchableOpacity
+                  onPress={() => setIsCuisinePickerModalVisible(true)}
+                  className={`border ${themeStyles.borderColor} rounded-lg ${themeStyles.pickerBg} px-4 py-3 flex-row items-center justify-between`}
+                >
+                  <Text
+                    className={`text-base ${
+                      selectedCuisine
+                        ? themeStyles.textPrimary
+                        : themeStyles.placeholderColor
+                    }`}
+                  >
+                    {selectedCuisine || 'Select Cuisine'}
+                  </Text>
+                  <Feather
+                    name="chevron-down"
+                    size={20}
+                    color={themeStyles.iconColor}
+                  />
+                </TouchableOpacity>
+
+                <Modal
+                  visible={isCuisinePickerModalVisible}
+                  transparent={true}
+                  animationType="slide"
+                  onRequestClose={() => setIsCuisinePickerModalVisible(false)}
+                >
+                  <View
+                    className="flex-1 justify-end"
+                    style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+                  >
+                    <View
+                      className={`p-4 rounded-t-2xl ${
+                        theme === 'dark' ? 'bg-gray-900' : 'bg-white'
+                      }`}
+                    >
+                      <View className="flex-row justify-between items-center pb-2 border-b border-gray-200 dark:border-gray-700">
+                        <Text
+                          className={`text-lg font-semibold ${themeStyles.textPrimary}`}
+                        >
+                          Select Cuisine
+                        </Text>
+                        <TouchableOpacity
+                          onPress={() => setIsCuisinePickerModalVisible(false)}
+                          className="px-3 py-1 bg-orange-500 rounded-lg"
+                        >
+                          <Text className="text-white font-medium">Done</Text>
+                        </TouchableOpacity>
+                      </View>
+                      <Picker
+                        selectedValue={selectedCuisine}
+                        onValueChange={(val) => {
+                          handleCuisineChange(val);
+                        }}
+                        itemStyle={{
+                          color: theme === 'dark' ? '#FFFFFF' : '#000000',
+                          fontSize: 18,
+                        }}
+                      >
+                        <Picker.Item label="Select Cuisine" value="" />
+                        {uniqueCuisines.map((cuisine) => (
+                          <Picker.Item
+                            key={cuisine}
+                            label={cuisine}
+                            value={cuisine}
+                          />
+                        ))}
+                      </Picker>
+                    </View>
+                  </View>
+                </Modal>
+              </>
+            ) : (
+              <View
+                className={`border ${themeStyles.borderColor} rounded-lg ${themeStyles.pickerBg}`}
               >
-                <Picker.Item label="Select Cuisine" value="" />
-                {uniqueCuisines.map((cuisine) => (
-                  <Picker.Item key={cuisine} label={cuisine} value={cuisine} />
-                ))}
-              </Picker>
-            </View>
+                <Picker
+                  selectedValue={selectedCuisine}
+                  onValueChange={handleCuisineChange}
+                  style={{ color: theme === 'dark' ? '#D1D5DB' : '#000000' }}
+                >
+                  <Picker.Item label="Select Cuisine" value="" />
+                  {uniqueCuisines.map((cuisine) => (
+                    <Picker.Item key={cuisine} label={cuisine} value={cuisine} />
+                  ))}
+                </Picker>
+              </View>
+            )}
           </View>
         )}
 

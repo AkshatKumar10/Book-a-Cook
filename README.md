@@ -1,15 +1,18 @@
 # 👨‍🍳 BookACook App
 
-**BookACook** is a full-featured **React Native (Expo)** app that lets users book professional home cooks based on cuisine, availability, and pricing. From browsing personalized recommendations to secure payments via Razorpay, this app streamlines the entire home-cook booking experience.
+**BookACook** is a mobile application built with **React Native (Expo)** that connects users with professional home cooks. Users can browse cooks by cuisine, view detailed profiles, book services, and make secure payments. Cooks can manage their profiles, track bookings, and receive real-time notifications. The app integrates a backend built with **Node.js**, **Express**, and **MongoDB** for authentication and data management, **Razorpay for payments**, and **Firebase** for notifications, creating a complete end-to-end booking experience.
 
 
 ## 🚀 Features
 
-- 🔐 **Firebase Email/Password Authentication**  
-  Secure login/signup using Firebase Authentication.
+<details>
+<summary><strong>User Features</strong></summary>
+
+- 🔐 **Email/Password Authentication via Backend**  
+  All authentication is handled through Node.js/Express/MongoDB.
 
 - 🧑‍🍳 **Cook Profiles**   
-  View detailed cook information including name, cuisine, bio, experience, specialties, pricing, and availability.
+  View detailed cook information including name, cuisine, bio, location, experience, specialties and pricing.
 
 - 🍽 **Cuisine-Based Browsing**  
   Explore popular cuisines and view associated dishes.
@@ -17,31 +20,48 @@
 - 🔍 **Search Functionality**  
   Search for cooks or cuisines easily from the home screen.
 
-- 🗺️ **Map Integration for Address Selection**  
-  Use an interactive map to pick your booking address with ease and accuracy.
+- 🗺️ **Map Integration**  
+  Pick booking addresses accurately with an interactive map.
 
 - 📅 **Smart Booking Flow**  
-  Book a cook by selecting address, guest count, date, time, and cuisine. Auto-calculate total pricing based on your inputs.
+  Book a cook by selecting cuisine, guest count, address, date and time. Auto-calculate total pricing based on your inputs.
 
-- 💳 **Razorpay Payment Integration**  
+- 💳 **Razorpay Payment Integration**   
   Seamless and secure payments using Razorpay. Confirm bookings after successful transactions.
 
-- 📂 **Bookings Management**  
-  View Upcoming and Past bookings. Keep track of when a cook is arriving and past events.
+- 🔔 **Notifications**\
+  Users receive notifications when a cook accepts or declines their booking.
 
-- ❓ **How It Works & FAQ Screens**  
-  Help screens to guide users and answer frequently asked questions.
+- 📂 **Bookings Management**  
+  View upcoming and past bookings. Track statuses: pending, confirmed, accepted, or declined.
 
 - 🌓 **Dark/Light Theme Support**    
   Seamless switching between dark and light themes for a better user experience.
 
+</details>
+
+<details>
+<summary><strong>Cook Features</strong></summary>
+
+- 📋 **Cook Dashboard**  
+  Manage bookings, view total earnings, and track booking statuses.
+
+- 🔔 **Notification**  
+  Receive notifications when a user makes a booking. Accept or decline bookings, and notify the user in real time.
+
+- ✏️ **Profile Management**  
+  Edit profile, specialties, pricing, experience, services offered, bio.
+
+</details>
 
 ## 🧰 Tech Stack
 
-- **Framework:** React Native with Expo
-- **Payments:** Razorpay React Native SDK
-- **Authentication:** Firebase Email/Password
-- **UI & UX:** TailwindCSS (via NativeWind)
+- **Frontend:** React Native (Expo) + NativeWind (TailwindCSS)  
+- **Backend:** Node.js + Express + MongoDB  
+- **Notifications:** Firebase Cloud Messaging  
+- **Payments:** Razorpay React Native SDK  
+- **Cloud Storage:** Cloudinary
+- **Containerization:** Docker + Docker Compose
 
 ## 📦 Installation
 
@@ -51,32 +71,65 @@ git clone https://github.com/AkshatKumar10/Book-a-Cook.git
 cd Book-a-Cook
 ```
 
-2. Install dependencies
+2. Install dependencies \
+
+   Navigate into both the frontend and backend folders and install dependencies:
 ```bash
+# Frontend
+cd frontend
+npm install
+
+# Backend
+cd backend
 npm install
 ```
+> Make sure to run the cd backend command from the root of the cloned repository.
 
-3. Start the Expo project
+3. Start the projects
+
+- Backend
 ```bash
-npx expo start
+npm run dev
 ```
 
-⚠️ Make sure you have the Expo Go app on your phone.
-
-
-## 🔐 Firebase & Environment Setup
-
-- Create a Firebase project.
-
-+ Enable Email/Password Authentication.
-
-- Create a .env file in the root of your project and add your Firebase credentials:
-
+- Frontend
 ```bash
-FIREBASE_API_KEY=your_api_key
-FIREBASE_AUTH_DOMAIN=your_project_id.firebaseapp.com
-FIREBASE_PROJECT_ID=your_project_id
-FIREBASE_STORAGE_BUCKET=your_project_id.appspot.com
-FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-FIREBASE_APP_ID=your_app_id
+npm start
 ```
+
+> Make sure you have the Expo Go app on your phone.
+
+
+## 🔐 Environment Setup
+
+### Frontend (`frontend/.env`)
+Create a `.env` file in the `frontend` folder with the following variables:
+
+```env
+RAZORPAY_KEY_ID=
+API_BASE_URL=
+```
+
+### Backend (`backend/.env`)
+Create a `.env` file in the `backend` folder with the following variables:
+
+```env
+PORT=
+MONGO_URI=
+JWT_SECRET=
+
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+
+FIREBASE_PROJECT_ID=
+
+RAZORPAY_KEY_ID=
+RAZORPAY_SECRET_KEY=
+```
+
+> Notes:
+> - The backend handles authentication, user/cook management, and bookings.
+> - Cloudinary is used to store cook profile images and other media.
+> - Firebase is used only for push notifications.
+> - Razorpay keys are required for payment integration.

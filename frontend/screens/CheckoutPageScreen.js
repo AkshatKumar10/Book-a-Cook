@@ -1,11 +1,5 @@
 import { useContext } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  Image,
-} from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Navbar from '../components/Navbar';
@@ -31,6 +25,7 @@ export default function CheckoutPageScreen() {
     totalAmount,
     cookImage,
     isDiscounted = false,
+    address,
   } = params || {};
 
   const themeStyles = {
@@ -69,7 +64,7 @@ export default function CheckoutPageScreen() {
     <SafeAreaView className={`flex-1 ${themeStyles.container}`}>
       <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
       <Navbar title="Checkout" onBackPress={() => navigation.goBack()} />
-      <ScrollView className="px-4 py-6" showsVerticalScrollIndicator={false}>
+      <ScrollView className="px-4 py-6" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
         <Text className={`text-xl font-semibold ${themeStyles.textPrimary}`}>
           Cook
         </Text>
@@ -88,7 +83,9 @@ export default function CheckoutPageScreen() {
           </View>
         </View>
 
-        <Text className={`mt-6 text-xl font-semibold ${themeStyles.textPrimary}`}>
+        <Text
+          className={`mt-6 text-xl font-semibold ${themeStyles.textPrimary}`}
+        >
           Booking Details
         </Text>
 
@@ -129,14 +126,23 @@ export default function CheckoutPageScreen() {
           </Text>
         </View>
 
-        <View className="flex-row justify-between items-center py-4">
+        <View className="flex-row justify-between items-center border-b border-red-100 py-4">
           <Text className={`text-lg text-red-300 w-1/5`}>Time</Text>
           <Text className={`text-lg ${themeStyles.textSecondary} flex-1 pl-12`}>
             {selectedTime}
           </Text>
         </View>
 
-        <Text className={`text-xl mt-6 font-semibold ${themeStyles.textPrimary}`}>
+        <View className="flex-row justify-between items-start py-4">
+          <Text className={`text-lg text-red-300 w-1/5`}>Location</Text>
+          <Text className={`text-lg ${themeStyles.textSecondary} flex-1 pl-12`}>
+            {address}
+          </Text>
+        </View>
+
+        <Text
+          className={`text-xl mt-6 font-semibold ${themeStyles.textPrimary}`}
+        >
           Payment Summary
         </Text>
 
@@ -157,11 +163,17 @@ export default function CheckoutPageScreen() {
                   -₹{discountAmount.toFixed(2)}
                 </Text>
               </View>
-              <View className={`border-t ${themeStyles.borderColor} mt-2 pt-2 flex-row justify-between items-center`}>
-                <Text className={`text-xl font-bold ${themeStyles.textPrimary}`}>
+              <View
+                className={`border-t ${themeStyles.borderColor} mt-2 pt-2 flex-row justify-between items-center`}
+              >
+                <Text
+                  className={`text-xl font-bold ${themeStyles.textPrimary}`}
+                >
                   Total
                 </Text>
-                <Text className={`text-xl font-bold ${themeStyles.textSecondary}`}>
+                <Text
+                  className={`text-xl font-bold ${themeStyles.textSecondary}`}
+                >
                   ₹{finalAmount.toFixed(2)}
                 </Text>
               </View>
@@ -170,7 +182,9 @@ export default function CheckoutPageScreen() {
           {!isDiscounted && (
             <View className={`mt-2 pt-2 flex-row justify-between items-center`}>
               <Text className={`text-xl font-bold text-red-300`}>Total</Text>
-              <Text className={`text-xl font-bold ${themeStyles.textSecondary}`}>
+              <Text
+                className={`text-xl font-bold ${themeStyles.textSecondary}`}
+              >
                 ₹{finalAmount.toFixed(2)}
               </Text>
             </View>
