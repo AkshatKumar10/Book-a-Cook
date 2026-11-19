@@ -1,17 +1,43 @@
 import cron from "node-cron";
 import Booking from "../models/Booking.js";
+import { refundPayment } from "../utils/razorpay.js";
+import { sendNotification } from "../utils/notifications.js";
 
 const bookingCron = () => {
   cron.schedule("0 0 * * *", async () => {
     try {
       const now = new Date();
-      await Booking.updateMany(
-        {
-          status: "pending",
-          createdAt: { $lt: new Date(Date.now() - 24 * 60 * 60 * 1000) },
-        },
-        { status: "declined", declineReason: "Expired after 24 hours" },
-      );
+      
+      const expiredBookings = await Booking.find({
+        status: "pending",
+        createdAt: { $lt: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+      }).populate("userId", "username fcmToken");
+
+      for (const booking of expiredBookings) {
+        let refundResult = null;
+        if (booking.paymentId) {
+          refundResult = await refundPayment(booking.paymentId, booking.totalAmount);
+        }
+
+        booking.status = "declined";
+        booking.declineReason = "Auto-declined: Expired after 24 hours without cook response";
+        booking.refundStatus = refundResult?.success ? "processed" : "failed";
+        booking.refundId = refundResult?.refundId || "";
+        booking.refundAmount = refundResult?.amount || 0;
+        await booking.save();
+
+        if (booking.userId && booking.userId.fcmToken) {
+          const refundText = refundResult?.success
+            ? ` A full refund of ₹${booking.totalAmount} has been initiated.`
+            : "";
+          await sendNotification(
+            booking.userId.fcmToken,
+            "Booking Expired & Refund Initiated",
+            `Your ${booking.mealType} booking was auto-cancelled because the chef did not respond within 24 hours.${refundText}`,
+            { bookingId: booking._id.toString(), action: "booking_declined" }
+          );
+        }
+      }
 
       const bookings = await Booking.find({ status: "accepted" });
       for (const booking of bookings) {
